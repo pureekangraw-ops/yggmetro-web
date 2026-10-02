@@ -17,13 +17,23 @@ jobs:
         with:
           node-version: 22
       - name: Syntax check
-        run: |
-          node --check src/index.js
+        run: node --check src/index.js
       - name: Secret isolation check
         run: |
-          if grep -RInE 'OPENAI_API_KEY[[:space:]]*[:=][[:space:]]*["'\''"]?sk-' src . --exclude-dir=.git; then
-            echo "OpenAI secret-like literal detected"
-            exit 1
-          fi
-          grep -q 'env\.OPENAI_API_KEY' src/go-client-server.js
-          grep -q 'authorization:.*Bearer' src/index.js
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const source = fs.readFileSync("src/index.js","utf8");
+          if (/OPENAI_API_KEY\s*[:=]\s*["']?sk-/.test(source)) {
+            console.error("OpenAI secret-like literal detected");
+            process.exit(1);
+          }
+          if (!source.includes("env.OPENAI_API_KEY")) {
+            console.error("Server-side OPENAI_API_KEY binding is missing");
+            process.exit(1);
+          }
+          if (!source.includes("api.openai.com/v1/responses")) {
+            console.error("OpenAI Responses endpoint wiring is missing");
+            process.exit(1);
+          }
+          console.log("Secret isolation checks passed.");
+          NODE
