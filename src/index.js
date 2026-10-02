@@ -148,7 +148,20 @@ p{margin:0 0 24px;max-width:34rem;font-size:clamp(.98rem,2.4vw,1.18rem);line-hei
 .actions{display:flex;flex-wrap:wrap;gap:10px}
 a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:700}
 .primary{background:#fff;color:#0a0d11}.ghost{color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(8,12,18,.28);backdrop-filter:blur(10px)}
-@media(max-width:640px){body{background-attachment:scroll;background-position:center}.page{padding-top:18px}.hero{padding-bottom:34px}h1{font-size:clamp(3rem,18vw,5rem)}}
+.work{padding:68px 0 40px;max-width:1100px;width:100%;margin:0 auto}
+.work-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}
+.work-head h2{margin:0;font-size:clamp(1.8rem,5vw,3.4rem);letter-spacing:-.04em}
+.work-head p{margin:0;max-width:28rem;color:rgba(255,255,255,.66);font-size:.95rem}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{min-height:220px;border-radius:22px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(8,12,18,.54));backdrop-filter:blur(14px);overflow:hidden;position:relative}
+.card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 10%,rgba(255,255,255,.14),transparent 36%);pointer-events:none}
+.card>*{position:relative;z-index:1}
+.card small{letter-spacing:.14em;text-transform:uppercase;opacity:.68}
+.card h3{margin:10px 0 6px;font-size:1.5rem;letter-spacing:-.03em}
+.card p{margin:0;color:rgba(255,255,255,.72);font-size:.92rem}
+.card .go{margin-top:28px;font-weight:700;font-size:.9rem}
+.foot{padding:30px 0 10px;color:rgba(255,255,255,.48);font-size:.78rem}
+@media(max-width:640px){body{background-attachment:scroll;background-position:center}.page{padding-top:18px}.hero{padding-bottom:34px}h1{font-size:clamp(3rem,18vw,5rem)}.work{padding-top:44px}.work-head{display:block}.work-head p{margin-top:8px}.grid{grid-template-columns:1fr}.card{min-height:180px}}
 </style></head>
 <body><main class="page">
 <header class="top"><div class="brand">YGG METRO</div><div class="shop">SHOP</div></header>
@@ -156,7 +169,16 @@ a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;
 <p>พื้นที่รวมงานและสิ่งที่เราสร้าง — ดูงานก่อน แล้วค่อยเข้ามาคุยกับ GO Client เมื่อต้องการเริ่มงาน</p>
 <div class="actions"><a class="primary" href="/client">คุยกับ GO Client</a><a class="ghost" href="#work">ดูงาน</a></div>
 </section>
-<div id="work" aria-hidden="true"></div>
+<section id="work" class="work">
+<div class="work-head"><div><div class="eyebrow">Selected work</div><h2>ดูงานของเรา</h2></div><p>ตัวอย่างงานและของที่กำลังทำใน YGG METRO — กดดูแต่ละหมวดได้เลย</p></div>
+<div class="grid">
+<a class="card" href="/client"><div><small>Presentation</small><h3>Company & Pitch</h3><p>จัดโครงเรื่อง ออกแบบสไลด์ และทำงานนำเสนอให้พร้อมใช้จริง</p></div><div class="go">เริ่มคุยงาน →</div></a>
+<a class="card" href="/client"><div><small>Visual</small><h3>Brand & Visual System</h3><p>งานภาพ ทิศทางแบรนด์ และ visual language สำหรับเว็บหรือโปรเจกต์</p></div><div class="go">ดูแนวทาง →</div></a>
+<a class="card" href="/client"><div><small>Digital</small><h3>Web Experience</h3><p>หน้าเว็บ เดโม และประสบการณ์ดิจิทัลที่เล่าเรื่องผ่านบรรยากาศ</p></div><div class="go">คุยกับ GO →</div></a>
+<a class="card" href="/client"><div><small>YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p></div><div class="go">เร็ว ๆ นี้ →</div></a>
+</div>
+<div class="foot">YGG METRO · Shop</div>
+</section>
 </main></body></html>`
 
 export default {
