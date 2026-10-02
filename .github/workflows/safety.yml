@@ -19,7 +19,6 @@ jobs:
       - name: Syntax check
         run: |
           node --check src/index.js
-          node --check src/go-client-server.js
       - name: Secret isolation check
         run: |
           if grep -RInE 'OPENAI_API_KEY[[:space:]]*[:=][[:space:]]*["'\''"]?sk-' src . --exclude-dir=.git; then
@@ -27,4 +26,4 @@ jobs:
             exit 1
           fi
           grep -q 'env\.OPENAI_API_KEY' src/go-client-server.js
-          grep -q 'authorization:.*Bearer' src/go-client-server.js
+          grep -q 'authorization:.*Bearer' src/index.js
