@@ -111,7 +111,7 @@ async function handleGoClientInterpret(request,env){
 function goClientPage(){
 return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GO Client · YGG METRO</title><style>
-body{margin:0;background:#0b0d10;color:#f5f7fa;font-family:system-ui,-apple-system,sans-serif}.wrap{max-width:760px;margin:auto;padding:48px 20px}
+body{margin:0;background:#0b0d10 url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat;color:#f5f7fa;font-family:system-ui,-apple-system,sans-serif}.wrap{max-width:760px;margin:auto;padding:48px 20px}
 .card{background:#151922;border:1px solid #2a313d;border-radius:18px;padding:22px}.tag{font-size:12px;letter-spacing:.16em;color:#93a0b5}
 h1{font-size:clamp(2rem,8vw,4rem);margin:.35em 0}.log{min-height:180px;white-space:pre-wrap;background:#0f1218;border-radius:14px;padding:16px;margin:18px 0;color:#c8d0dc}
 form{display:flex;gap:10px}input{flex:1;border:1px solid #343c49;background:#0f1218;color:white;border-radius:12px;padding:14px}button{border:0;border-radius:12px;padding:14px 18px;font-weight:700}
