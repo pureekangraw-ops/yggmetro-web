@@ -2,5 +2,23 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "yggmetro-web",
   "main": "src/index.js",
-  "compatibility_date": "2026-10-01"
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/health", "/api/*", "/client", "/client/*"]
+  },
+  "secrets": {
+    "required": ["OPENAI_API_KEY"]
+  },
+  "vars": {
+    "INTERPRETER_PROVIDER_ENABLED": "true"
+  },
+  "ratelimits": [
+    {
+      "name": "INTERPRET_RATE_LIMITER",
+      "namespace_id": 926082601,
+      "simple": { "limit": 10, "period": 60 }
+    }
+  ]
 }
