@@ -130,10 +130,34 @@ catch{log.className="log err";log.textContent="เชื่อมต่อไม
 
 
 const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>YGGMETRO</title><meta name="description" content="YGGMETRO official website">
-<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0d10;color:#f5f7fa;font-family:system-ui,-apple-system,sans-serif}.shell{width:min(92vw,760px);padding:48px 28px}h1{font-size:clamp(3rem,12vw,7rem);letter-spacing:-.06em;margin:0}p{font-size:1.05rem;line-height:1.6;color:#aeb6c2;max-width:42rem}.tag{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:#7f8a99}a{color:#dbeafe}</style>
-</head><body><main class="shell"><div class="tag">Official website</div><h1>YGGMETRO</h1><p>The production web home for YGGMETRO is online.</p><p><a href="/client">Open GO Client</a></p></main></body></html>`;
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YGG METRO · Shop</title><meta name="description" content="YGG METRO Shop">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{min-height:100svh;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090c10 url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,7,12,.16) 0%,rgba(3,7,12,.24) 45%,rgba(3,7,12,.72) 100%);pointer-events:none}
+.page{position:relative;z-index:1;min-height:100svh;display:flex;flex-direction:column;padding:22px clamp(18px,4vw,56px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-size:.76rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-shadow:0 2px 18px #000}
+.shop{padding:8px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(8,12,18,.28);backdrop-filter:blur(10px);font-size:.72rem;letter-spacing:.14em}
+.hero{margin-top:auto;padding:0 0 clamp(34px,8vh,84px);max-width:720px;text-shadow:0 2px 24px rgba(0,0,0,.7)}
+.eyebrow{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.78}
+h1{font-size:clamp(3.2rem,14vw,8.6rem);line-height:.82;letter-spacing:-.065em;margin:.15em 0 .18em;font-weight:800}
+p{margin:0 0 24px;max-width:34rem;font-size:clamp(.98rem,2.4vw,1.18rem);line-height:1.55;color:rgba(255,255,255,.82)}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:700}
+.primary{background:#fff;color:#0a0d11}.ghost{color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(8,12,18,.28);backdrop-filter:blur(10px)}
+@media(max-width:640px){body{background-attachment:scroll;background-position:center}.page{padding-top:18px}.hero{padding-bottom:34px}h1{font-size:clamp(3rem,18vw,5rem)}}
+</style></head>
+<body><main class="page">
+<header class="top"><div class="brand">YGG METRO</div><div class="shop">SHOP</div></header>
+<section class="hero"><div class="eyebrow">Creative systems · visual work</div><h1>YGG<br>METRO</h1>
+<p>พื้นที่รวมงานและสิ่งที่เราสร้าง — ดูงานก่อน แล้วค่อยเข้ามาคุยกับ GO Client เมื่อต้องการเริ่มงาน</p>
+<div class="actions"><a class="primary" href="/client">คุยกับ GO Client</a><a class="ghost" href="#work">ดูงาน</a></div>
+</section>
+<div id="work" aria-hidden="true"></div>
+</main></body></html>`
 
 export default {
   async fetch(request, env) {
