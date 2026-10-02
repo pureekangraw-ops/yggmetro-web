@@ -1,0 +1,79 @@
+name: YGG METRO Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Preflight deployment credentials
+        shell: bash
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo "::error::CLOUDFLARE_API_TOKEN is not available to yggmetro-web"; exit 1; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID}" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is not available to yggmetro-web"; exit 1; }
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Deploy yggmetro-web
+        run: npx wrangler deploy
+
+      - name: Verify production health and GO Client
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+
+          const subdomainRes = await fetch(
+            "https://api.cloudflare.com/client/v4/accounts/" + accountId + "/workers/subdomain",
+            { headers:{ authorization:"Bearer " + token } },
+          );
+          const subdomainPayload = await subdomainRes.json().catch(() => null);
+          const subdomain = String(subdomainPayload?.result?.subdomain || "").trim();
+          if (!subdomainRes.ok || !subdomain) {
+            console.error("::error::Unable to resolve workers.dev subdomain.");
+            process.exit(1);
+          }
+
+          const origin = "https://yggmetro-web." + subdomain + ".workers.dev";
+
+          const healthRes = await fetch(origin + "/health", { headers:{ "cache-control":"no-cache" } });
+          const health = await healthRes.json().catch(() => null);
+          if (!healthRes.ok || health?.ok !== true || health?.service !== "yggmetro-web" || health?.goClientConfigured !== true) {
+            console.error("::error::Production health failed or OPENAI_API_KEY binding is missing.");
+            process.exit(1);
+          }
+
+          const clientRes = await fetch(origin + "/api/v1/interpret", {
+            method:"POST",
+            headers:{ "content-type":"application/json" },
+            body:JSON.stringify({
+              version:"1",
+              text:"อยากทำ company profile ประมาณ 12 หน้า",
+              context:{ surface:"GO_CLIENT", stage:"SALES" },
+            }),
+          });
+          const client = await clientRes.json().catch(() => null);
+          if (!clientRes.ok || client?.provider !== "openai" || typeof client?.intent !== "string") {
+            console.error("::error::GO Client OpenAI smoke failed: " + String(client?.code || clientRes.status));
+            process.exit(1);
+          }
+
+          console.log("YGG METRO production smoke passed: health + GO Client OpenAI.");
+          NODE
