@@ -105,29 +105,121 @@ async function handleGoClientInterpret(request,env){
   try{result=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502)}
   if(!validResult(result))return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502);
 
-  return json({...result,provider:"openai",model:MODEL});
+  const clientId=typeof body?.clientId==="string"?body.clientId.trim().slice(0,120):"";
+  const conversationId=typeof body?.conversationId==="string"?body.conversationId.trim().slice(0,120):"";
+  return json({...result,provider:"openai",model:MODEL,clientId:clientId||null,conversationId:conversationId||null});
+}
+
+
+function briefId(value){return String(value||"").trim().slice(0,120)}
+function briefText(value,max=2000){return typeof value==="string"?value.trim().slice(0,max):""}
+function briefObject(value){
+  const input=value&&typeof value==="object"&&!Array.isArray(value)?value:{};
+  return {
+    goal:briefText(input.goal),
+    jobType:JOB_TYPES.includes(input.jobType)?input.jobType:null,
+    audience:briefText(input.audience),
+    materials:briefText(input.materials),
+    pageCount:Number.isInteger(input.pageCount)&&input.pageCount>=1&&input.pageCount<=500?input.pageCount:null,
+    package:PACKAGES.includes(input.package)?input.package:null,
+    desiredDate:briefText(input.desiredDate,120),
+    deadlineText:briefText(input.deadlineText,240),
+  };
+}
+async function callBriefRegistry(env,path,payload){
+  if(!env?.GO_HUB||typeof env.GO_HUB.fetch!=="function")return {ok:false,status:503,code:"BRIEF_BRIDGE_NOT_CONFIGURED"};
+  let response;
+  try{
+    response=await env.GO_HUB.fetch(new Request("https://go-hub.internal"+path,{method:"POST",headers:{"content-type":"application/json","x-yggmetro-surface":"GO_CLIENT"},body:JSON.stringify(payload)}));
+  }catch{return {ok:false,status:502,code:"BRIEF_BRIDGE_UNAVAILABLE"}}
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok)return {ok:false,status:502,code:String(body?.code||"BRIEF_BRIDGE_REJECTED")};
+  return {ok:true,body};
+}
+async function readBriefBody(request){
+  let body;
+  try{body=await request.json()}catch{return {error:json({ok:false,code:"INVALID_JSON"},400)}}
+  const clientId=briefId(body?.clientId),conversationId=briefId(body?.conversationId),id=briefId(body?.briefId);
+  if(!clientId||!conversationId||!id)return {error:json({ok:false,code:"BRIEF_IDENTITY_REQUIRED"},400)};
+  return {body,clientId,conversationId,briefId:id};
+}
+async function handleBriefUpsert(request,env){
+  if(request.method!=="POST")return new Response("Method Not Allowed",{status:405,headers:{allow:"POST"}});
+  if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
+  const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
+  const {body,clientId,conversationId,briefId:id}=parsed;
+  const payload={version:"1",briefId:id,clientId,conversationId,surface:"GO_CLIENT",status:"DRAFT",stage:briefText(body?.stage,40),brief:briefObject(body?.brief),latestInterpretation:body?.latestInterpretation&&typeof body.latestInterpretation==="object"?body.latestInterpretation:null,updatedAt:new Date().toISOString()};
+  const result=await callBriefRegistry(env,"/internal/brief/upsert",payload);
+  if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
+  return json({ok:true,status:"DRAFT",briefId:id,clientId,conversationId,registry:result.body||null});
+}
+async function handleBriefConfirm(request,env){
+  if(request.method!=="POST")return new Response("Method Not Allowed",{status:405,headers:{allow:"POST"}});
+  if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
+  const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
+  const {body,clientId,conversationId,briefId:id}=parsed;
+  const payload={version:"1",briefId:id,clientId,conversationId,surface:"GO_CLIENT",status:"CONFIRMED",stage:"summary",brief:briefObject(body?.brief),confirmedAt:new Date().toISOString()};
+  const result=await callBriefRegistry(env,"/internal/brief/confirm",payload);
+  if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
+  return json({ok:true,status:"CONFIRMED",briefId:id,clientId,conversationId,office:result.body||null});
 }
 
 function goClientPage(){
 return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GO Client · YGG METRO</title><style>
-body{margin:0;background:#0b0d10 url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat;color:#f5f7fa;font-family:system-ui,-apple-system,sans-serif}.wrap{max-width:760px;margin:auto;padding:48px 20px}
-.card{background:#151922;border:1px solid #2a313d;border-radius:18px;padding:22px}.tag{font-size:12px;letter-spacing:.16em;color:#93a0b5}
-h1{font-size:clamp(2rem,8vw,4rem);margin:.35em 0}.log{min-height:180px;white-space:pre-wrap;background:#0f1218;border-radius:14px;padding:16px;margin:18px 0;color:#c8d0dc}
-form{display:flex;gap:10px}input{flex:1;border:1px solid #343c49;background:#0f1218;color:white;border-radius:12px;padding:14px}button{border:0;border-radius:12px;padding:14px 18px;font-weight:700}
-small{color:#8d98aa}.ok{color:#a7f3d0}.err{color:#fca5a5}</style></head>
-<body><main class="wrap"><div class="card"><div class="tag">YGG METRO · GO CLIENT</div><h1>คุยกับ GO Client</h1>
-<small>ข้อความถูกส่งไป YGG METRO Worker แล้วเรียก OpenAI จากฝั่งเซิร์ฟเวอร์เท่านั้น</small>
-<div id="log" class="log">พร้อมรับข้อความ</div>
-<form id="f"><input id="q" maxlength="2000" placeholder="เช่น อยากทำ company profile ประมาณ 12 หน้า"><button>ส่ง</button></form></div></main>
+<title>GO Client · YGG METRO</title><meta name="description" content="เล่าโจทย์งานให้ YGG METRO ช่วยจัด brief">
+<style>
+:root{color-scheme:dark;--bg:#080b10;--panel:rgba(18,24,34,.82);--panel-2:rgba(10,14,21,.78);--line:rgba(255,255,255,.13);--text:#f5f7fa;--muted:rgba(245,247,250,.64);--warm:#f5c78b;--green:#a7f3d0}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}body{min-height:100svh;color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg) url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(4,8,14,.64),rgba(4,8,14,.9)),radial-gradient(circle at 78% 12%,rgba(245,199,139,.16),transparent 30%);pointer-events:none}.page{position:relative;z-index:1;min-height:100svh;padding:22px 20px 44px}.top{width:min(1180px,100%);margin:0 auto 52px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{color:#fff;text-decoration:none;font-size:.73rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.back{color:var(--muted);text-decoration:none;font-size:.84rem}.back:hover,.back:focus-visible{color:#fff}.shell{width:min(1180px,100%);margin:auto}.intro{display:flex;align-items:end;justify-content:space-between;gap:32px;margin-bottom:24px}.eyebrow{font-size:.7rem;letter-spacing:.19em;text-transform:uppercase;color:var(--warm);font-weight:800}.intro h1{margin:10px 0 10px;font-size:clamp(2.8rem,7vw,6.4rem);line-height:1.02;letter-spacing:-.055em}.intro p{max-width:480px;margin:0;color:var(--muted);line-height:1.6}.intro-note{max-width:220px;color:var(--muted);font-size:.84rem;line-height:1.5;text-align:right}.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}.progress-step{padding:10px 12px;border-top:1px solid var(--line);color:rgba(245,247,250,.38);font-size:.72rem;letter-spacing:.06em}.progress-step span{display:block;font-size:.64rem;color:rgba(245,247,250,.38);margin-bottom:4px}.progress-step.active{border-color:var(--warm);color:#fff}.progress-step.active span{color:var(--warm)}.progress-step.done{color:rgba(245,247,250,.7);border-color:rgba(167,243,208,.6)}
+.workspace{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:14px}.panel{border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(18px);border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.22)}.chat{min-height:600px;display:flex;flex-direction:column;overflow:hidden}.chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}.chat-head strong{font-size:.94rem}.chat-head small{color:var(--muted)}.reset{border:0;background:transparent;color:var(--muted);font:inherit;font-size:.78rem;cursor:pointer}.reset:hover{color:#fff}.messages{flex:1;min-height:340px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto}.message{max-width:min(82%,620px);padding:14px 16px;border-radius:17px;line-height:1.58;font-size:.95rem;white-space:pre-wrap;animation:message-in .35s cubic-bezier(.22,1,.36,1) both}.message.assistant{align-self:flex-start;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-top-left-radius:6px}.message.user{align-self:flex-end;background:#fff;color:#0b0e13;border-top-right-radius:6px}.message.error{color:#fecaca;border-color:rgba(248,113,113,.35)}.quick{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 14px}.quick button,.chip{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--muted);background:rgba(255,255,255,.05);font:inherit;font-size:.78rem;cursor:pointer}.quick button:hover,.quick button:focus-visible{border-color:var(--warm);color:#fff;background:rgba(245,199,139,.1)}.composer{display:flex;gap:10px;padding:14px 20px 20px;border-top:1px solid var(--line)}.composer textarea{flex:1;min-height:52px;max-height:140px;resize:vertical;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel-2);color:#fff;font:inherit;line-height:1.45}.composer textarea::placeholder{color:rgba(245,247,250,.4)}.composer textarea:focus{outline:2px solid var(--warm);outline-offset:1px}.send{align-self:stretch;min-width:76px;border:0;border-radius:14px;background:#fff;color:#0b0e13;font:inherit;font-weight:800;cursor:pointer}.send:hover{background:var(--warm)}.send:disabled{opacity:.5;cursor:wait}
+.brief{padding:20px;align-self:start;position:sticky;top:18px}.brief-top{display:flex;align-items:start;justify-content:space-between;gap:12px}.brief h2{margin:6px 0 0;font-size:1.45rem;letter-spacing:-.035em}.status{color:var(--warm);font-size:.72rem;text-align:right;white-space:nowrap}.brief-copy{margin:20px 0 16px;padding-bottom:16px;border-bottom:1px solid var(--line);color:var(--muted);font-size:.84rem;line-height:1.55}.brief-list{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}.chip{color:#fff;background:rgba(245,199,139,.1);border-color:rgba(245,199,139,.28);cursor:default}.missing{margin:22px 0 0;padding:14px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted);font-size:.82rem;line-height:1.55}.missing strong{display:block;color:#fff;margin-bottom:6px}.brief-actions{display:flex;gap:8px;margin-top:16px}.brief-action{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:750;cursor:pointer}.brief-action.primary{background:#fff;color:#0b0e13;border-color:#fff}.brief-action:hover{border-color:var(--warm)}.privacy{margin:16px 0 0;color:rgba(245,247,250,.4);font-size:.72rem;line-height:1.5}
+@keyframes message-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:840px){.intro{display:block}.intro-note{max-width:none;margin-top:14px;text-align:left}.workspace{grid-template-columns:1fr}.brief{position:static}.chat{min-height:560px}}
+@media(max-width:560px){.page{padding:18px 14px 28px}.top{margin-bottom:40px}.back{font-size:.78rem}.intro h1{font-size:clamp(2.8rem,15vw,4.8rem)}.progress-step{padding:9px 6px;font-size:.64rem}.progress-step span{font-size:.58rem}.chat-head,.messages,.quick,.composer{padding-left:14px;padding-right:14px}.message{max-width:92%;font-size:.91rem}.composer{align-items:stretch;flex-direction:column}.send{min-height:48px}.brief{padding:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.message{animation:none}}
+</style></head><body><main class="page">
+<header class="top"><a class="brand" href="/">YGG METRO</a><a class="back" href="/">กลับหน้าแรก ↗</a></header>
+<section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · GO CLIENT</div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><div class="intro-note">GO Client จะช่วยจับประเด็น ถามข้อมูลที่ขาด และสรุป brief ให้ตรวจสอบ</div></div>
+<nav class="progress" aria-label="สถานะการรับ brief"><div class="progress-step active" data-stage="discover"><span>01</span>โจทย์</div><div class="progress-step" data-stage="audience"><span>02</span>ขอบเขต</div><div class="progress-step" data-stage="materials"><span>03</span>ข้อมูล</div><div class="progress-step" data-stage="summary"><span>04</span>สรุป</div></nav>
+<div class="workspace"><section class="panel chat" aria-label="บทสนทนา GO Client"><div class="chat-head"><div><strong>คุยกับ GO Client</strong><br><small>ช่วยจัดโจทย์ให้พร้อมคุยงาน</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section>
+<aside class="panel brief" aria-label="สรุป brief"><div class="brief-top"><div><div class="eyebrow">Live brief</div><h2>สิ่งที่จับได้</h2></div><div id="status" class="status">กำลังเริ่ม</div></div><p class="brief-copy">ข้อมูลจะค่อย ๆ เติมจากบทสนทนา ตรวจสอบให้เรียบร้อยก่อนส่งต่อ</p><div id="brief-list" class="brief-list"><span class="chip">ยังไม่มีข้อมูล</span></div><div id="missing" class="missing"><strong>ขั้นต่อไป</strong>เล่าให้ฟังก่อนว่าอยากทำงานอะไร</div><div class="brief-actions"><button class="brief-action" id="copy" type="button">คัดลอก brief</button><button class="brief-action primary" id="confirm" type="button">ยืนยัน brief</button></div><p class="privacy">เก็บสถานะชั่วคราวใน browser นี้ และยังไม่ส่งออกอัตโนมัติจนกว่าจะเชื่อม handoff จริง</p></aside></div></section></main>
 <script>
-const f=document.getElementById("f"),q=document.getElementById("q"),log=document.getElementById("log");
-f.addEventListener("submit",async e=>{e.preventDefault();const text=q.value.trim();if(!text)return;log.textContent="กำลังประมวลผล…";
-try{const r=await fetch("/api/v1/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({version:"1",text,context:{surface:"GO_CLIENT"}})});
-const data=await r.json();log.className="log "+(r.ok?"ok":"err");log.textContent=JSON.stringify(data,null,2)}
-catch{log.className="log err";log.textContent="เชื่อมต่อไม่ได้"}})</script></body></html>`;
+const STORAGE_KEY='yggmetro-go-client-v2';
+const clientKey='yggmetro-go-client-id-v1',conversationKey='yggmetro-go-conversation-id-v1',briefKey='yggmetro-go-brief-id-v1';
+function stableId(storage,key,prefix){let id=storage.getItem(key);if(!id){id=prefix+'-'+crypto.randomUUID();storage.setItem(key,id)}return id}
+const clientId=stableId(localStorage,clientKey,'CLIENT');
+const conversationId=stableId(sessionStorage,conversationKey,'CONV');
+const briefId=stableId(localStorage,briefKey,'BRIEF');
+const JOB_LABELS={PROPOSAL:'Proposal',COMPANY_PROFILE:'Company Profile',PORTFOLIO_CASE_STUDY:'Portfolio Case Study',REPORT_SUMMARY:'Report Summary',OTHER:'งานเฉพาะทาง'};
+const STAGES=['discover','audience','materials','summary'];
+const defaultState={stage:'discover',jobType:null,package:null,pageCount:null,desiredDate:null,goal:'',audience:'',materials:'',deadlineText:'',confirmed:false,bridgeStatus:'PENDING',messages:[]};
+function loadState(){try{return {...defaultState,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return {...defaultState}}}
+let state=loadState();
+const messages=document.getElementById('messages'),quick=document.getElementById('quick'),input=document.getElementById('input'),send=document.getElementById('send'),status=document.getElementById('status'),briefList=document.getElementById('brief-list'),missing=document.getElementById('missing'),confirmButton=document.getElementById('confirm');
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function escapeHtml(value){return String(value||'').replace(/[&<>'"]/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[char]})}
+function addMessage(role,text,saveState=true){state.messages.push({role,text});if(saveState)save();renderMessages();messages.scrollTop=messages.scrollHeight}
+function renderMessages(){messages.innerHTML=state.messages.map(function(item){return '<div class="message '+escapeHtml(item.role)+'">'+escapeHtml(item.text)+'</div>'}).join('')}
+function stageLabel(){return {discover:'กำลังเริ่ม',audience:'ถามขอบเขต',materials:'เก็บข้อมูล',summary:state.confirmed?'ยืนยันแล้ว':'พร้อมตรวจสอบ'}[state.stage]||'กำลังคุย'}
+function renderProgress(){const current=STAGES.indexOf(state.stage);document.querySelectorAll('.progress-step').forEach(function(el){const index=STAGES.indexOf(el.dataset.stage);el.classList.toggle('active',index===current);el.classList.toggle('done',index<current||state.confirmed)})}
+function getBriefItems(){const items=[];if(state.jobType)items.push(JOB_LABELS[state.jobType]||state.jobType);if(state.pageCount)items.push(state.pageCount+' หน้า');if(state.package)items.push('Package '+state.package);if(state.audience)items.push('ผู้ชม: '+state.audience);if(state.materials)items.push('มีข้อมูล/ไฟล์แล้ว');if(state.deadlineText)items.push('ใช้ภายใน: '+state.deadlineText);return items}
+function renderBrief(){status.textContent=state.bridgeStatus==='CONFIRMED'?'CONFIRMED':state.bridgeStatus==='DRAFT_SAVED'?'DRAFT SAVED':stageLabel();const items=getBriefItems();briefList.innerHTML=items.length?items.map(function(item){return '<span class="chip">'+escapeHtml(item)+'</span>'}).join(''):'<span class="chip">ยังไม่มีข้อมูล</span>';let next='';if(!state.jobType)next='เล่าให้ฟังก่อนว่าอยากทำงานอะไร';else if(!state.audience)next='บอกเพิ่มว่างานนี้ทำเพื่อใคร หรืออยากให้คนดูทำอะไรต่อ';else if(!state.materials)next='ตอนนี้มีข้อมูลหรือไฟล์อะไรอยู่แล้วบ้าง';else if(!state.deadlineText)next='มีวันที่อยากใช้งานหรือ deadline ไหม';else next=state.confirmed?'brief นี้พร้อมให้ทีมรับช่วงต่อแล้ว':'ตรวจสอบข้อมูล แล้วกดยืนยัน brief';missing.innerHTML='<strong>'+(state.confirmed?'สถานะ':'ขั้นต่อไป')+'</strong>'+escapeHtml(next);confirmButton.textContent=state.confirmed?'ยืนยันแล้ว':'ยืนยัน brief';confirmButton.disabled=state.confirmed;renderProgress()}
+function renderQuick(){const options=state.stage==='discover'?['Company Profile','Pitch Deck','หน้าเว็บ','มีไฟล์แล้ว แต่อยากจัดโครง']:state.stage==='summary'?['ข้อมูลถูกต้องแล้ว','ขอแก้ข้อมูล']:['อยากประเมินก่อน','ขอคุยกับคน'];quick.innerHTML=options.map(function(text){return '<button type="button" data-quick="'+escapeHtml(text)+'">'+escapeHtml(text)+'</button>'}).join('');quick.querySelectorAll('button').forEach(function(button){button.addEventListener('click',function(){submitText(button.dataset.quick)})})}
+function render(){renderMessages();renderBrief();renderQuick();if(!state.messages.length)addMessage('assistant','สวัสดีครับ เล่าโจทย์ที่อยากทำมาได้เลย\\nเช่น อยากทำ Company Profile หรือ Pitch Deck สำหรับโปรเจกต์ใหม่',false)}
+function advanceFromText(text,data){if(!state.goal)state.goal=text;if(data&&data.jobType)state.jobType=data.jobType;if(data&&data.package)state.package=data.package;if(data&&data.pageCount)state.pageCount=data.pageCount;if(data&&data.desiredDate)state.desiredDate=data.desiredDate;if(state.stage==='discover'){if(state.jobType)state.stage='audience'}else if(state.stage==='audience'){state.audience=text;state.stage='materials'}else if(state.stage==='materials'){state.materials=text;state.stage='timing'}else if(state.stage==='timing'){state.deadlineText=data&&data.desiredDate?data.desiredDate:text;state.stage='summary'}}
+function replyFor(data){if(state.stage==='discover')return 'อยากทำงานประเภทไหนครับ? เล่าเป็นประโยคสั้น ๆ ได้เลย';if(state.stage==='audience')return 'เข้าใจแล้วครับ งานนี้ทำเพื่อใคร หรืออยากให้คนดูทำอะไรต่อหลังเห็นงานนี้?';if(state.stage==='materials')return 'ดีครับ ตอนนี้มีข้อมูล ไฟล์เดิม หรือ reference อะไรอยู่แล้วบ้าง?';if(state.stage==='timing')return 'รับทราบครับ มีวันที่อยากใช้งานหรือ deadline ไหม ถ้ายังไม่มีก็บอกว่า “ยังไม่กำหนด” ได้';return 'จับโจทย์ได้แล้วครับ ตรวจสอบสรุปด้านขวา แล้วกดยืนยัน brief ได้เลย'}
+function briefBody(latestInterpretation){return {version:'1',briefId:briefId,clientId:clientId,conversationId:conversationId,status:state.confirmed?'CONFIRMED':'DRAFT',stage:state.stage,brief:{goal:state.goal,jobType:state.jobType,audience:state.audience,materials:state.materials,pageCount:state.pageCount,package:state.package,desiredDate:state.desiredDate,deadlineText:state.deadlineText},latestInterpretation:latestInterpretation||null,updatedAt:new Date().toISOString()}}
+async function upsertBrief(latestInterpretation){const response=await fetch('/api/v1/brief/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(latestInterpretation))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_UPSERT_FAILED');state.bridgeStatus='DRAFT_SAVED';save();return body}
+async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(null))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_CONFIRM_FAILED');state.bridgeStatus='CONFIRMED';save();return body}
+async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'GO_CLIENT',stage:state.stage,jobType:state.jobType,package:state.package}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ระบบช่วยจับโจทย์ไม่ได้ชั่วคราวครับ ลองส่งข้อความอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
+document.getElementById('composer').addEventListener('submit',function(event){event.preventDefault();submitText(input.value);input.value=''})
+input.addEventListener('keydown',function(event){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('composer').requestSubmit()}})
+document.getElementById('reset').addEventListener('click',function(){localStorage.removeItem(STORAGE_KEY);state={...defaultState};render()})
+document.getElementById('copy').addEventListener('click',async function(){const brief=['YGG METRO brief','ประเภทงาน: '+(JOB_LABELS[state.jobType]||'ยังไม่ระบุ'),'โจทย์: '+(state.goal||'ยังไม่ระบุ'),'ผู้ชม: '+(state.audience||'ยังไม่ระบุ'),'ข้อมูล/ไฟล์: '+(state.materials||'ยังไม่ระบุ'),'จำนวนหน้า: '+(state.pageCount||'ยังไม่ระบุ'),'กำหนดใช้: '+(state.deadlineText||'ยังไม่ระบุ')].join('\\n');try{await navigator.clipboard.writeText(brief);addMessage('assistant','คัดลอก brief ให้แล้วครับ นำไปส่งต่อให้ทีมได้เลย')}catch{addMessage('assistant',brief)}})
+confirmButton.addEventListener('click',async function(){if(state.confirmed||confirmButton.disabled)return;confirmButton.disabled=true;confirmButton.textContent='กำลังบันทึก…';try{await confirmBrief();state.confirmed=true;state.stage='summary';save();addMessage('assistant','ยืนยัน brief แล้วครับ ตอนนี้ snapshot ถูกล็อกเป็น CONFIRMED และส่งต่อให้ Office ตรวจรับช่วงได้');renderBrief();renderQuick()}catch(error){state.bridgeStatus='BRIDGE_PENDING';save();addMessage('assistant','ยังยืนยัน brief กับ Office ไม่ได้ครับ ลองอีกครั้งเมื่อ bridge พร้อม');renderBrief()}finally{confirmButton.disabled=state.confirmed;confirmButton.textContent=state.confirmed?'ยืนยันแล้ว':'ยืนยัน brief'}})
+render();
+</script></body></html>`;
 }
-
 
 const html = `<!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -176,6 +268,12 @@ export default {
     }
     if (url.pathname === "/api/v1/interpret" || url.pathname === "/client/api/v1/interpret") {
       return handleGoClientInterpret(request, env);
+    }
+    if (url.pathname === "/api/v1/brief/upsert" || url.pathname === "/client/api/v1/brief/upsert") {
+      return handleBriefUpsert(request, env);
+    }
+    if (url.pathname === "/api/v1/brief/confirm" || url.pathname === "/client/api/v1/brief/confirm") {
+      return handleBriefConfirm(request, env);
     }
     if (url.pathname === "/client" || url.pathname === "/client/") {
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
