@@ -105,7 +105,28 @@ async function handleGoClientInterpret(request,env){
   try{result=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502)}
   if(!validResult(result))return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502);
 
-  return json({...result,provider:"openai",model:MODEL});
+  const clientId=typeof body?.clientId==="string"?body.clientId.trim().slice(0,120):"";
+  const conversationId=typeof body?.conversationId==="string"?body.conversationId.trim().slice(0,120):"";
+  if(clientId&&conversationId&&env?.GO_HUB&&typeof env.GO_HUB.fetch==="function"){
+    try{
+      await env.GO_HUB.fetch(new Request("https://go-hub.internal/internal/client-registry",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({
+          clientId,
+          conversationId,
+          surface:"GO_CLIENT",
+          latestText:text,
+          interpreted:result,
+          at:new Date().toISOString()
+        })
+      }));
+    }catch{
+      // Storefront interpretation remains available if the private Office bridge is unavailable.
+    }
+  }
+
+  return json({...result,provider:"openai",model:MODEL,clientId:clientId||null,conversationId:conversationId||null});
 }
 
 function goClientPage(){
@@ -122,8 +143,12 @@ small{color:#8d98aa}.ok{color:#a7f3d0}.err{color:#fca5a5}</style></head>
 <form id="f"><input id="q" maxlength="2000" placeholder="เช่น อยากทำ company profile ประมาณ 12 หน้า"><button>ส่ง</button></form></div></main>
 <script>
 const f=document.getElementById("f"),q=document.getElementById("q"),log=document.getElementById("log");
+const clientKey="yggmetro-go-client-id-v1",conversationKey="yggmetro-go-conversation-id-v1";
+function stableId(storage,key,prefix){let id=storage.getItem(key);if(!id){id=prefix+"-"+crypto.randomUUID();storage.setItem(key,id)}return id}
+const clientId=stableId(localStorage,clientKey,"CLIENT");
+const conversationId=stableId(sessionStorage,conversationKey,"CONV");
 f.addEventListener("submit",async e=>{e.preventDefault();const text=q.value.trim();if(!text)return;log.textContent="กำลังประมวลผล…";
-try{const r=await fetch("/api/v1/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({version:"1",text,context:{surface:"GO_CLIENT"}})});
+try{const r=await fetch("/api/v1/interpret",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({version:"1",clientId,conversationId,text,context:{surface:"GO_CLIENT"}})});
 const data=await r.json();log.className="log "+(r.ok?"ok":"err");log.textContent=JSON.stringify(data,null,2)}
 catch{log.className="log err";log.textContent="เชื่อมต่อไม่ได้"}})</script></body></html>`;
 }
