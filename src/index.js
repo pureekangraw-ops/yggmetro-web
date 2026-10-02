@@ -131,54 +131,41 @@ catch{log.className="log err";log.textContent="เชื่อมต่อไม
 
 const html = `<!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>YGG METRO · Shop</title><meta name="description" content="YGG METRO Shop">
+<title>YGG METRO · Shop</title><meta name="description" content="YGG METRO — presentation, visual systems และ web experiences ที่พร้อมใช้งานจริง">
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{min-height:100svh;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090c10 url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
-body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,7,12,.16) 0%,rgba(3,7,12,.24) 45%,rgba(3,7,12,.72) 100%);pointer-events:none}
-.page{position:relative;z-index:1;min-height:100svh;display:flex;flex-direction:column;padding:22px clamp(18px,4vw,56px)}
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{font-size:.76rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-shadow:0 2px 18px #000}
-.shop{padding:8px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(8,12,18,.28);backdrop-filter:blur(10px);font-size:.72rem;letter-spacing:.14em}
-.hero{margin-top:auto;padding:0 0 clamp(34px,8vh,84px);max-width:720px;text-shadow:0 2px 24px rgba(0,0,0,.7)}
-.eyebrow{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.78}
-h1{font-size:clamp(3.2rem,14vw,8.6rem);line-height:.82;letter-spacing:-.065em;margin:.15em 0 .18em;font-weight:800}
-p{margin:0 0 24px;max-width:34rem;font-size:clamp(.98rem,2.4vw,1.18rem);line-height:1.55;color:rgba(255,255,255,.82)}
-.actions{display:flex;flex-wrap:wrap;gap:10px}
-a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:700}
-.primary{background:#fff;color:#0a0d11}.ghost{color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(8,12,18,.28);backdrop-filter:blur(10px)}
-.work{padding:68px 0 40px;max-width:1100px;width:100%;margin:0 auto}
-.work-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}
-.work-head h2{margin:0;font-size:clamp(1.8rem,5vw,3.4rem);letter-spacing:-.04em}
-.work-head p{margin:0;max-width:28rem;color:rgba(255,255,255,.66);font-size:.95rem}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.card{min-height:220px;border-radius:22px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(8,12,18,.54));backdrop-filter:blur(14px);overflow:hidden;position:relative}
-.card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 10%,rgba(255,255,255,.14),transparent 36%);pointer-events:none}
-.card>*{position:relative;z-index:1}
-.card small{letter-spacing:.14em;text-transform:uppercase;opacity:.68}
-.card h3{margin:10px 0 6px;font-size:1.5rem;letter-spacing:-.03em}
-.card p{margin:0;color:rgba(255,255,255,.72);font-size:.92rem}
-.card .go{margin-top:28px;font-weight:700;font-size:.9rem}
-.foot{padding:30px 0 10px;color:rgba(255,255,255,.48);font-size:.78rem}
-@media(max-width:640px){body{background-attachment:scroll;background-position:center}.page{padding-top:18px}.hero{padding-bottom:34px}h1{font-size:clamp(3rem,18vw,5rem)}.work{padding-top:44px}.work-head{display:block}.work-head p{margin-top:8px}.grid{grid-template-columns:1fr}.card{min-height:180px}}
+:root{color-scheme:dark;--ink:#f7f8fa;--muted:rgba(247,248,250,.68);--line:rgba(255,255,255,.16);--glass:rgba(10,15,22,.46);--warm:#f5c78b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}html,body{margin:0;min-height:100%}
+body{min-height:100svh;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090c10 url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,7,12,.22) 0%,rgba(3,7,12,.34) 40%,rgba(3,7,12,.88) 100%);pointer-events:none}
+body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle at 78% 12%,rgba(245,199,139,.14),transparent 28%),radial-gradient(circle at 15% 70%,rgba(95,150,210,.12),transparent 32%);pointer-events:none}
+.page{position:relative;z-index:1;overflow:hidden}.container{width:calc(100% - 40px);max-width:1180px;margin:0 auto}
+.top{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:22px max(20px,calc((100% - 1180px)/2));gap:16px}
+.brand{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;text-shadow:0 2px 18px #000}.topnav{display:flex;align-items:center;gap:18px}.topnav a{color:var(--muted);text-decoration:none;font-size:.86rem}.topnav a:hover,.topnav a:focus-visible{color:#fff}.shop{padding:9px 14px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(8,12,18,.3);backdrop-filter:blur(12px);font-size:.72rem;letter-spacing:.14em}
+.hero{min-height:clamp(660px,92svh,900px);display:flex;align-items:flex-end;padding:120px 0 76px}.hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.55fr);gap:48px;align-items:end;width:100%}
+.eyebrow{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--warm);font-weight:750}.hero h1{font-size:clamp(4rem,10vw,8.2rem);line-height:.82;letter-spacing:-.075em;margin:16px 0 22px;font-weight:850;text-wrap:balance}.hero-copy{max-width:560px}.hero-copy p{margin:0 0 26px;max-width:38rem;font-size:clamp(1rem,2.2vw,1.2rem);line-height:1.62;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:10px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:750;border:1px solid transparent;transition:transform .2s ease,background .2s ease,border-color .2s ease}.button:hover{transform:translateY(-2px)}.button:focus-visible,.topnav a:focus-visible,.card:focus-visible{outline:3px solid var(--warm);outline-offset:3px}.primary{background:#fff;color:#0a0d11}.ghost{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(8,12,18,.3);backdrop-filter:blur(10px)}
+.hero-note{justify-self:end;max-width:280px;padding:18px 0 6px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;line-height:1.55}.hero-note strong{display:block;color:#fff;font-size:1rem;margin-bottom:8px}
+.section{padding:82px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:26px}.section-head h2{margin:8px 0 0;font-size:clamp(2.1rem,5vw,4.1rem);line-height:.95;letter-spacing:-.06em}.section-head p{max-width:390px;margin:0;color:var(--muted);line-height:1.55;font-size:.96rem}
+.service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{display:flex;flex-direction:column;min-height:260px;padding:18px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(8,12,18,.62));backdrop-filter:blur(16px);color:#fff;text-decoration:none;position:relative;overflow:hidden}.card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 0%,rgba(245,199,139,.18),transparent 38%);pointer-events:none}.card>*{position:relative;z-index:1}.card small{letter-spacing:.16em;text-transform:uppercase;color:var(--warm);font-size:.68rem;font-weight:750}.card h3{margin:30px 0 8px;font-size:1.35rem;letter-spacing:-.035em}.card p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}.card .go{margin-top:auto;padding-top:24px;font-size:.86rem;font-weight:750;color:#fff}
+.process{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:start}.process-intro h2{margin:8px 0 16px;font-size:clamp(2.2rem,5vw,4rem);line-height:.96;letter-spacing:-.06em}.process-intro p{margin:0;max-width:360px;color:var(--muted);line-height:1.6}.steps{border-top:1px solid var(--line)}.step{display:grid;grid-template-columns:48px 1fr;gap:18px;padding:20px 0;border-bottom:1px solid var(--line)}.step-index{color:var(--warm);font-size:.76rem;letter-spacing:.12em;font-weight:800;padding-top:3px}.step h3{margin:0 0 6px;font-size:1.05rem}.step p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
+.feature{padding:30px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(120deg,rgba(245,199,139,.16),rgba(255,255,255,.05) 45%,rgba(8,12,18,.62));display:flex;align-items:end;justify-content:space-between;gap:30px}.feature h2{margin:8px 0 12px;font-size:clamp(2.1rem,5vw,4rem);line-height:.95;letter-spacing:-.06em}.feature p{margin:0;max-width:540px;color:var(--muted);line-height:1.58}.feature .button{flex:0 0 auto}
+.foot{display:flex;justify-content:space-between;gap:20px;padding:34px 0 22px;color:rgba(255,255,255,.46);font-size:.76rem;border-top:1px solid var(--line)}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:32px}.hero-note{justify-self:start;max-width:420px}.service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.process{grid-template-columns:1fr;gap:34px}}
+@media(max-width:640px){body{background-attachment:scroll;background-position:center}.container{width:min(100% - 32px,1180px)}.top{padding:18px 16px}.topnav a{display:none}.hero{min-height:720px;padding:112px 0 52px}.hero h1{font-size:clamp(3.2rem,16vw,5.5rem)}.section{padding:58px 0}.section-head{display:block}.section-head p{margin-top:12px}.service-grid{grid-template-columns:1fr}.card{min-height:190px}.process{gap:26px}.feature{display:block;padding:24px}.feature .button{margin-top:24px}.foot{display:block}.foot span{display:block;margin-top:8px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}.button:hover{transform:none}}
 </style></head>
 <body><main class="page">
-<header class="top"><div class="brand">YGG METRO</div><div class="shop">SHOP</div></header>
-<section class="hero"><div class="eyebrow">Creative systems · visual work</div><h1>YGG<br>METRO</h1>
-<p>พื้นที่รวมงานและสิ่งที่เราสร้าง — ดูงานก่อน แล้วค่อยเข้ามาคุยกับ GO Client เมื่อต้องการเริ่มงาน</p>
-<div class="actions"><a class="primary" href="/client">คุยกับ GO Client</a><a class="ghost" href="#work">ดูงาน</a></div>
-</section>
-<section id="work" class="work">
-<div class="work-head"><div><div class="eyebrow">Selected work</div><h2>ดูงานของเรา</h2></div><p>ตัวอย่างงานและของที่กำลังทำใน YGG METRO — กดดูแต่ละหมวดได้เลย</p></div>
-<div class="grid">
-<a class="card" href="/client"><div><small>Presentation</small><h3>Company & Pitch</h3><p>จัดโครงเรื่อง ออกแบบสไลด์ และทำงานนำเสนอให้พร้อมใช้จริง</p></div><div class="go">เริ่มคุยงาน →</div></a>
-<a class="card" href="/client"><div><small>Visual</small><h3>Brand & Visual System</h3><p>งานภาพ ทิศทางแบรนด์ และ visual language สำหรับเว็บหรือโปรเจกต์</p></div><div class="go">ดูแนวทาง →</div></a>
-<a class="card" href="/client"><div><small>Digital</small><h3>Web Experience</h3><p>หน้าเว็บ เดโม และประสบการณ์ดิจิทัลที่เล่าเรื่องผ่านบรรยากาศ</p></div><div class="go">คุยกับ GO →</div></a>
-<a class="card" href="/client"><div><small>YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p></div><div class="go">เร็ว ๆ นี้ →</div></a>
-</div>
-<div class="foot">YGG METRO · Shop</div>
-</section>
+<header class="top"><a class="brand" href="/" aria-label="YGG METRO home">YGG METRO</a><nav class="topnav" aria-label="เมนูหลัก"><a href="#services">บริการ</a><a href="#process">วิธีทำงาน</a><a class="shop" href="/client">เริ่มคุยงาน</a></nav></header>
+<section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO ช่วยเปลี่ยนโจทย์ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ GO Client</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
+<section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ GO Client เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
+<a class="card" href="/client"><small>01 · Presentation</small><h3>Company & Pitch</h3><p>จัดโครงเรื่อง ออกแบบสไลด์ และทำงานนำเสนอให้พร้อมใช้จริง</p><div class="go">เริ่มคุยงาน →</div></a>
+<a class="card" href="/client"><small>02 · Visual</small><h3>Brand & Visual System</h3><p>วางทิศทางแบรนด์ งานภาพ และ visual language ให้ทั้งระบบไปทางเดียวกัน</p><div class="go">คุยเรื่องทิศทาง →</div></a>
+<a class="card" href="/client"><small>03 · Digital</small><h3>Web Experience</h3><p>ออกแบบหน้าเว็บ เดโม และประสบการณ์ดิจิทัลที่เล่าเรื่องผ่านบรรยากาศ</p><div class="go">เริ่มวางหน้าเว็บ →</div></a>
+<a class="card" href="/client"><small>04 · YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p><div class="go">ดูของที่กำลังทำ →</div></a>
+</div></div></section>
+<section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>GO Client ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
+<section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ GO Client</a></div></div></section>
+<footer class="container foot"><span>YGG METRO · Shop</span><span>Presentation · Visual · Digital · YGG Lab</span></footer>
 </main></body></html>`
 
 export default {
