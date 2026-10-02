@@ -1,12 +1,14 @@
 {
   "name": "yggmetro-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev"
+    "check": "node --check src/index.js && node --check src/go-client-api.mjs && node --check src/guards.mjs && node --check src/http.mjs && node --check src/rate-limit.mjs && node --check master-input/intent-contract.mjs && node --check master-input/interpreter-provider.mjs && node --check master-input/go-client-interpreter-provider.mjs && node --check master-input/go-client-manager-provider.mjs && node --check public/client/assets/ui/go-client-entry.mjs && node --check public/client/assets/ui/go-client.mjs && node --check public/client/assets/ui/go-client-flow.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
-  }
+  },
+  "type": "module"
 }
