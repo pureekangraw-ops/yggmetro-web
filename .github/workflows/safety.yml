@@ -1,0 +1,30 @@
+name: YGG METRO Safety Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check
+        run: |
+          node --check src/index.js
+          node --check src/go-client-server.js
+      - name: Secret isolation check
+        run: |
+          if grep -RInE 'OPENAI_API_KEY[[:space:]]*[:=][[:space:]]*["'\''"]?sk-' src . --exclude-dir=.git; then
+            echo "OpenAI secret-like literal detected"
+            exit 1
+          fi
+          grep -q 'env\.OPENAI_API_KEY' src/go-client-server.js
+          grep -q 'authorization:.*Bearer' src/go-client-server.js
