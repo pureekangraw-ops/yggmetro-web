@@ -3,6 +3,7 @@ const MODEL = "gpt-5.4-mini";
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 20;
 const buckets = new Map();
+const SHOP_ASSET_PREFIX = "shop/";
 
 const INTENTS = ["SERVICE","PRICE","INCLUDED","MATERIALS","REVISION","SCOPE_CHANGE","TIMELINE","PAGE_COUNT","OLD_FILE","UNORGANIZED_CONTENT","GRAPH_TABLE_DIAGRAM","PORTFOLIO","START","PRE_ESTIMATE","HELP","UNKNOWN"];
 const JOB_TYPES = ["PROPOSAL","COMPANY_PROFILE","PORTFOLIO_CASE_STUDY","REPORT_SUMMARY","OTHER"];
@@ -32,6 +33,27 @@ const SCHEMA = {
 };
 
 function json(data,status=200){return Response.json(data,{status,headers:{"cache-control":"no-store","x-content-type-options":"nosniff"}})}
+function shopAssetKey(pathname){
+  const raw=decodeURIComponent(String(pathname||"").replace(/^\/assets\/?/,"")).replace(/^\/+/, "");
+  if(!raw||raw.includes("..")||raw.includes("\\"))return null;
+  return SHOP_ASSET_PREFIX+raw;
+}
+async function handleShopAsset(request,env,url){
+  if(request.method!=="GET"&&request.method!=="HEAD")return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
+  if(!env?.SHOP_ASSETS||typeof env.SHOP_ASSETS.get!=="function")return json({ok:false,code:"SHOP_ASSETS_NOT_CONFIGURED"},503);
+  const key=shopAssetKey(url.pathname);
+  if(!key)return json({ok:false,code:"SHOP_ASSET_KEY_INVALID"},400);
+  const object=await env.SHOP_ASSETS.get(key);
+  if(!object)return new Response("Not Found",{status:404,headers:{"cache-control":"public, max-age=60","x-content-type-options":"nosniff"}});
+  const headers={
+    "content-type":String(object.httpMetadata?.contentType||"application/octet-stream"),
+    "content-length":String(object.size||""),
+    "etag":String(object.etag||""),
+    "cache-control":"public, max-age=3600",
+    "x-content-type-options":"nosniff",
+  };
+  return new Response(request.method==="HEAD"?null:object.body,{status:200,headers});
+}
 function clientKey(request){return request.headers.get("cf-connecting-ip")||"unknown"}
 function rateLimited(request){
   const key=clientKey(request), now=Date.now();
@@ -263,6 +285,9 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/assets/")) {
+      return handleShopAsset(request, env, url);
+    }
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",goClientConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
