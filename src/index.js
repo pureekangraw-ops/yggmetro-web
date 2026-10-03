@@ -3,7 +3,6 @@ const MODEL = "gpt-5.4-mini";
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 20;
 const buckets = new Map();
-const SHOP_ASSET_PREFIX = "shop/";
 
 const INTENTS = ["SERVICE","PRICE","INCLUDED","MATERIALS","REVISION","SCOPE_CHANGE","TIMELINE","PAGE_COUNT","OLD_FILE","UNORGANIZED_CONTENT","GRAPH_TABLE_DIAGRAM","PORTFOLIO","START","PRE_ESTIMATE","HELP","UNKNOWN"];
 const JOB_TYPES = ["PROPOSAL","COMPANY_PROFILE","PORTFOLIO_CASE_STUDY","REPORT_SUMMARY","OTHER"];
@@ -36,7 +35,7 @@ function json(data,status=200){return Response.json(data,{status,headers:{"cache
 function shopAssetKey(pathname){
   const raw=decodeURIComponent(String(pathname||"").replace(/^\/assets\/?/,"")).replace(/^\/+/, "");
   if(!raw||raw.includes("..")||raw.includes("\\"))return null;
-  return SHOP_ASSET_PREFIX+raw;
+  return raw;
 }
 async function handleShopAsset(request,env,url){
   if(request.method!=="GET"&&request.method!=="HEAD")return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
