@@ -8,7 +8,7 @@ const INTENTS = ["SERVICE","PRICE","INCLUDED","MATERIALS","REVISION","SCOPE_CHAN
 const JOB_TYPES = ["PROPOSAL","COMPANY_PROFILE","PORTFOLIO_CASE_STUDY","REPORT_SUMMARY","OTHER"];
 const PACKAGES = ["STARTER","STANDARD","BUSINESS"];
 
-const SYSTEM_PROMPT = `คุณเป็นตัวจำแนก intent สำหรับ GO Client ฝั่งรับงาน Presentation เท่านั้น
+const SYSTEM_PROMPT = `คุณเป็น SPECTRUMSALE ฝั่งหน้าร้าน YGG METRO ทำหน้าที่จำแนก intent สำหรับรับงาน Presentation เท่านั้น
 อ่านข้อความลูกค้าแล้วคืนเฉพาะ JSON ตาม schema ห้ามคิดราคาใหม่ ห้ามสร้างข้อเท็จจริง ห้ามคืน runtime/domain/command/mutation authority
 อย่าเดา pageCount, desiredDate หรือ package ถ้าลูกค้าไม่ได้ระบุชัด
 wantsEstimate=true เมื่อขอประเมินราคา/แพ็กเกจ/จำนวนหน้า/ระยะเวลา
@@ -79,7 +79,7 @@ async function handleGoClientInterpret(request,env){
       {role:"system",content:`current_context: ${compactContext(body?.context)}`},
       {role:"user",content:text}
     ],
-    text:{format:{type:"json_schema",name:"go_client_intent_v1",strict:true,schema:SCHEMA}}
+    text:{format:{type:"json_schema",name:"spectrumsale_intent_v1",strict:true,schema:SCHEMA}}
   };
 
   let upstream;
@@ -130,7 +130,7 @@ async function callBriefRegistry(env,path,payload){
   if(!env?.GO_HUB||typeof env.GO_HUB.fetch!=="function")return {ok:false,status:503,code:"BRIEF_BRIDGE_NOT_CONFIGURED"};
   let response;
   try{
-    response=await env.GO_HUB.fetch(new Request("https://go-hub.internal"+path,{method:"POST",headers:{"content-type":"application/json","x-yggmetro-surface":"GO_CLIENT"},body:JSON.stringify(payload)}));
+    response=await env.GO_HUB.fetch(new Request("https://go-hub.internal"+path,{method:"POST",headers:{"content-type":"application/json","x-yggmetro-surface":"SPECTRUMSALE"},body:JSON.stringify(payload)}));
   }catch{return {ok:false,status:502,code:"BRIEF_BRIDGE_UNAVAILABLE"}}
   const body=await response.json().catch(()=>({}));
   if(!response.ok)return {ok:false,status:502,code:String(body?.code||"BRIEF_BRIDGE_REJECTED")};
@@ -148,7 +148,7 @@ async function handleBriefUpsert(request,env){
   if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
   const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
   const {body,clientId,conversationId,briefId:id}=parsed;
-  const payload={version:"1",briefId:id,clientId,conversationId,surface:"GO_CLIENT",status:"DRAFT",stage:briefText(body?.stage,40),brief:briefObject(body?.brief),latestInterpretation:body?.latestInterpretation&&typeof body.latestInterpretation==="object"?body.latestInterpretation:null,updatedAt:new Date().toISOString()};
+  const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"DRAFT",stage:briefText(body?.stage,40),brief:briefObject(body?.brief),latestInterpretation:body?.latestInterpretation&&typeof body.latestInterpretation==="object"?body.latestInterpretation:null,updatedAt:new Date().toISOString()};
   const result=await callBriefRegistry(env,"/internal/brief/upsert",payload);
   if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
   return json({ok:true,status:"DRAFT",briefId:id,clientId,conversationId,registry:result.body||null});
@@ -158,7 +158,7 @@ async function handleBriefConfirm(request,env){
   if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
   const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
   const {body,clientId,conversationId,briefId:id}=parsed;
-  const payload={version:"1",briefId:id,clientId,conversationId,surface:"GO_CLIENT",status:"CONFIRMED",stage:"summary",brief:briefObject(body?.brief),confirmedAt:new Date().toISOString()};
+  const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"CONFIRMED",stage:"summary",brief:briefObject(body?.brief),confirmedAt:new Date().toISOString()};
   const result=await callBriefRegistry(env,"/internal/brief/confirm",payload);
   if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
   return json({ok:true,status:"CONFIRMED",briefId:id,clientId,conversationId,office:result.body||null});
@@ -166,7 +166,7 @@ async function handleBriefConfirm(request,env){
 
 function goClientPage(){
 return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GO Client · YGG METRO</title><meta name="description" content="เล่าโจทย์งานให้ YGG METRO ช่วยจัด brief">
+<title>SPECTRUMSALE · YGG METRO</title><meta name="description" content="เล่าโจทย์งานให้ YGG METRO ช่วยจัด brief">
 <style>
 :root{color-scheme:dark;--bg:#080b10;--panel:rgba(18,24,34,.82);--panel-2:rgba(10,14,21,.78);--line:rgba(255,255,255,.13);--text:#f5f7fa;--muted:rgba(245,247,250,.64);--warm:#f5c78b;--green:#a7f3d0}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%}body{min-height:100svh;color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg) url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
@@ -179,13 +179,13 @@ body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.message{animation:none}}
 </style></head><body><main class="page">
 <header class="top"><a class="brand" href="/">YGG METRO</a><a class="back" href="/">กลับหน้าแรก ↗</a></header>
-<section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · GO CLIENT</div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><div class="intro-note">GO Client จะช่วยจับประเด็น ถามข้อมูลที่ขาด และสรุป brief ให้ตรวจสอบ</div></div>
+<section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · SPECTRUMSALE</div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><div class="intro-note">SPECTRUMSALE จะช่วยจับประเด็น ถามข้อมูลที่ขาด และสรุป brief ให้ตรวจสอบ</div></div>
 <nav class="progress" aria-label="สถานะการรับ brief"><div class="progress-step active" data-stage="discover"><span>01</span>โจทย์</div><div class="progress-step" data-stage="audience"><span>02</span>ขอบเขต</div><div class="progress-step" data-stage="materials"><span>03</span>ข้อมูล</div><div class="progress-step" data-stage="summary"><span>04</span>สรุป</div></nav>
-<div class="workspace"><section class="panel chat" aria-label="บทสนทนา GO Client"><div class="chat-head"><div><strong>คุยกับ GO Client</strong><br><small>ช่วยจัดโจทย์ให้พร้อมคุยงาน</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section>
+<div class="workspace"><section class="panel chat" aria-label="บทสนทนา SPECTRUMSALE"><div class="chat-head"><div><strong>คุยกับ SPECTRUMSALE</strong><br><small>ช่วยจัดโจทย์ให้พร้อมคุยงาน</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section>
 <aside class="panel brief" aria-label="สรุป brief"><div class="brief-top"><div><div class="eyebrow">Live brief</div><h2>สิ่งที่จับได้</h2></div><div id="status" class="status">กำลังเริ่ม</div></div><p class="brief-copy">ข้อมูลจะค่อย ๆ เติมจากบทสนทนา ตรวจสอบให้เรียบร้อยก่อนส่งต่อ</p><div id="brief-list" class="brief-list"><span class="chip">ยังไม่มีข้อมูล</span></div><div id="missing" class="missing"><strong>ขั้นต่อไป</strong>เล่าให้ฟังก่อนว่าอยากทำงานอะไร</div><div class="brief-actions"><button class="brief-action" id="copy" type="button">คัดลอก brief</button><button class="brief-action primary" id="confirm" type="button">ยืนยัน brief</button></div><p class="privacy">เก็บสถานะชั่วคราวใน browser นี้ และยังไม่ส่งออกอัตโนมัติจนกว่าจะเชื่อม handoff จริง</p></aside></div></section></main>
 <script>
-const STORAGE_KEY='yggmetro-go-client-v2';
-const clientKey='yggmetro-go-client-id-v1',conversationKey='yggmetro-go-conversation-id-v1',briefKey='yggmetro-go-brief-id-v1';
+const STORAGE_KEY='yggmetro-spectrumsale-v1';
+const clientKey='yggmetro-spectrumsale-client-id-v1',conversationKey='yggmetro-spectrumsale-conversation-id-v1',briefKey='yggmetro-spectrumsale-brief-id-v1';
 function stableId(storage,key,prefix){let id=storage.getItem(key);if(!id){id=prefix+'-'+crypto.randomUUID();storage.setItem(key,id)}return id}
 const clientId=stableId(localStorage,clientKey,'CLIENT');
 const conversationId=stableId(sessionStorage,conversationKey,'CONV');
@@ -211,7 +211,7 @@ function replyFor(data){if(state.stage==='discover')return 'อยากทำ�
 function briefBody(latestInterpretation){return {version:'1',briefId:briefId,clientId:clientId,conversationId:conversationId,status:state.confirmed?'CONFIRMED':'DRAFT',stage:state.stage,brief:{goal:state.goal,jobType:state.jobType,audience:state.audience,materials:state.materials,pageCount:state.pageCount,package:state.package,desiredDate:state.desiredDate,deadlineText:state.deadlineText},latestInterpretation:latestInterpretation||null,updatedAt:new Date().toISOString()}}
 async function upsertBrief(latestInterpretation){const response=await fetch('/api/v1/brief/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(latestInterpretation))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_UPSERT_FAILED');state.bridgeStatus='DRAFT_SAVED';save();return body}
 async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(null))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_CONFIRM_FAILED');state.bridgeStatus='CONFIRMED';save();return body}
-async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'GO_CLIENT',stage:state.stage,jobType:state.jobType,package:state.package}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ระบบช่วยจับโจทย์ไม่ได้ชั่วคราวครับ ลองส่งข้อความอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
+async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,jobType:state.jobType,package:state.package}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ระบบช่วยจับโจทย์ไม่ได้ชั่วคราวครับ ลองส่งข้อความอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
 document.getElementById('composer').addEventListener('submit',function(event){event.preventDefault();submitText(input.value);input.value=''})
 input.addEventListener('keydown',function(event){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('composer').requestSubmit()}})
 document.getElementById('reset').addEventListener('click',function(){localStorage.removeItem(STORAGE_KEY);state={...defaultState};render()})
@@ -248,15 +248,15 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 </style></head>
 <body><main class="page">
 <header class="top"><a class="brand" href="/" aria-label="YGG METRO home">YGG METRO</a><nav class="topnav" aria-label="เมนูหลัก"><a href="#services">บริการ</a><a href="#process">วิธีทำงาน</a><a class="shop" href="/client">เริ่มคุยงาน</a></nav></header>
-<section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO ช่วยเปลี่ยนโจทย์ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ GO Client</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
-<section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ GO Client เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
+<section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO ช่วยเปลี่ยนโจทย์ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ SPECTRUMSALE</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
+<section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ SPECTRUMSALE เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
 <a class="card" href="/client"><small>01 · Presentation</small><h3>Company & Pitch</h3><p>จัดโครงเรื่อง ออกแบบสไลด์ และทำงานนำเสนอให้พร้อมใช้จริง</p><div class="go">เริ่มคุยงาน →</div></a>
 <a class="card" href="/client"><small>02 · Visual</small><h3>Brand & Visual System</h3><p>วางทิศทางแบรนด์ งานภาพ และ visual language ให้ทั้งระบบไปทางเดียวกัน</p><div class="go">คุยเรื่องทิศทาง →</div></a>
 <a class="card" href="/client"><small>03 · Digital</small><h3>Web Experience</h3><p>ออกแบบหน้าเว็บ เดโม และประสบการณ์ดิจิทัลที่เล่าเรื่องผ่านบรรยากาศ</p><div class="go">เริ่มวางหน้าเว็บ →</div></a>
 <a class="card" href="/client"><small>04 · YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p><div class="go">ดูของที่กำลังทำ →</div></a>
 </div></div></section>
-<section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>GO Client ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
-<section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ GO Client</a></div></div></section>
+<section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>SPECTRUMSALE ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
+<section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ SPECTRUMSALE</a></div></div></section>
 <footer class="container foot"><span>YGG METRO · Shop</span><span>Presentation · Visual · Digital · YGG Lab</span></footer>
 </main></body></html>`
 
@@ -264,7 +264,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/health") {
-      return Response.json({ok:true,service:"yggmetro-web",status:"READY",goClientConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
+      return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
     if (url.pathname === "/api/v1/interpret" || url.pathname === "/client/api/v1/interpret") {
       return handleGoClientInterpret(request, env);
