@@ -6,7 +6,7 @@
   "r2_buckets": [
     {
       "binding": "SHOP_ASSETS",
-      "bucket_name": "ygg-office-assets"
+      "bucket_name": "ygg-shop"
     }
   ],
   "services": [
