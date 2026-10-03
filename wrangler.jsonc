@@ -3,6 +3,12 @@
   "name": "yggmetro-web",
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
+  "r2_buckets": [
+    {
+      "binding": "SHOP_ASSETS",
+      "bucket_name": "ygg-shop"
+    }
+  ],
   "services": [
     {
       "binding": "GO_HUB",
