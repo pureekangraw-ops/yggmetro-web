@@ -33,8 +33,8 @@ const SCHEMA = {
 
 function json(data,status=200){return Response.json(data,{status,headers:{"cache-control":"no-store","x-content-type-options":"nosniff"}})}
 function clientKey(request){return request.headers.get("cf-connecting-ip")||"unknown"}
-function rateLimited(request){
-  const key=clientKey(request), now=Date.now();
+function rateLimited(request,scope='customer'){
+  const key=scope+':'+clientKey(request), now=Date.now();
   const current=buckets.get(key);
   if(!current||now-current.startedAt>=WINDOW_MS){buckets.set(key,{startedAt:now,count:1});return false}
   current.count+=1;
@@ -164,6 +164,26 @@ async function handleBriefConfirm(request,env){
   return json({ok:true,status:"CONFIRMED",briefId:id,clientId,conversationId,office:result.body||null});
 }
 
+async function handleSalesEvent(request,env){
+  if(request.method!=="POST")return new Response("Method Not Allowed",{status:405});
+  if(rateLimited(request,"observations"))return json({ok:false,code:"RATE_LIMITED"},429);
+  const raw=await request.text();if(raw.length>4096)return json({ok:false,code:"PAYLOAD_TOO_LARGE"},413);
+  let body;try{body=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_JSON"},400)}
+  if(!["PAGE_VIEW","SERVICE_INTEREST","BRIEF_STARTED","CTA_CLICK"].includes(body?.type)||!briefId(body?.eventId))return json({ok:false,code:"SALES_EVENT_INVALID"},400);
+  const result=await callBriefRegistry(env,"/internal/spectrum/event",{eventId:body.eventId,type:body.type,page:briefText(body.page,240).split(/[?#]/)[0],source:briefText(body.source,120)});
+  return result.ok?json({ok:true}):json({ok:false,code:result.code},result.status);
+}
+const salesObserverScript=`<script>
+(function(){
+ const key='ygg-sales-observations-v1';let sending=false;
+ function load(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}}
+ function save(queue){try{localStorage.setItem(key,JSON.stringify(queue));return true}catch{return false}}
+ async function flush(){if(sending)return;sending=true;try{let queue=load();while(queue.length){const response=await fetch('/api/v1/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(queue[0])});if(!response.ok)break;const current=load().filter(function(e){return e.eventId!==queue[0].eventId});save(current);queue=current;}}catch{}finally{sending=false}}
+ function observe(type){let source='direct';try{if(document.referrer)source=new URL(document.referrer).hostname}catch{}const queue=load();if(queue.length>=200)return;queue.push({eventId:'EV-'+crypto.randomUUID(),type:type,page:location.pathname,source:source});if(save(queue))flush();}
+ observe('PAGE_VIEW');document.addEventListener('click',function(event){const link=event.target.closest('a[href]');if(!link)return;let target;try{target=new URL(link.href)}catch{return}if(target.origin===location.origin && target.pathname==='/client')observe('SERVICE_INTEREST');});window.addEventListener('online',flush);setInterval(flush,30000);flush();
+})();
+</script>`;
+
 function goClientPage(){
 return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SPECTRUMSALE · YGG METRO</title><meta name="description" content="เล่าโจทย์งานให้ YGG METRO ช่วยจัด brief">
@@ -182,7 +202,7 @@ body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,
 <section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · SPECTRUMSALE</div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><div class="intro-note">SPECTRUMSALE จะช่วยจับประเด็น ถามข้อมูลที่ขาด และสรุป brief ให้ตรวจสอบ</div></div>
 <nav class="progress" aria-label="สถานะการรับ brief"><div class="progress-step active" data-stage="discover"><span>01</span>โจทย์</div><div class="progress-step" data-stage="audience"><span>02</span>ขอบเขต</div><div class="progress-step" data-stage="materials"><span>03</span>ข้อมูล</div><div class="progress-step" data-stage="summary"><span>04</span>สรุป</div></nav>
 <div class="workspace"><section class="panel chat" aria-label="บทสนทนา SPECTRUMSALE"><div class="chat-head"><div><strong>คุยกับ SPECTRUMSALE</strong><br><small>ช่วยจัดโจทย์ให้พร้อมคุยงาน</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section>
-<aside class="panel brief" aria-label="สรุป brief"><div class="brief-top"><div><div class="eyebrow">Live brief</div><h2>สิ่งที่จับได้</h2></div><div id="status" class="status">กำลังเริ่ม</div></div><p class="brief-copy">ข้อมูลจะค่อย ๆ เติมจากบทสนทนา ตรวจสอบให้เรียบร้อยก่อนส่งต่อ</p><div id="brief-list" class="brief-list"><span class="chip">ยังไม่มีข้อมูล</span></div><div id="missing" class="missing"><strong>ขั้นต่อไป</strong>เล่าให้ฟังก่อนว่าอยากทำงานอะไร</div><div class="brief-actions"><button class="brief-action" id="copy" type="button">คัดลอก brief</button><button class="brief-action primary" id="confirm" type="button">ยืนยัน brief</button></div><p class="privacy">เก็บสถานะชั่วคราวใน browser นี้ และยังไม่ส่งออกอัตโนมัติจนกว่าจะเชื่อม handoff จริง</p></aside></div></section></main>
+<aside class="panel brief" aria-label="สรุป brief"><div class="brief-top"><div><div class="eyebrow">Live brief</div><h2>สิ่งที่จับได้</h2></div><div id="status" class="status">กำลังเริ่ม</div></div><p class="brief-copy">ข้อมูลจะค่อย ๆ เติมจากบทสนทนา ตรวจสอบให้เรียบร้อยก่อนส่งต่อ</p><div id="brief-list" class="brief-list"><span class="chip">ยังไม่มีข้อมูล</span></div><div id="missing" class="missing"><strong>ขั้นต่อไป</strong>เล่าให้ฟังก่อนว่าอยากทำงานอะไร</div><div class="brief-actions"><button class="brief-action" id="copy" type="button">คัดลอก brief</button><button class="brief-action primary" id="confirm" type="button">ยืนยัน brief</button></div><p class="privacy">เก็บแบบร่างใน browser และส่งบรีฟที่จับได้ไปยัง Centre · ยืนยันเมื่อข้อมูลครบ ไม่ใช่การชำระเงิน</p></aside></div></section></main>
 <script>
 const STORAGE_KEY='yggmetro-spectrumsale-v1';
 const clientKey='yggmetro-spectrumsale-client-id-v1',conversationKey='yggmetro-spectrumsale-conversation-id-v1',briefKey='yggmetro-spectrumsale-brief-id-v1';
@@ -266,6 +286,7 @@ export default {
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
+    if (url.pathname === "/api/v1/events") return handleSalesEvent(request,env);
     if (url.pathname === "/api/v1/interpret" || url.pathname === "/client/api/v1/interpret") {
       return handleGoClientInterpret(request, env);
     }
@@ -277,9 +298,9 @@ export default {
     }
     if (url.pathname === "/client" || url.pathname === "/client/") {
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-      return new Response(request.method==="HEAD"?null:goClientPage(),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
+      return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    return new Response(request.method==="HEAD"?null:html,{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
+    return new Response(request.method==="HEAD"?null:html.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
 };
