@@ -76,7 +76,7 @@ function validResult(x){
 const PUBLIC_FORBIDDEN=/\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority)\b/i;
 const HUMAN_REQUEST=/(?:คุยกับ(?:คน|พนักงาน|เจ้าหน้าที่|ทีม)|ขอ(?:คน|พนักงาน|เจ้าหน้าที่)|คนจริง|พนักงาน|เจ้าหน้าที่|สำนักงาน|human|manager)/i;
 const ESTIMATE_REQUEST=/(?:ประเมิน|ราคา|งบ|ใบเสนอราคา|quotation|quote|estimate|แพ็กเกจ)/i;
-const PAYMENT_CLAIM=/(?:จ่ายแล้ว|ชำระแล้ว|โอนแล้ว|ตัดเงินแล้ว|payment\s*(?:done|paid)|paid\b)/i;
+const PAYMENT_CLAIM=/(?:จ่าย(?:เงิน)?(?:ไป)?แล้ว|ชำระ(?:เงิน)?(?:ไป)?แล้ว|โอน(?:เงิน)?(?:ไป)?แล้ว|ตัดเงินแล้ว|payment\s*(?:done|paid)|paid\b)/i;
 const COMPLAINT_REQUEST=/(?:ไม่พอใจ|ร้องเรียน|แย่มาก|ช้ามาก|ล่าช้า|ผิดหวัง|complain|complaint|refund|คืนเงิน)/i;
 const IDENTITY_COLLISION=/(?:yggdrazil|ygg-cg\.com|ตลาดหลักทรัพย์|\bSET\b)/i;
 function publicFallback(kind){
