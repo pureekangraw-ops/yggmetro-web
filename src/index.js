@@ -173,7 +173,8 @@ async function reserveGoBudget(env,{clientId,conversationId,requestId,kind}){
   if(!result.ok)return {ok:false,code:result.code,status:result.status};
   const budget=result.body||{};
   if(!budget.allowed)return {ok:false,code:budget.reason||"GO_BUDGET_BLOCKED",status:429,budget:budget.budget||null};
-  return {ok:true,budget:budget.budget||null,duplicate:Boolean(budget.duplicate)};
+  if(budget.duplicate)return {ok:false,code:"GO_DUPLICATE_REQUEST",status:409,budget:budget.budget||null};
+  return {ok:true,budget:budget.budget||null,duplicate:false};
 }
 async function callEscalationModel(env,{model,maxOutputTokens,system,schema,name,input}){
   if(typeof env?.OPENAI_API_KEY!=="string"||!env.OPENAI_API_KEY.trim())return {ok:false,code:"GO_NOT_CONFIGURED",status:503};
