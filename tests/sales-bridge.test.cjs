@@ -12,6 +12,51 @@ test('unavailable event transport does not claim saved',async()=>{
 test('public event intake rejects payment claims',async()=>{
  const {default:web}=await load();const response=await web.fetch(new Request('https://yggmetro.com/api/v1/events',{method:'POST',body:JSON.stringify({eventId:'EV-3',type:'PAYMENT_CONFIRMED',page:'/'})}),{});assert.equal(response.status,400);
 });
+
+test('checkout request forwards identity only and preserves payment authority in GO Hub',async()=>{
+ const {default:web}=await load();let seen;
+ const env={GO_HUB:{fetch:async r=>{seen={url:r.url,headers:Object.fromEntries(r.headers),body:await r.json()};return Response.json({
+   ok:true,paymentId:'PAY-1',quoteId:'QUOTE-1',workId:'WORK-1',status:'PAYMENT_PENDING',checkoutUrl:'https://checkout.example.test/session/1',providerReference:'REF-1'
+ });}}};
+ const response=await web.fetch(new Request('https://yggmetro.com/api/v1/payment/checkout',{method:'POST',headers:{'content-type':'application/json','cf-connecting-ip':'payment-forward'},body:JSON.stringify({
+   customerId:'CLIENT-1',quoteId:'QUOTE-1',workId:'WORK-1',idempotencyKey:'CHECKOUT-1'
+ })}),env);
+ const body=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(seen.url,'https://go-hub.internal/internal/payment/checkout');
+ assert.equal(seen.headers['x-yggmetro-surface'],'SPECTRUMSALE');
+ assert.deepEqual(Object.keys(seen.body).sort(),['customerId','idempotencyKey','quoteId','requestedAt','surface','version','workId']);
+ assert.equal(seen.body.status,undefined);
+ assert.equal(seen.body.amount,undefined);
+ assert.equal(body.status,'PAYMENT_PENDING');
+ assert.equal(body.checkoutUrl,'https://checkout.example.test/session/1');
+});
+
+test('checkout request rejects customer payment truth and card-like data before transport',async()=>{
+ const {default:web}=await load();let called=false;
+ const env={GO_HUB:{fetch:async()=>{called=true;return Response.json({ok:true})}}};
+ for(const [ip,extra] of [['payment-status',{status:'PAYMENT_CONFIRMED'}],['payment-card',{cardNumber:'4111111111111111'}],['payment-amount',{amount:5000,currency:'THB'}]]){
+   const response=await web.fetch(new Request('https://yggmetro.com/api/v1/payment/checkout',{method:'POST',headers:{'content-type':'application/json','cf-connecting-ip':ip},body:JSON.stringify({customerId:'CLIENT-1',quoteId:'QUOTE-1',workId:'WORK-1',idempotencyKey:'CHECKOUT-1',...extra})}),env);
+   assert.equal(response.status,400,ip);
+ }
+ assert.equal(called,false);
+});
+
+test('provider-confirmed status requires provider evidence in owner readback',async()=>{
+ const {default:web}=await load();
+ const request=ip=>new Request('https://yggmetro.com/api/v1/payment/checkout',{method:'POST',headers:{'content-type':'application/json','cf-connecting-ip':ip},body:JSON.stringify({customerId:'CLIENT-1',quoteId:'QUOTE-1',workId:'WORK-1',idempotencyKey:'CHECKOUT-1'})});
+ let env={GO_HUB:{fetch:async()=>Response.json({ok:true,paymentId:'PAY-1',quoteId:'QUOTE-1',workId:'WORK-1',status:'PAYMENT_CONFIRMED',checkoutUrl:'https://checkout.example.test/session/1'})}};
+ let response=await web.fetch(request('payment-unproven'),env);
+ assert.equal(response.status,502);
+ assert.equal((await response.json()).code,'PAYMENT_EVIDENCE_REQUIRED');
+ env={GO_HUB:{fetch:async()=>Response.json({ok:true,paymentId:'PAY-1',quoteId:'QUOTE-1',workId:'WORK-1',status:'PAYMENT_CONFIRMED',checkoutUrl:'https://checkout.example.test/session/1',ownerSource:'PAYMENT_PROVIDER',providerEventId:'EVT-1',providerReference:'REF-1'})}};
+ response=await web.fetch(request('payment-proven'),env);
+ const body=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(body.status,'PAYMENT_CONFIRMED');
+ assert.equal(body.ownerSource,'PAYMENT_PROVIDER');
+ assert.equal(body.providerEventId,'EVT-1');
+});
 test('event backlog cannot exhaust the customer brief budget',async()=>{
  const {default:web}=await load();const env={GO_HUB:{fetch:async()=>Response.json({ok:true})}};
  for(let i=0;i<21;i++)await web.fetch(new Request('https://yggmetro.com/api/v1/events',{method:'POST',headers:{'cf-connecting-ip':'test-backlog'},body:JSON.stringify({eventId:'EV-backlog-'+i,type:'PAGE_VIEW',page:'/'})}),env);
