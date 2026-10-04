@@ -73,6 +73,60 @@ function validResult(x){
     typeof x.wantsEstimate==="boolean"&&typeof x.wantsManager==="boolean"&&typeof x.clientConfirmedComplete==="boolean";
 }
 
+const PUBLIC_FORBIDDEN=/\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority)\b/i;
+const HUMAN_REQUEST=/(?:คุยกับ(?:คน|พนักงาน|เจ้าหน้าที่|ทีม)|ขอ(?:คน|พนักงาน|เจ้าหน้าที่)|คนจริง|พนักงาน|เจ้าหน้าที่|สำนักงาน|human|manager)/i;
+const ESTIMATE_REQUEST=/(?:ประเมิน|ราคา|งบ|ใบเสนอราคา|quotation|quote|estimate|แพ็กเกจ)/i;
+const PAYMENT_CLAIM=/(?:จ่ายแล้ว|ชำระแล้ว|โอนแล้ว|ตัดเงินแล้ว|payment\s*(?:done|paid)|paid\b)/i;
+const COMPLAINT_REQUEST=/(?:ไม่พอใจ|ร้องเรียน|แย่มาก|ช้ามาก|ล่าช้า|ผิดหวัง|complain|complaint|refund|คืนเงิน)/i;
+const IDENTITY_COLLISION=/(?:yggdrazil|ygg-cg\.com|ตลาดหลักทรัพย์|\bSET\b)/i;
+function publicFallback(kind){
+  if(kind==="human")return "ได้ครับ ผมจะหยุดถามข้อมูลซ้ำไว้ตรงนี้ คุณส่งรายละเอียดให้ทีมได้เลย แล้วทีมจะรับช่วงจากข้อมูลที่คุยกันไว้ครับ";
+  if(kind==="estimate")return "ได้ครับ ผมรับว่าอยากประเมินก่อน โดยจะไม่เดาราคาเอง เมื่อข้อมูลพอให้ส่งรายละเอียดให้ทีมเพื่อประเมินจากข้อมูลจริงครับ";
+  if(kind==="payment")return "รับทราบครับ เรื่องการชำระเงินต้องตรวจจากรายการจริงก่อน ตอนนี้ผมยังไม่ยืนยันสถานะการชำระเงินจากข้อความอย่างเดียวครับ";
+  if(kind==="complaint")return "รับทราบครับ ผมจะไม่เถียงหรือเดาสาเหตุ ขอเก็บสิ่งที่กระทบคุณให้ชัด แล้วส่งต่อให้ทีมรับช่วงพร้อมบริบทที่มีอยู่ครับ";
+  if(kind==="identity")return "ตอนนี้ YGG METRO ไม่มีข้อมูลยืนยันความเกี่ยวข้องกับองค์กรที่ชื่อนี้ครับ ผมจึงจะไม่เชื่อมโยงหรือเติมข้อมูลบริษัทจากแหล่งภายนอกเอง";
+  return "รับทราบครับ ผมจะยึดข้อมูลที่ยืนยันได้และถามเฉพาะสิ่งที่จำเป็นต่อการเดินงานต่อ";
+}
+function safePublicReply(value,fallback){
+  const reply=String(value||"").trim().slice(0,700);
+  if(!reply||PUBLIC_FORBIDDEN.test(reply))return fallback;
+  return reply;
+}
+export function applyConversationGuards(text,result={}){
+  const input=String(text||"");
+  const guarded={...result};
+  let kind=null;
+  if(IDENTITY_COLLISION.test(input)){kind="identity";guarded.intent="HELP";}
+  else if(PAYMENT_CLAIM.test(input)){kind="payment";guarded.intent="HELP";guarded.wantsManager=true;}
+  else if(COMPLAINT_REQUEST.test(input)){kind="complaint";guarded.intent="HELP";guarded.wantsManager=true;}
+  else if(HUMAN_REQUEST.test(input)){kind="human";guarded.intent="HELP";guarded.wantsManager=true;}
+  else if(ESTIMATE_REQUEST.test(input)){kind="estimate";guarded.wantsEstimate=true;if(guarded.intent==="UNKNOWN")guarded.intent="PRE_ESTIMATE";}
+  const fallback=publicFallback(kind);
+  guarded.reply=kind?fallback:safePublicReply(guarded.reply,fallback);
+  guarded.reply=safePublicReply(guarded.reply,fallback);
+  return guarded;
+}
+const handoffText=(value,max=1200)=>typeof value==="string"?value.trim().slice(0,max):"";
+const handoffList=(value,maxItems=8,maxLen=500)=>Array.isArray(value)?value.slice(-maxItems).map(v=>handoffText(v,maxLen)).filter(Boolean):[];
+export function buildHandoffPacket({briefId,clientId,conversationId,brief={},latestInterpretation=null,recentCustomerWords=[]}={}){
+  const fields=["goal","jobType","audience","materials","deadlineText"];
+  const missingFields=fields.filter(k=>!handoffText(brief?.[k],500));
+  const confirmedFacts=fields.map(k=>[k,handoffText(brief?.[k],900)]).filter(([,v])=>v).map(([k,v])=>k+"="+v);
+  const activeIntent=handoffText(latestInterpretation?.intent,80)||"UNKNOWN";
+  const wantsManager=Boolean(latestInterpretation?.wantsManager);
+  const wantsEstimate=Boolean(latestInterpretation?.wantsEstimate);
+  return {
+    version:"1",
+    identity:{customerId:handoffText(clientId,160),conversationId:handoffText(conversationId,160),briefId:handoffText(briefId,160),workId:null},
+    intent:{activeIntent,requestedResult:handoffText(brief?.goal,1200),customerWords:handoffList(recentCustomerWords),successDefinition:"ทีมรับช่วงได้โดยไม่ต้องให้ลูกค้าเล่าซ้ำ"},
+    scope:{confirmedFacts,included:[],excluded:[],assumptions:[],missingFields,materialsReceived:handoffText(brief?.materials,1200)},
+    commercial:{packageCandidate:handoffText(brief?.package,80)||null,priceSource:null,paymentClaim:"UNKNOWN",approvalRequired:wantsEstimate},
+    operations:{riskClass:wantsManager?"HUMAN_HANDOFF":wantsEstimate?"COMMERCIAL_REVIEW":"STANDARD",ownerSource:"CENTRE_SPECTRUM_INTAKE",currentState:"CONFIRMED",checkpointId:null,holder:null,blocker:null,nextAction:"TEAM_REVIEW",promisedUpdateAt:null},
+    evidence:{eventIds:[],receipts:[],readbackRefs:[],sourceUrls:[]},
+    communication:{lastMessage:handoffList(recentCustomerWords,1,700)[0]||"",customerEmotion:"UNKNOWN",responseTone:"WARM_STRICT",whatNotToRepeat:confirmedFacts}
+  };
+}
+
 async function handleGoClientInterpret(request,env){
   if(request.method!=="POST")return new Response("Method Not Allowed",{status:405,headers:{allow:"POST"}});
   if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
@@ -115,6 +169,7 @@ async function handleGoClientInterpret(request,env){
   let result;
   try{result=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502)}
   if(!validResult(result))return json({ok:false,code:"INVALID_PROVIDER_RESPONSE"},502);
+  result=applyConversationGuards(text,result);
 
   const clientId=typeof body?.clientId==="string"?body.clientId.trim().slice(0,120):"";
   const conversationId=typeof body?.conversationId==="string"?body.conversationId.trim().slice(0,120):"";
@@ -172,7 +227,9 @@ async function handleBriefConfirm(request,env){
   if(rateLimited(request))return json({ok:false,code:"RATE_LIMITED"},429);
   const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
   const {body,clientId,conversationId,briefId:id}=parsed;
-  const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"CONFIRMED",stage:"summary",brief:briefObject(body?.brief),confirmedAt:new Date().toISOString()};
+  const brief=briefObject(body?.brief);
+  const handoff=buildHandoffPacket({briefId:id,clientId,conversationId,brief,latestInterpretation:body?.latestInterpretation,recentCustomerWords:body?.recentCustomerWords});
+  const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"CONFIRMED",stage:"summary",brief,handoff,confirmedAt:new Date().toISOString()};
   const result=await callBriefRegistry(env,"/internal/brief/confirm",payload);
   if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
   const office=result.body||{};return json({ok:true,status:"CONFIRMED",briefId:id,clientId,conversationId,workId:office.workId||null,work:office.work||null,workCreated:Boolean(office.workCreated),office});
@@ -279,10 +336,10 @@ function replyFor(data){
   if(state.stage==='timing')return 'รับทราบครับ มีวันที่อยากใช้งานหรือ deadline ไหม ถ้ายังไม่มีก็บอกว่า “ยังไม่กำหนด” ได้';
   return 'รายละเอียดหลักครบแล้วครับ ถ้ามีอะไรอยากเพิ่มพิมพ์ต่อได้เลย หรือส่งรายละเอียดให้ทีมได้ครับ';
 }
-function briefBody(latestInterpretation){return {version:'1',briefId:briefId,clientId:clientId,conversationId:conversationId,status:state.confirmed?'CONFIRMED':'DRAFT',stage:state.stage,brief:{goal:state.goal,serviceLine:state.serviceLine,entryService:state.entryService,sourcePage:state.sourcePage,jobType:state.jobType,audience:state.audience,materials:state.materials,pageCount:state.pageCount,package:state.package,desiredDate:state.desiredDate,deadlineText:state.deadlineText},latestInterpretation:latestInterpretation||null,updatedAt:new Date().toISOString()}}
+function briefBody(latestInterpretation){return {version:'1',briefId:briefId,clientId:clientId,conversationId:conversationId,status:state.confirmed?'CONFIRMED':'DRAFT',stage:state.stage,brief:{goal:state.goal,serviceLine:state.serviceLine,entryService:state.entryService,sourcePage:state.sourcePage,jobType:state.jobType,audience:state.audience,materials:state.materials,pageCount:state.pageCount,package:state.package,desiredDate:state.desiredDate,deadlineText:state.deadlineText},latestInterpretation:latestInterpretation||state.lastInterpretation||null,recentCustomerWords:state.messages.filter(function(m){return m.role==='user'}).slice(-5).map(function(m){return m.text}),updatedAt:new Date().toISOString()}}
 async function upsertBrief(latestInterpretation){const response=await fetch('/api/v1/brief/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(latestInterpretation))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_UPSERT_FAILED');state.bridgeStatus='DRAFT_SAVED';save();return body}
-async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(null))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_CONFIRM_FAILED');state.bridgeStatus='CONFIRMED';state.workId=body.workId||body.office?.workId||null;state.workStatus=body.work?.status||body.office?.work?.status||null;state.workCreated=Boolean(body.workCreated||body.office?.workCreated);save();return body}
-async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,serviceLine:state.serviceLine,jobType:state.jobType,package:state.package,confirmed:state.confirmed}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ตอบข้อความนี้ไม่ได้ชั่วคราวครับ ลองส่งอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
+async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(state.lastInterpretation))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_CONFIRM_FAILED');state.bridgeStatus='CONFIRMED';state.workId=body.workId||body.office?.workId||null;state.workStatus=body.work?.status||body.office?.work?.status||null;state.workCreated=Boolean(body.workCreated||body.office?.workCreated);save();return body}
+async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,serviceLine:state.serviceLine,jobType:state.jobType,package:state.package,confirmed:state.confirmed}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');state.lastInterpretation=data;advanceFromText(text,data);try{await upsertBrief(data)catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ตอบข้อความนี้ไม่ได้ชั่วคราวครับ ลองส่งอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
 document.getElementById('composer').addEventListener('submit',function(event){event.preventDefault();submitText(input.value);input.value=''})
 input.addEventListener('keydown',function(event){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('composer').requestSubmit()}})
 document.getElementById('reset').addEventListener('click',function(){localStorage.removeItem(STORAGE_KEY);state={...defaultState,messages:[]};render()})
