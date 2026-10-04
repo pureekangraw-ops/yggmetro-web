@@ -99,6 +99,19 @@ public class MetroBubblePlugin extends Plugin {
     getContext().startService(intent);
     call.resolve();
   }
+
+  @PluginMethod
+  public void openPrism(PluginCall call) {
+    String url = call.getString("url");
+    if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) {
+      call.reject("PRISM_URL_INVALID");
+      return;
+    }
+    Intent intent = new Intent(getContext(), PrismActivity.class);
+    intent.putExtra("url", url);
+    getActivity().startActivity(intent);
+    call.resolve();
+  }
 }
 `);
 
