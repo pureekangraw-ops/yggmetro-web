@@ -17,3 +17,11 @@ test('event backlog cannot exhaust the customer brief budget',async()=>{
  for(let i=0;i<21;i++)await web.fetch(new Request('https://yggmetro.com/api/v1/events',{method:'POST',headers:{'cf-connecting-ip':'test-backlog'},body:JSON.stringify({eventId:'EV-backlog-'+i,type:'PAGE_VIEW',page:'/'})}),env);
  const response=await web.fetch(new Request('https://yggmetro.com/api/v1/brief/upsert',{method:'POST',headers:{'cf-connecting-ip':'test-backlog'},body:JSON.stringify({briefId:'BRIEF-backlog',clientId:'CLIENT-backlog',conversationId:'CONV-backlog',brief:{goal:'brief'}})}),env);assert.equal(response.status,200);
 });
+
+test('confirmed brief surfaces the canonical GO Hub Work',async()=>{
+ const {default:web}=await load();let seen;
+ const env={GO_HUB:{fetch:async r=>{seen={url:r.url,body:await r.json()};return Response.json({ok:true,workId:'WORK-SPECTRUM-BRIEF-4',work:{workId:'WORK-SPECTRUM-BRIEF-4',status:'OPEN'},workCreated:true});}}};
+ const response=await web.fetch(new Request('https://yggmetro.com/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({briefId:'BRIEF-4',clientId:'CLIENT-4',conversationId:'CONV-4',brief:{goal:'Company profile'}})}),env);
+ const body=await response.json();
+ assert.equal(response.status,200);assert.equal(seen.url,'https://go-hub.internal/internal/brief/confirm');assert.equal(seen.body.status,'CONFIRMED');assert.equal(body.workId,'WORK-SPECTRUM-BRIEF-4');assert.equal(body.work.status,'OPEN');assert.equal(body.workCreated,true);
+});
