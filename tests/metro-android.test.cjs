@@ -40,7 +40,7 @@ test("PRISM stays inside METRO and never becomes the connection gateway",()=>{
   assert.match(html,/INSIDE METRO/);
   assert.match(html,/ไม่รับ connection โดยตรง/);
   assert.match(js,/api\.openPrism\(\{url\}\)/);
-  assert.doesNotMatch(js,/kind==="prism"[\s\S]{0,400}location\.href=url/);
+  assert.match(js,/if\(kind==="prism"\)[\s\S]*?return;\n  }\n  location\.href=url;/);
   assert.match(patch,/class PrismActivity/);
   assert.match(patch,/android:name="\.PrismActivity"/);
   assert.match(patch,/PRISM · inside METRO/);
