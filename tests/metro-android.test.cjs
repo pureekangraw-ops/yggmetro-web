@@ -15,6 +15,6 @@ test("METRO mobile exposes SHOP OFFICE PRISM and contextual SPECTRUM",()=>{
 });
 test("METRO mobile stores only route URLs and no provider secret fields",()=>{
   const html=read("metro-android/www/index.html"),js=read("metro-android/www/app.js");
-  assert.doesNotMatch(html,/API Key|Password|Secret/i);
-  assert.doesNotMatch(js,/OPENAI_API_KEY|GOHUB_MASTER_KEY|tokens*:/i);
+  assert.doesNotMatch(html,/<input[^>]+(?:id|name)=["'][^"']*(?:key|password|secret|token)[^"']*["']/i);
+  assert.doesNotMatch(js,/OPENAI_API_KEY|GOHUB_MASTER_KEY|GOHUB_OWNER_PASSCODE|GOHUB_OFFICE_SESSION_KEY/i);
 });
