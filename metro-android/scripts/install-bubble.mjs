@@ -289,9 +289,9 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
+import android.app.Activity;
 
-public class PrismActivity extends AppCompatActivity {
+public class PrismActivity extends Activity {
   private WebView webView;
 
   @SuppressLint("SetJavaScriptEnabled")
