@@ -63,9 +63,9 @@ test('client page inline scripts compile and mobile chat stays compact',async()=
   const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>!s.trim().startsWith('{"@context"'));
   assert.ok(scripts.length>=2);
   for(const script of scripts)assert.doesNotThrow(()=>new Function(script));
-  assert.match(page,/\.chat\{height:clamp\(360px,52dvh,480px\);min-height:0;max-height:480px/);
+  assert.match(page,/\.chat\{height:clamp\(360px,56dvh,500px\);min-height:0;max-height:500px/);
   assert.match(page,/\.messages\{flex:1 1 auto;min-height:0;max-height:none/);
-  assert.match(page,/\.composer\{padding-top:10px;align-items:stretch;flex-direction:row/);
+  assert.match(page,/\.composer\{padding-top:9px;padding-bottom:12px;align-items:stretch;flex-direction:row/);
   assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
 });
 
@@ -116,11 +116,23 @@ test('client wires whisper-before-takeover and short-lived GO state',async()=>{
 test('team call prechecks with GO before durable handoff and resumes handoff after takeover',async()=>{
   const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
   assert.match(page,/teamRequestPending:false/);
-  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'เรียกทีม'/);
+  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
   const handler=page.slice(page.indexOf("confirmButton.addEventListener('click'"),page.indexOf("render();",page.indexOf("confirmButton.addEventListener('click'")));
   assert.ok(handler.indexOf("handleTeamPrecheck(last)")>=0);
   assert.equal(handler.indexOf("confirmBrief()"),-1);
   const helper=page.slice(page.indexOf("async function handleTeamPrecheck"),page.indexOf("async function submitText"));
   assert.ok(helper.indexOf("askWhisper('CUSTOMER_REQUESTS_TEAM'")<helper.indexOf("finalizeTeamHandoff()"));
   assert.match(page,/if\(state\.teamRequestPending\)await finalizeTeamHandoff\(\)/);
+});
+
+
+test('mobile client stays within viewport and team CTA is contextual/secondary',async()=>{
+  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
+  assert.match(page,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(page,/html,body\{overflow-x:hidden\}/);
+  assert.match(page,/\.shell,\.workspace,\.chat,\.panel\{width:100%;max-width:100%;min-width:0\}/);
+  assert.match(page,/\.brief-action\.primary\{background:rgba\(255,255,255,.07\);color:var\(--muted\)/);
+  assert.match(page,/const showTeam=state\.confirmed\|\|state\.teamRequestPending\|\|state\.stage==='summary'/);
+  assert.match(page,/confirmButton\.closest\('\.brief-actions'\)\.hidden=!showTeam/);
+  assert.match(page,/confirmButton\.textContent=state\.confirmed\?'ส่งแล้ว':state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
 });
