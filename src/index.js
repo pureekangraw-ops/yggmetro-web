@@ -386,7 +386,7 @@ const SERVICE_ENTRY={
 };
 const STAGES=['discover','audience','materials','timing','summary'];
 const params=new URLSearchParams(location.search),entryService=String(params.get('service')||'').toLowerCase(),entry=SERVICE_ENTRY[entryService]||null;
-const defaultState={stage:'discover',serviceLine:entry?.serviceLine||null,entryService:entryService||null,sourcePage:location.pathname,jobType:null,package:null,pageCount:null,desiredDate:null,goal:'',audience:'',materials:'',deadlineText:'',confirmed:false,bridgeStatus:'PENDING',workId:null,workStatus:null,workCreated:false,whisperCount:0,stuckCount:0,goActive:false,goTurns:0,goFocus:'',messages:[]};
+const defaultState={stage:'discover',serviceLine:entry?.serviceLine||null,entryService:entryService||null,sourcePage:location.pathname,jobType:null,package:null,pageCount:null,desiredDate:null,goal:'',audience:'',materials:'',deadlineText:'',confirmed:false,bridgeStatus:'PENDING',workId:null,workStatus:null,workCreated:false,whisperCount:0,stuckCount:0,goActive:false,goTurns:0,goFocus:'',teamRequestPending:false,messages:[]};
 function loadState(){try{return {...defaultState,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return {...defaultState}}}
 let state=loadState();
 const messages=document.getElementById('messages'),quick=document.getElementById('quick'),input=document.getElementById('input'),send=document.getElementById('send'),status=document.getElementById('status'),briefList=document.getElementById('brief-list'),missing=document.getElementById('missing'),confirmButton=document.getElementById('confirm');
@@ -403,8 +403,8 @@ function renderBrief(){
   const items=getBriefItems();
   briefList.innerHTML=items.length?items.map(function(item){return '<span class="chip">'+escapeHtml(item)+'</span>'}).join(''):'';
   missing.textContent='';
-  confirmButton.textContent=state.confirmed?'ส่งรายละเอียดแล้ว':'ส่งรายละเอียดให้ทีม';
-  confirmButton.disabled=state.confirmed;
+  confirmButton.textContent=state.confirmed?'ส่งรายละเอียดแล้ว':state.teamRequestPending?'กำลังเรียกทีม…':'เรียกทีม';
+  confirmButton.disabled=state.confirmed||state.teamRequestPending;
   renderProgress()
 }
 function renderQuick(){const options=state.stage==='discover'?(entry?.quick||['Company Profile','Brand / Visual','หน้าเว็บ','Template / Asset']):state.stage==='summary'?['ข้อมูลถูกต้องแล้ว','ขอแก้ข้อมูล']:['อยากประเมินก่อน','ขอคุยกับคน'];quick.innerHTML=options.map(function(text){return '<button type="button" data-quick="'+escapeHtml(text)+'">'+escapeHtml(text)+'</button>'}).join('');quick.querySelectorAll('button').forEach(function(button){button.addEventListener('click',function(){submitText(button.dataset.quick)})})}
@@ -440,13 +440,41 @@ async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm'
 function escalationBody(reason,text){return {clientId:clientId,conversationId:conversationId,requestId:'GO-'+crypto.randomUUID(),reason:reason,text:String(text||'').slice(0,1200),brief:{goal:state.goal,serviceLine:state.serviceLine,jobType:state.jobType,audience:state.audience,materials:state.materials,deadlineText:state.deadlineText},messages:state.messages.slice(-6),focus:state.goFocus||''}}
 async function askWhisper(reason,text){const response=await fetch('/api/v1/go/whisper',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(escalationBody(reason,text))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'GO_WHISPER_FAILED');state.whisperCount+=1;save();return body}
 async function askGo(reason,text){const response=await fetch('/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(escalationBody(reason,text))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'GO_TAKEOVER_FAILED');state.goTurns+=1;state.goFocus=body.focus||state.goFocus;state.goActive=!body.resolved&&state.goTurns<3;save();return body}
+async function finalizeTeamHandoff(){
+ if(state.confirmed)return;
+ await confirmBrief();state.confirmed=true;state.teamRequestPending=false;state.stage='summary';save();
+ addMessage('assistant','รับเรื่องแล้วครับ ทีมจะรับช่วงต่อจากข้อมูลที่คุยกันไว้');
+}
+async function handleTeamPrecheck(text){
+ try{
+  const whisper=await askWhisper('CUSTOMER_REQUESTS_TEAM',text);
+  state.goFocus=whisper.focus||state.goFocus;
+  if(whisper.decision==='GO_TAKEOVER'){
+   const go=await askGo('CUSTOMER_REQUESTS_TEAM',text);addMessage('assistant',go.reply);
+   if(!state.goActive)await finalizeTeamHandoff();
+   return;
+  }
+  if(whisper.decision==='SPECTRUM_RETRY'&&whisper.nextQuestion){
+   addMessage('assistant',whisper.nextQuestion);save();return;
+  }
+  await finalizeTeamHandoff();
+ }catch(error){
+  await finalizeTeamHandoff();
+ }
+}
 async function submitText(text){
  text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';
  try{
   if(state.goActive){
    const go=await askGo('ACTIVE_TAKEOVER',text);addMessage('assistant',go.reply);
-   if(!state.goActive)addMessage('assistant','โอเคครับ จุดนี้ชัดแล้ว เดี๋ยว SPECTRUMSALE รับช่วงต่อครับ');
+   if(!state.goActive){
+    if(state.teamRequestPending)await finalizeTeamHandoff();
+    else addMessage('assistant','โอเคครับ จุดนี้ชัดแล้ว เดี๋ยว SPECTRUMSALE รับช่วงต่อครับ');
+   }
    renderBrief();renderQuick();return;
+  }
+  if(state.teamRequestPending){
+   await handleTeamPrecheck(text);renderBrief();renderQuick();return;
   }
   const beforeStage=state.stage,beforeJob=state.jobType;
   const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,serviceLine:state.serviceLine,jobType:state.jobType,package:state.package,confirmed:state.confirmed}})});
@@ -477,7 +505,7 @@ document.getElementById('composer').addEventListener('submit',function(event){ev
 input.addEventListener('keydown',function(event){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('composer').requestSubmit()}})
 document.getElementById('reset').addEventListener('click',function(){localStorage.removeItem(STORAGE_KEY);state={...defaultState,messages:[]};render()})
 document.getElementById('copy').addEventListener('click',async function(){const brief=['YGG METRO brief','ประเภทงาน: '+(JOB_LABELS[state.jobType]||'ยังไม่ระบุ'),'โจทย์: '+(state.goal||'ยังไม่ระบุ'),'ผู้ชม: '+(state.audience||'ยังไม่ระบุ'),'ข้อมูล/ไฟล์: '+(state.materials||'ยังไม่ระบุ'),'จำนวนหน้า: '+(state.pageCount||'ยังไม่ระบุ'),'กำหนดใช้: '+(state.deadlineText||'ยังไม่ระบุ')].join('\\n');try{await navigator.clipboard.writeText(brief);addMessage('assistant','คัดลอก brief ให้แล้วครับ นำไปส่งต่อให้ทีมได้เลย')}catch{addMessage('assistant',brief)}})
-confirmButton.addEventListener('click',async function(){if(state.confirmed||confirmButton.disabled)return;confirmButton.disabled=true;confirmButton.textContent='กำลังส่ง…';try{await confirmBrief();state.confirmed=true;state.stage='summary';save();let handled=false;try{const last=state.messages.filter(function(m){return m.role==='user'}).slice(-1)[0]?.text||'';const whisper=await askWhisper('CUSTOMER_REQUESTS_TEAM',last);state.goFocus=whisper.focus||'';if(whisper.decision==='GO_TAKEOVER'){const go=await askGo('CUSTOMER_REQUESTS_TEAM',last);addMessage('assistant',go.reply);handled=true}}catch(error){}if(!handled)addMessage('assistant','ส่งรายละเอียดให้ทีมแล้วครับ เดี๋ยวทีมจะรับช่วงต่อจากข้อมูลที่คุยกันไว้');renderBrief();renderQuick()}catch(error){state.bridgeStatus='BRIDGE_PENDING';save();addMessage('assistant','ตอนนี้ยังส่งรายละเอียดไม่ได้ครับ ลองอีกครั้งอีกสักครู่');renderBrief()}finally{confirmButton.disabled=state.confirmed;confirmButton.textContent=state.confirmed?'ส่งรายละเอียดแล้ว':'ส่งรายละเอียดให้ทีม'}})
+confirmButton.addEventListener('click',async function(){if(state.confirmed||state.teamRequestPending||confirmButton.disabled)return;state.teamRequestPending=true;save();renderBrief();try{const last=state.messages.filter(function(m){return m.role==='user'}).slice(-1)[0]?.text||state.goal||'ขอคุยกับทีม';await handleTeamPrecheck(last);renderBrief();renderQuick()}catch(error){state.teamRequestPending=false;state.bridgeStatus='BRIDGE_PENDING';save();addMessage('assistant','ตอนนี้ยังเรียกทีมไม่ได้ครับ ลองอีกครั้งอีกสักครู่');renderBrief()}})
 render();
 </script></body></html>`;
 }

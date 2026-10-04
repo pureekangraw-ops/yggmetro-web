@@ -111,3 +111,16 @@ test('client wires whisper-before-takeover and short-lived GO state',async()=>{
   assert.match(page,/whisperCount:0,stuckCount:0,goActive:false,goTurns:0/);
   assert.match(page,/CUSTOMER_REQUESTS_TEAM/);assert.match(page,/state\.goTurns<3/);
 });
+
+
+test('team call prechecks with GO before durable handoff and resumes handoff after takeover',async()=>{
+  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
+  assert.match(page,/teamRequestPending:false/);
+  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'เรียกทีม'/);
+  const handler=page.slice(page.indexOf("confirmButton.addEventListener('click'"),page.indexOf("render();",page.indexOf("confirmButton.addEventListener('click'")));
+  assert.ok(handler.indexOf("handleTeamPrecheck(last)")>=0);
+  assert.equal(handler.indexOf("confirmBrief()"),-1);
+  const helper=page.slice(page.indexOf("async function handleTeamPrecheck"),page.indexOf("async function submitText"));
+  assert.ok(helper.indexOf("askWhisper('CUSTOMER_REQUESTS_TEAM'")<helper.indexOf("finalizeTeamHandoff()"));
+  assert.match(page,/if\(state\.teamRequestPending\)await finalizeTeamHandoff\(\)/);
+});
