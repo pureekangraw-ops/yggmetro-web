@@ -29,7 +29,8 @@ const service=`
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Floating METRO entrance bubble shown only after explicit owner action" />
         </service>`;
-if(!manifest.includes('android:name=".BubbleService"')) manifest=manifest.replace("</application>",service+"\n    </application>");\nconst prismActivity=`\n        <activity\n            android:name=".PrismActivity"\n            android:exported="false"\n            android:theme="@style/AppTheme.NoActionBar" />`;\nif(!manifest.includes('android:name=".PrismActivity"')) manifest=manifest.replace("</application>",prismActivity+"\n    </application>");
+if(!manifest.includes('android:name=".BubbleService"')) manifest=manifest.replace("</application>",service+"\n    </application>");
+const prismActivity=`\n        <activity\n            android:name=".PrismActivity"\n            android:exported="false"\n            android:theme="@style/AppTheme.NoActionBar" />`;\nif(!manifest.includes('android:name=".PrismActivity"')) manifest=manifest.replace("</application>",prismActivity+"\n    </application>");
 fs.writeFileSync(manifestPath,manifest);
 
 fs.mkdirSync(javaDir,{recursive:true});
