@@ -1,0 +1,7 @@
+{
+  "appId":"com.yggmetro.metro",
+  "appName":"METRO",
+  "webDir":"www",
+  "server":{"androidScheme":"https"},
+  "android":{"allowMixedContent":false}
+}
