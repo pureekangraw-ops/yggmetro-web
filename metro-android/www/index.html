@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060910">
+<title>METRO</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="shell">
+  <header class="hero">
+    <div>
+      <small>YGG · UNIVERSAL ENTRANCE</small>
+      <h1>METRO</h1>
+      <p>ทางลัดเข้าทุกเมือง</p>
+    </div>
+    <button id="settings" class="iconBtn" aria-label="Settings">⚙</button>
+  </header>
+
+  <section class="cities" aria-label="Metro destinations">
+    <button class="city shop" data-route="shop"><span>01</span><strong>SHOP</strong><em>ร้าน · ลูกค้า · ออเดอร์</em></button>
+    <button class="city office" data-route="office"><span>02</span><strong>OFFICE</strong><em>งาน · สถานะ · Centre truth</em></button>
+    <button class="city prism" data-route="prism"><span>03</span><strong>PRISM</strong><em>ตา · Browser · Observe</em></button>
+  </section>
+
+  <section class="card continue">
+    <div>
+      <small>CONTINUE</small>
+      <h2>ไปต่อจากจุดล่าสุด</h2>
+      <p id="lastRoute">ยังไม่มีเส้นทางล่าสุด</p>
+    </div>
+    <button id="resume" class="ghost" disabled>เปิดต่อ</button>
+  </section>
+
+  <section class="card status">
+    <div class="statusDot"></div>
+    <div>
+      <strong>METRO Mobile</strong>
+      <p>ตัวแอปเป็นทางเข้า ส่วน truth / permission / action จริงยังอยู่ที่ GO Hub</p>
+    </div>
+  </section>
+
+  <button id="spectrumOpen" class="spectrumOrb">✦ SPECTRUM</button>
+</main>
+
+<dialog id="spectrum">
+  <form method="dialog" class="sheet" id="spectrumForm">
+    <div class="handle"></div>
+    <div class="sheetHead">
+      <div><small>CONTEXT COPILOT</small><h2>SPECTRUM</h2></div>
+      <button value="cancel" class="iconBtn">×</button>
+    </div>
+    <div id="contextChip" class="contextChip">METRO · HOME</div>
+    <label>อยากทำอะไร<textarea id="mission" rows="3" placeholder="เช่น ดูหน้านี้แล้วบอกว่าควรส่งไปไหน"></textarea></label>
+    <label>ผลลัพธ์ที่ต้องการ<input id="result" placeholder="เช่น สรุป + ทางเลือกต่อ"></label>
+    <div class="quick">
+      <button type="button" data-prompt="สรุปสถานะงานที่กำลังทำ">สรุปงาน</button>
+      <button type="button" data-prompt="ดูสิ่งที่กำลังเห็นใน PRISM แล้วเสนอทางต่อ">ดูด้วย PRISM</button>
+      <button type="button" data-prompt="วิเคราะห์หน้าร้านและบอกสิ่งที่ควรทำต่อ">ดู SHOP</button>
+    </div>
+    <div class="routePreview"><span>Route preview</span><strong id="routePreview">METRO → SPECTRUM → GO HUB</strong><small>SPECTRUM ไม่สร้าง authority เอง</small></div>
+    <button id="sendSpectrum" type="button" class="primary">เปิด SPECTRUM ใน METRO</button>
+  </form>
+</dialog>
+
+<dialog id="settingsDlg">
+  <form method="dialog" class="sheet settingsSheet" id="settingsForm">
+    <div class="handle"></div>
+    <div class="sheetHead"><div><small>CONNECTIONS</small><h2>Metro routes</h2></div><button value="cancel" class="iconBtn">×</button></div>
+    <label>METRO / GO Hub URL<input id="metroUrl" inputmode="url" placeholder="https://…/metro"></label>
+    <label>SHOP URL<input id="shopUrl" inputmode="url" placeholder="https://…"></label>
+    <label>OFFICE URL<input id="officeUrl" inputmode="url" placeholder="https://…/office"></label>
+    <label>PRISM URL<input id="prismUrl" inputmode="url" placeholder="https://…"></label>
+    <p class="hint">เก็บเฉพาะ URL ในเครื่อง แอปนี้ไม่เก็บ provider API key หรือ Hub secret</p>
+    <button id="saveSettings" type="button" class="primary">บันทึก</button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>
