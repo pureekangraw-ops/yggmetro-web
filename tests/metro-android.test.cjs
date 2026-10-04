@@ -32,3 +32,16 @@ test("METRO Android installs an owner-enabled floating overlay bubble contract",
   assert.match(js,/MetroBubble/);
   assert.match(workflow,/Patch native floating bubble/);
 });
+
+test("PRISM stays inside METRO and never becomes the connection gateway",()=>{
+  const html=read("metro-android/www/index.html");
+  const js=read("metro-android/www/app.js");
+  const patch=read("metro-android/scripts/install-bubble.mjs");
+  assert.match(html,/INSIDE METRO/);
+  assert.match(html,/ไม่รับ connection โดยตรง/);
+  assert.match(js,/api\.openPrism\(\{url\}\)/);
+  assert.doesNotMatch(js,/kind==="prism"[\s\S]{0,400}location\.href=url/);
+  assert.match(patch,/class PrismActivity/);
+  assert.match(patch,/android:name="\.PrismActivity"/);
+  assert.match(patch,/PRISM · inside METRO/);
+});
