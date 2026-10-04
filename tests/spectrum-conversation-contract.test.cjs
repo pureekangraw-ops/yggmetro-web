@@ -68,3 +68,46 @@ test('client page inline scripts compile and mobile chat stays compact',async()=
   assert.match(page,/\.composer\{padding-top:10px;align-items:stretch;flex-direction:row/);
   assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
 });
+
+
+test('GO whisper and takeover use durable budget gate before model calls',async()=>{
+  const mod=await load();
+  const originalFetch=global.fetch;
+  const providerCalls=[];
+  global.fetch=async request=>{
+    const body=JSON.parse(await request.clone().text());providerCalls.push(body);
+    const isWhisper=body.model==='gpt-6-luna';
+    const result=isWhisper
+      ? {decision:'SPECTRUM_RETRY',focus:'logo direction',nextQuestion:'อยากเก็บอะไรจากโลโก้เดิมไว้บ้างครับ?',avoid:['อย่าถาม audience ซ้ำ']}
+      : {reply:'ถ้าจะเก็บโลโก้เดิมไว้ จุดที่อยากเปลี่ยนที่สุดคือรูปทรง สี หรือฟอนต์ครับ?',focus:'logo direction',resolved:false};
+    return Response.json({output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(result)}]}]});
+  };
+  const gateCalls=[];
+  const env={OPENAI_API_KEY:'test',GO_HUB:{fetch:async request=>{gateCalls.push(new URL(request.url).pathname);return Response.json({ok:true,allowed:true,duplicate:false,budget:{conversation:{whisper:1,takeover:0,total:1},global:{total:1}}});}}};
+  try{
+    const base={clientId:'CLIENT-1',conversationId:'CONV-1',brief:{goal:'แก้โลโก้'},messages:[{role:'user',text:'อยากแก้โลโก้'}]};
+    let response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/whisper',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...base,requestId:'REQ-W-1',reason:'SPECTRUM_CANNOT_PROGRESS',text:'ไปต่อไม่ไหว'})}),env);
+    assert.equal(response.status,200);let body=await response.json();assert.equal(body.decision,'SPECTRUM_RETRY');assert.equal(body.model,'gpt-6-luna');
+    response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...base,requestId:'REQ-T-1',reason:'CUSTOMER_REQUESTS_TEAM',text:'ขอทีม'})}),env);
+    assert.equal(response.status,200);body=await response.json();assert.equal(body.model,'gpt-6.1-sol');assert.equal(body.resolved,false);
+    assert.deepEqual(gateCalls,['/internal/spectrum/go-budget','/internal/spectrum/go-budget']);
+    assert.equal(providerCalls[0].max_output_tokens,140);assert.equal(providerCalls[1].max_output_tokens,220);
+  }finally{global.fetch=originalFetch}
+});
+
+test('GO budget refusal prevents expensive provider call',async()=>{
+  const mod=await load();const originalFetch=global.fetch;let providerCalled=false;
+  global.fetch=async()=>{providerCalled=true;throw new Error('must not call provider')};
+  const env={OPENAI_API_KEY:'test',GO_HUB:{fetch:async()=>Response.json({ok:true,allowed:false,reason:'GO_CONVERSATION_TAKEOVER_LIMIT',budget:{conversation:{takeover:3}}})}};
+  try{
+    const response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:'CLIENT-1',conversationId:'CONV-1',requestId:'REQ-BLOCK',reason:'ACTIVE_TAKEOVER',text:'ต่อ',messages:[],brief:{}})}),env);
+    assert.equal(response.status,429);assert.equal(providerCalled,false);
+  }finally{global.fetch=originalFetch}
+});
+
+test('client wires whisper-before-takeover and short-lived GO state',async()=>{
+  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
+  assert.match(page,/\/api\/v1\/go\/whisper/);assert.match(page,/\/api\/v1\/go\/takeover/);
+  assert.match(page,/whisperCount:0,stuckCount:0,goActive:false,goTurns:0/);
+  assert.match(page,/CUSTOMER_REQUESTS_TEAM/);assert.match(page,/state\.goTurns<3/);
+});
