@@ -275,4 +275,97 @@ public class BubbleService extends Service {
 }
 `);
 
+fs.writeFileSync(path.join(javaDir,"PrismActivity.java"),`package com.yggmetro.metro;
+
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class PrismActivity extends AppCompatActivity {
+  private WebView webView;
+
+  @SuppressLint("SetJavaScriptEnabled")
+  @Override protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    String url = getIntent().getStringExtra("url");
+    if (url == null || !(url.startsWith("https://") || url.startsWith("http://"))) {
+      finish();
+      return;
+    }
+
+    LinearLayout root = new LinearLayout(this);
+    root.setOrientation(LinearLayout.VERTICAL);
+    root.setBackgroundColor(Color.rgb(5, 9, 14));
+
+    LinearLayout bar = new LinearLayout(this);
+    bar.setGravity(Gravity.CENTER_VERTICAL);
+    bar.setPadding(dp(10), dp(7), dp(10), dp(7));
+    bar.setBackgroundColor(Color.rgb(8, 17, 27));
+
+    Button back = new Button(this);
+    back.setText("← METRO");
+    back.setAllCaps(false);
+    back.setOnClickListener(v -> finish());
+
+    TextView title = new TextView(this);
+    title.setText("PRISM · inside METRO");
+    title.setTextColor(Color.WHITE);
+    title.setTextSize(14);
+    title.setGravity(Gravity.CENTER_VERTICAL);
+    title.setPadding(dp(10), 0, 0, 0);
+
+    bar.addView(back, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)));
+    bar.addView(title, new LinearLayout.LayoutParams(0, dp(48), 1f));
+
+    webView = new WebView(this);
+    WebSettings settings = webView.getSettings();
+    settings.setJavaScriptEnabled(true);
+    settings.setDomStorageEnabled(true);
+    settings.setAllowFileAccess(false);
+    settings.setAllowContentAccess(false);
+    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+
+    webView.setWebViewClient(new WebViewClient() {
+      @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        String next = request.getUrl().toString();
+        return !(next.startsWith("https://") || next.startsWith("http://"));
+      }
+    });
+
+    root.addView(bar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(62)));
+    root.addView(webView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+    setContentView(root);
+    webView.loadUrl(url);
+  }
+
+  @Override public void onBackPressed() {
+    if (webView != null && webView.canGoBack()) webView.goBack();
+    else super.onBackPressed();
+  }
+
+  private int dp(int value) {
+    return Math.round(value * getResources().getDisplayMetrics().density);
+  }
+
+  @Override protected void onDestroy() {
+    if (webView != null) {
+      webView.stopLoading();
+      webView.destroy();
+      webView = null;
+    }
+    super.onDestroy();
+  }
+}
+`);
+
 console.log("METRO floating bubble native layer installed");
