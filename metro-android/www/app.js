@@ -8,7 +8,20 @@ function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function toast(msg){const el=$("#toast");el.textContent=msg;el.classList.remove("hidden");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.add("hidden"),1600)}
 function normalizeUrl(v){const s=String(v||"").trim();if(!s)return "";try{const u=new URL(s);if(!/^https?:$/.test(u.protocol))return "";return u.toString()}catch{return ""}}
 function routeUrl(kind){if(kind==="shop")return state.shopUrl;if(kind==="office")return state.officeUrl;if(kind==="prism")return state.prismUrl;if(kind==="metro")return state.metroUrl;return ""}
-function openRoute(kind){const url=normalizeUrl(routeUrl(kind));if(!url){toast("ตั้ง URL ของ "+kind.toUpperCase()+" ก่อน");openSettings();return}state.lastRoute=kind;save();renderLast();location.href=url}
+async function openRoute(kind){
+  const url=normalizeUrl(routeUrl(kind));
+  if(!url){toast("ตั้ง URL ของ "+kind.toUpperCase()+" ก่อน");openSettings();return}
+  state.lastRoute=kind;save();renderLast();setContext(kind.toUpperCase());
+  if(kind==="prism"){
+    const api=window.Capacitor?.Plugins?.MetroBubble;
+    if(api?.openPrism){
+      try{await api.openPrism({url});return}catch(e){toast(String(e?.message||"เปิด PRISM ไม่สำเร็จ"));return}
+    }
+    toast("PRISM ภายในใช้ได้เมื่อเปิดเป็นแอป Android");
+    return;
+  }
+  location.href=url;
+}
 function renderLast(){const kind=state.lastRoute;$("#lastRoute").textContent=kind?kind.toUpperCase()+" · พร้อมเปิดต่อ":"ยังไม่มีเส้นทางล่าสุด";$("#resume").disabled=!kind}
 function setContext(city){context={city};$("#contextChip").textContent="METRO · "+city;$("#routePreview").textContent="METRO → SPECTRUM → GO HUB → "+city}
 function openSpectrum(city=context.city||"HOME"){setContext(city);$("#spectrum").showModal()}
@@ -37,7 +50,7 @@ async function toggleBubble(){
   setTimeout(refreshBubble,350);
 }
 
-document.querySelectorAll("[data-route]").forEach(b=>b.addEventListener("click",()=>{const kind=b.dataset.route;setContext(kind.toUpperCase());openRoute(kind)}));
+document.querySelectorAll("[data-route]").forEach(b=>b.addEventListener("click",()=>openRoute(b.dataset.route)));
 $("#resume").addEventListener("click",()=>openRoute(state.lastRoute));
 $("#settings").addEventListener("click",openSettings);
 $("#bubbleToggle").addEventListener("click",toggleBubble);
