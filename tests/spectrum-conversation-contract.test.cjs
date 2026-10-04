@@ -63,9 +63,9 @@ test('client page inline scripts compile and mobile chat stays compact',async()=
   const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>!s.trim().startsWith('{"@context"'));
   assert.ok(scripts.length>=2);
   for(const script of scripts)assert.doesNotThrow(()=>new Function(script));
-  assert.match(page,/\.chat\{height:clamp\(360px,52dvh,480px\);min-height:0;max-height:480px/);
+  assert.match(page,/\.chat\{height:clamp\(360px,56dvh,500px\);min-height:0;max-height:500px/);
   assert.match(page,/\.messages\{flex:1 1 auto;min-height:0;max-height:none/);
-  assert.match(page,/\.composer\{padding-top:10px;align-items:stretch;flex-direction:row/);
+  assert.match(page,/\.composer\{padding-top:9px;padding-bottom:12px;align-items:stretch;flex-direction:row/);
   assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
 });
 
@@ -116,7 +116,7 @@ test('client wires whisper-before-takeover and short-lived GO state',async()=>{
 test('team call prechecks with GO before durable handoff and resumes handoff after takeover',async()=>{
   const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
   assert.match(page,/teamRequestPending:false/);
-  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'เรียกทีม'/);
+  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
   const handler=page.slice(page.indexOf("confirmButton.addEventListener('click'"),page.indexOf("render();",page.indexOf("confirmButton.addEventListener('click'")));
   assert.ok(handler.indexOf("handleTeamPrecheck(last)")>=0);
   assert.equal(handler.indexOf("confirmBrief()"),-1);
