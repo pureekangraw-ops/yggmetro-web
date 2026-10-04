@@ -21,7 +21,7 @@
   <section class="cities" aria-label="Metro destinations">
     <button class="city shop" data-route="shop"><span>01</span><strong>SHOP</strong><em>ร้าน · ลูกค้า · ออเดอร์</em></button>
     <button class="city office" data-route="office"><span>02</span><strong>OFFICE</strong><em>งาน · สถานะ · Centre truth</em></button>
-    <button class="city prism" data-route="prism"><span>03</span><strong>PRISM</strong><em>ตา · Browser · Observe</em></button>
+    <button class="city prism" data-route="prism"><span>03 · INSIDE METRO</span><strong>PRISM</strong><em>ตา · Browser · Observe · ไม่รับ connection โดยตรง</em></button>
   </section>
 
   <section class="card continue">
@@ -75,8 +75,8 @@
     <label>METRO / GO Hub URL<input id="metroUrl" inputmode="url" placeholder="https://…/metro"></label>
     <label>SHOP URL<input id="shopUrl" inputmode="url" placeholder="https://…"></label>
     <label>OFFICE URL<input id="officeUrl" inputmode="url" placeholder="https://…/office"></label>
-    <label>PRISM URL<input id="prismUrl" inputmode="url" placeholder="https://…"></label>
-    <p class="hint">เก็บเฉพาะ URL ในเครื่อง แอปนี้ไม่เก็บ provider API key หรือ Hub secret</p>
+    <label>PRISM source URL · เปิดภายใน METRO<input id="prismUrl" inputmode="url" placeholder="https://…"></label>
+    <p class="hint">Connection เข้าที่ METRO ก่อนเสมอ · PRISM เป็น surface ภายในเท่านั้น · เก็บเฉพาะ URL ในเครื่อง</p>
     <button id="saveSettings" type="button" class="primary">บันทึก</button>
   </form>
 </dialog>
