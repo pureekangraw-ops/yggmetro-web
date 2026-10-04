@@ -52,3 +52,16 @@ test('handoff packet carries context without inventing commercial truth',async()
   assert.equal(h.commercial.approvalRequired,true);
   assert.deepEqual(h.intent.customerWords,['อยากทำ pitch deck','อยากประเมินก่อน']);
 });
+
+
+test('client page inline scripts compile and mobile chat stays compact',async()=>{
+  const mod=await load();
+  const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});
+  const page=await response.text();
+  const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>!s.trim().startsWith('{"@context"'));
+  assert.ok(scripts.length>=2);
+  for(const script of scripts)assert.doesNotThrow(()=>new Function(script));
+  assert.match(page,/\.messages\{flex:0 1 auto;min-height:96px;max-height:34svh/);
+  assert.match(page,/\.composer\{padding-top:10px;align-items:stretch;flex-direction:row/);
+  assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
+});
