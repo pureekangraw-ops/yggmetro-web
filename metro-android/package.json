@@ -1,13 +1,21 @@
 {
-  "name":"ygg-metro-android",
-  "version":"0.1.0",
-  "private":true,
-  "engines":{"node":">=22"},
-  "scripts":{
-    "android:add":"npx cap add android",
-    "android:sync":"npx cap sync android",
-    "android:debug":"cd android && ./gradlew assembleDebug"
+  "name": "ygg-metro-android",
+  "version": "0.2.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
   },
-  "dependencies":{"@capacitor/core":"8.5.0"},
-  "devDependencies":{"@capacitor/android":"8.5.0","@capacitor/cli":"8.5.0"}
+  "scripts": {
+    "android:add": "npx cap add android",
+    "android:sync": "npx cap sync android",
+    "android:debug": "cd android && ./gradlew assembleDebug",
+    "android:patch-bubble": "node scripts/install-bubble.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/cli": "8.5.0"
+  }
 }
