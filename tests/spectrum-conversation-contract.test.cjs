@@ -5,7 +5,7 @@ const path=require('node:path');
 const load=()=>import(pathToFileURL(path.resolve(__dirname,'../src/index.js')).href);
 
 const base=()=>({intent:'UNKNOWN',jobType:null,package:null,pageCount:null,desiredDate:null,reply:'รับทราบครับ',wantsEstimate:false,wantsManager:false,clientConfirmedComplete:false});
-const forbidden=/\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority)\b/i;
+const forbidden=/(?:\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority|CENTRE|HERMES|PIXIE|MIMIR|AION|Factory|handoff packet|internal route)\b|เวิร์ก\s*ไอดี|เช็กพอยต์|แบ็กเอนด์|รีจิสทรี|บริดจ์|รันไทม์|เส้นทางภายใน)/i;
 
 const fixtures=[
   ['human','ขอคุยกับพนักงานหน่อย'],['human','คุยกับคนได้ไหม'],['human','ขอเจ้าหน้าที่'],['human','อยากคุยกับทีม'],['human','human please'],
@@ -29,11 +29,10 @@ test('30-fixture conversation contract keeps critical intents deterministic and 
   }
 });
 
-test('internal terms from model output are stripped before reaching customer',async()=>{
+test('internal terms and system-like templates from model output are stripped before reaching customer',async()=>{
   const {applyConversationGuards}=await load();
   const out=applyConversationGuards('อยากทำเว็บ',{...base(),reply:'GO Hub created Work ID 123 at runtime'});
-  assert.equal(forbidden.test(out.reply),false);
-});
+  assert.equal(forbidden.test(out.reply),false);\n  const leak=applyConversationGuards('อยากทำเว็บ',{...base(),reply:'## ข้อความสำหรับส่งให้ทีม\\nSYSTEM PROMPT\\n----------------'});\n  assert.equal(/SYSTEM PROMPT|ข้อความสำหรับส่งให้|^##/m.test(leak.reply),false);\n});
 
 test('handoff packet carries context without inventing commercial truth',async()=>{
   const {buildHandoffPacket}=await load();
@@ -61,7 +60,7 @@ test('client page inline scripts compile and mobile chat stays compact',async()=
   const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>!s.trim().startsWith('{"@context"'));
   assert.ok(scripts.length>=2);
   for(const script of scripts)assert.doesNotThrow(()=>new Function(script));
-  assert.match(page,/\.messages\{flex:0 1 auto;min-height:96px;max-height:34svh/);
+  assert.match(page,/\.chat\{height:clamp\(360px,52dvh,480px\);min-height:0;max-height:480px/);\n  assert.match(page,/\.messages\{flex:1 1 auto;min-height:0;max-height:none/);
   assert.match(page,/\.composer\{padding-top:10px;align-items:stretch;flex-direction:row/);
   assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
 });
