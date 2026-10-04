@@ -302,6 +302,44 @@ async function callBriefRegistry(env,path,payload){
   if(!response.ok)return {ok:false,status:502,code:String(body?.code||"BRIEF_BRIDGE_REJECTED")};
   return {ok:true,body};
 }
+const PAYMENT_STATUSES=new Set(["QUOTE_DRAFT","QUOTE_SENT","PAYMENT_PENDING","PAYMENT_CONFIRMED","PAYMENT_FAILED","REFUND_PENDING","REFUNDED","DISPUTED","UNKNOWN"]);
+const CHECKOUT_INPUT_FIELDS=new Set(["customerId","quoteId","workId","idempotencyKey"]);
+function safeCheckoutUrl(value){
+  try{const url=new URL(String(value||""));return url.protocol==="https:"&&!url.username&&!url.password&&url.href.length<=2000?url.href:null}catch{return null}
+}
+function publicPaymentReadback(value={}){
+  const source=value&&typeof value==="object"&&!Array.isArray(value)?value:{};
+  const status=PAYMENT_STATUSES.has(source.status)?source.status:"UNKNOWN";
+  const ownerSource=briefId(source.ownerSource),providerEventId=briefId(source.providerEventId);
+  if(status==="PAYMENT_CONFIRMED"&&(ownerSource!=="PAYMENT_PROVIDER"||!providerEventId))return {error:"PAYMENT_EVIDENCE_REQUIRED"};
+  const checkoutUrl=safeCheckoutUrl(source.checkoutUrl);
+  if(status==="PAYMENT_PENDING"&&!checkoutUrl)return {error:"PAYMENT_CHECKOUT_INVALID"};
+  return {value:{
+    ok:true,
+    paymentId:briefId(source.paymentId)||null,
+    quoteId:briefId(source.quoteId)||null,
+    workId:briefId(source.workId)||null,
+    status,
+    checkoutUrl,
+    providerReference:briefId(source.providerReference)||null,
+    ownerSource:ownerSource||null,
+    providerEventId:providerEventId||null,
+  }};
+}
+async function handlePaymentCheckout(request,env){
+  if(request.method!=="POST")return new Response("Method Not Allowed",{status:405,headers:{allow:"POST"}});
+  if(rateLimited(request,"payment-checkout"))return json({ok:false,code:"RATE_LIMITED"},429);
+  const raw=await request.text();if(raw.length>8192)return json({ok:false,code:"PAYLOAD_TOO_LARGE"},413);
+  let body;try{body=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_JSON"},400)}
+  if(!body||typeof body!=="object"||Array.isArray(body)||Object.keys(body).some(key=>!CHECKOUT_INPUT_FIELDS.has(key)))return json({ok:false,code:"PAYMENT_INPUT_FORBIDDEN"},400);
+  const customerId=briefId(body.customerId),quoteId=briefId(body.quoteId),workId=briefId(body.workId),idempotencyKey=briefId(body.idempotencyKey);
+  if(!customerId||!quoteId||!workId||!idempotencyKey)return json({ok:false,code:"PAYMENT_IDENTITY_REQUIRED"},400);
+  const result=await callBriefRegistry(env,"/internal/payment/checkout",{version:"1",surface:"SPECTRUMSALE",customerId,quoteId,workId,idempotencyKey,requestedAt:new Date().toISOString()});
+  if(!result.ok)return json({ok:false,code:result.code,quoteId,workId},result.status);
+  const readback=publicPaymentReadback(result.body);
+  if(readback.error)return json({ok:false,code:readback.error,quoteId,workId},502);
+  return json(readback.value);
+}
 async function readBriefBody(request){
   let body;
   try{body=await request.json()}catch{return {error:json({ok:false,code:"INVALID_JSON"},400)}}
@@ -565,6 +603,7 @@ export default {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
     if (url.pathname === "/api/v1/events") return handleSalesEvent(request,env);
+    if (url.pathname === "/api/v1/payment/checkout") return handlePaymentCheckout(request,env);
     if (url.pathname === "/api/v1/go/whisper") return handleGoWhisper(request,env);
     if (url.pathname === "/api/v1/go/takeover") return handleGoTakeover(request,env);
     if (url.pathname === "/api/v1/interpret" || url.pathname === "/client/api/v1/interpret") {
