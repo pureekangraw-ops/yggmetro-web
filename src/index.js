@@ -73,7 +73,8 @@ function validResult(x){
     typeof x.wantsEstimate==="boolean"&&typeof x.wantsManager==="boolean"&&typeof x.clientConfirmedComplete==="boolean";
 }
 
-const PUBLIC_FORBIDDEN=/(?:\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority|CENTRE|HERMES|PIXIE|MIMIR|AION|Factory|handoff packet|internal route)\b|เวิร์ก\s*ไอดี|เช็กพอยต์|แบ็กเอนด์|รีจิสทรี|บริดจ์|รันไทม์|เส้นทางภายใน)/i;\nconst PUBLIC_TEMPLATE_LEAK=/(?:^|\\n)\\s*(?:#{1,6}\\s|```|[-=]{8,}\\s*$)|(?:ข้อความสำหรับส่งให้|คัดลอกข้อความด้านล่าง|แบบฟอร์มบนหน้าเว็บไซต์|SYSTEM PROMPT|INTERNAL ONLY)/im;
+const PUBLIC_FORBIDDEN=/(?:\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority|CENTRE|HERMES|PIXIE|MIMIR|AION|Factory|handoff packet|internal route)\b|เวิร์ก\s*ไอดี|เช็กพอยต์|แบ็กเอนด์|รีจิสทรี|บริดจ์|รันไทม์|เส้นทางภายใน)/i;
+const PUBLIC_TEMPLATE_LEAK=/(?:^|[\r\n])\s*(?:#{1,6}\s|```|[-=]{8,}\s*$)|(?:ข้อความสำหรับส่งให้|คัดลอกข้อความด้านล่าง|แบบฟอร์มบนหน้าเว็บไซต์|SYSTEM PROMPT|INTERNAL ONLY)/im;
 const HUMAN_REQUEST=/(?:คุยกับ(?:คน|พนักงาน|เจ้าหน้าที่|ทีม)|ขอ(?:คน|พนักงาน|เจ้าหน้าที่)|คนจริง|พนักงาน|เจ้าหน้าที่|สำนักงาน|human|manager)/i;
 const ESTIMATE_REQUEST=/(?:ประเมิน|ราคา|งบ|ใบเสนอราคา|quotation|quote|estimate|แพ็กเกจ)/i;
 const PAYMENT_CLAIM=/(?:จ่าย(?:เงิน)?(?:ไป)?แล้ว|ชำระ(?:เงิน)?(?:ไป)?แล้ว|โอน(?:เงิน)?(?:ไป)?แล้ว|ตัดเงินแล้ว|payment\s*(?:done|paid)|paid\b)/i;
