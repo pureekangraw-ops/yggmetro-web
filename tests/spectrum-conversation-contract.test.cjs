@@ -74,8 +74,8 @@ test('GO whisper and takeover use durable budget gate before model calls',async(
   const mod=await load();
   const originalFetch=global.fetch;
   const providerCalls=[];
-  global.fetch=async request=>{
-    const body=JSON.parse(await request.clone().text());providerCalls.push(body);
+  global.fetch=async (request,init={})=>{
+    const body=JSON.parse(String(init.body||'{}'));providerCalls.push(body);
     const isWhisper=body.model==='gpt-6-luna';
     const result=isWhisper
       ? {decision:'SPECTRUM_RETRY',focus:'logo direction',nextQuestion:'อยากเก็บอะไรจากโลโก้เดิมไว้บ้างครับ?',avoid:['อย่าถาม audience ซ้ำ']}
