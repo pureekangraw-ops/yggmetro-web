@@ -8,12 +8,14 @@ const INTENTS = ["SERVICE","PRICE","INCLUDED","MATERIALS","REVISION","SCOPE_CHAN
 const JOB_TYPES = ["PROPOSAL","COMPANY_PROFILE","PORTFOLIO_CASE_STUDY","REPORT_SUMMARY","OTHER"];
 const PACKAGES = ["STARTER","STANDARD","BUSINESS"];
 
-const SYSTEM_PROMPT = `คุณเป็น SPECTRUMSALE ฝั่งหน้าร้าน YGG METRO ทำหน้าที่จำแนก intent สำหรับรับงาน Presentation เท่านั้น
-อ่านข้อความลูกค้าแล้วคืนเฉพาะ JSON ตาม schema ห้ามคิดราคาใหม่ ห้ามสร้างข้อเท็จจริง ห้ามคืน runtime/domain/command/mutation authority
+const SYSTEM_PROMPT = `คุณเป็น SPECTRUMSALE ฝั่งหน้าร้าน YGG METRO เป็นผู้ช่วยรับโจทย์และจัดทิศทางงาน Presentation แบบสนทนาธรรมชาติ
+อ่านข้อความลูกค้าแล้วคืนเฉพาะ JSON ตาม schema โดย reply ต้องตอบข้อความล่าสุดของลูกค้าโดยตรง กระชับ สุภาพ ไม่พูดซ้ำเป็นประโยคเดิมทุกครั้ง
+ห้ามคิดราคาใหม่ ห้ามสร้างข้อเท็จจริง ห้ามอ้างว่ามีพนักงานกำลังคุยสดถ้ายังไม่ได้ส่ง Work เข้า GO Hub และห้ามคืน runtime/domain/command/mutation authority
 อย่าเดา pageCount, desiredDate หรือ package ถ้าลูกค้าไม่ได้ระบุชัด
 wantsEstimate=true เมื่อขอประเมินราคา/แพ็กเกจ/จำนวนหน้า/ระยะเวลา
-wantsManager=true เมื่อขอคนช่วยโดยตรงหรือประเด็นต้องใช้ดุลยพินิจ
+wantsManager=true เมื่อขอคุยกับพนักงาน คนจริง สำนักงาน ผู้จัดการ หรือประเด็นต้องใช้ดุลยพินิจ
 clientConfirmedComplete=true เมื่อบอกชัดว่าข้อมูลที่ส่งมาคือทั้งหมดที่มี
+ถ้าลูกค้าขอคุยกับคน ให้ reply ยืนยันความต้องการนั้นตรง ๆ และบอกว่าจะส่งต่อผ่าน Work หลังยืนยัน brief โดยไม่กลับไปถามคำถามแบบฟอร์มเดิม
 ถ้ายังไม่พอให้เลือก intent ให้ใช้ UNKNOWN`;
 
 const SCHEMA = {
@@ -24,11 +26,12 @@ const SCHEMA = {
     package:{anyOf:[{type:"string",enum:PACKAGES},{type:"null"}]},
     pageCount:{anyOf:[{type:"integer",minimum:1,maximum:500},{type:"null"}]},
     desiredDate:{type:["string","null"]},
+    reply:{type:"string",minLength:1,maxLength:700},
     wantsEstimate:{type:"boolean"},
     wantsManager:{type:"boolean"},
     clientConfirmedComplete:{type:"boolean"}
   },
-  required:["intent","jobType","package","pageCount","desiredDate","wantsEstimate","wantsManager","clientConfirmedComplete"]
+  required:["intent","jobType","package","pageCount","desiredDate","reply","wantsEstimate","wantsManager","clientConfirmedComplete"]
 };
 
 function json(data,status=200){return Response.json(data,{status,headers:{"cache-control":"no-store","x-content-type-options":"nosniff"}})}
@@ -51,7 +54,10 @@ function outputText(payload){
   return null;
 }
 function compactContext(context={}){
-  return ["stage","jobType","package"].map(k=>typeof context?.[k]==="string"?`${k}=${context[k].slice(0,40)}`:null).filter(Boolean).join("; ")||"none";
+  const fields=["stage","jobType","package"].map(k=>typeof context?.[k]==="string"?`${k}=${context[k].slice(0,40)}`:null).filter(Boolean);
+  if(typeof context?.confirmed==="boolean")fields.push("confirmed="+String(context.confirmed));
+  if(typeof context?.workId==="string"&&context.workId)fields.push("workId="+context.workId.slice(0,120));
+  return fields.join("; ")||"none";
 }
 function validResult(x){
   return x&&typeof x==="object"&&!Array.isArray(x)&&INTENTS.includes(x.intent)&&
@@ -59,6 +65,7 @@ function validResult(x){
     (x.package===null||PACKAGES.includes(x.package))&&
     (x.pageCount===null||(Number.isInteger(x.pageCount)&&x.pageCount>=1&&x.pageCount<=500))&&
     (x.desiredDate===null||typeof x.desiredDate==="string")&&
+    typeof x.reply==="string"&&x.reply.trim().length>0&&x.reply.length<=700&&
     typeof x.wantsEstimate==="boolean"&&typeof x.wantsManager==="boolean"&&typeof x.clientConfirmedComplete==="boolean";
 }
 
@@ -226,12 +233,35 @@ function getBriefItems(){const items=[];if(state.jobType)items.push(JOB_LABELS[s
 function renderBrief(){let label=state.workId?'WORK '+(state.workStatus||'OPEN'):state.bridgeStatus==='CONFIRMED'?'CONFIRMED':state.bridgeStatus==='DRAFT_SAVED'?'DRAFT SAVED':stageLabel();status.textContent=label;const items=getBriefItems();if(state.workId)items.push('Work ID: '+state.workId);briefList.innerHTML=items.length?items.map(function(item){return '<span class="chip">'+escapeHtml(item)+'</span>'}).join(''):'<span class="chip">ยังไม่มีข้อมูล</span>';let next='';if(!state.jobType)next='เล่าให้ฟังก่อนว่าอยากทำงานอะไร';else if(!state.audience)next='บอกเพิ่มว่างานนี้ทำเพื่อใคร หรืออยากให้คนดูทำอะไรต่อ';else if(!state.materials)next='ตอนนี้มีข้อมูลหรือไฟล์อะไรอยู่แล้วบ้าง';else if(!state.deadlineText)next='มีวันที่อยากใช้งานหรือ deadline ไหม';else if(state.workId)next='ส่งเข้า GO Hub แล้ว · รอทีมรับงานจาก Work นี้';else next=state.confirmed?'ยืนยัน brief แล้ว แต่กำลังรอ readback จาก GO Hub':'ตรวจสอบข้อมูล แล้วกดยืนยัน brief';missing.innerHTML='<strong>'+(state.workId?'GO Hub':state.confirmed?'สถานะ':'ขั้นต่อไป')+'</strong>'+escapeHtml(next);confirmButton.textContent=state.workId?'ส่งเข้า GO Hub แล้ว':state.confirmed?'ยืนยันแล้ว':'ยืนยัน brief';confirmButton.disabled=state.confirmed;renderProgress()}
 function renderQuick(){const options=state.stage==='discover'?['Company Profile','Pitch Deck','หน้าเว็บ','มีไฟล์แล้ว แต่อยากจัดโครง']:state.stage==='summary'?['ข้อมูลถูกต้องแล้ว','ขอแก้ข้อมูล']:['อยากประเมินก่อน','ขอคุยกับคน'];quick.innerHTML=options.map(function(text){return '<button type="button" data-quick="'+escapeHtml(text)+'">'+escapeHtml(text)+'</button>'}).join('');quick.querySelectorAll('button').forEach(function(button){button.addEventListener('click',function(){submitText(button.dataset.quick)})})}
 function render(){renderMessages();renderBrief();renderQuick();if(!state.messages.length)addMessage('assistant','สวัสดีครับ เล่าโจทย์ที่อยากทำมาได้เลย\\nเช่น อยากทำ Company Profile หรือ Pitch Deck สำหรับโปรเจกต์ใหม่',false)}
-function advanceFromText(text,data){if(!state.goal)state.goal=text;if(data&&data.jobType)state.jobType=data.jobType;if(data&&data.package)state.package=data.package;if(data&&data.pageCount)state.pageCount=data.pageCount;if(data&&data.desiredDate)state.desiredDate=data.desiredDate;if(state.stage==='discover'){if(state.jobType)state.stage='audience'}else if(state.stage==='audience'){state.audience=text;state.stage='materials'}else if(state.stage==='materials'){state.materials=text;state.stage='timing'}else if(state.stage==='timing'){state.deadlineText=data&&data.desiredDate?data.desiredDate:text;state.stage='summary'}}
-function replyFor(data){if(state.stage==='discover')return 'อยากทำงานประเภทไหนครับ? เล่าเป็นประโยคสั้น ๆ ได้เลย';if(state.stage==='audience')return 'เข้าใจแล้วครับ งานนี้ทำเพื่อใคร หรืออยากให้คนดูทำอะไรต่อหลังเห็นงานนี้?';if(state.stage==='materials')return 'ดีครับ ตอนนี้มีข้อมูล ไฟล์เดิม หรือ reference อะไรอยู่แล้วบ้าง?';if(state.stage==='timing')return 'รับทราบครับ มีวันที่อยากใช้งานหรือ deadline ไหม ถ้ายังไม่มีก็บอกว่า “ยังไม่กำหนด” ได้';return 'จับโจทย์ได้แล้วครับ ตรวจสอบสรุปด้านขวา แล้วกดยืนยัน brief ได้เลย'}
+function advanceFromText(text,data){
+  if(data&&(data.wantsManager||data.wantsEstimate||['PRICE','PRE_ESTIMATE','HELP'].includes(data.intent)))return;
+  if(!state.goal)state.goal=text;
+  if(data&&data.jobType)state.jobType=data.jobType;
+  if(data&&data.package)state.package=data.package;
+  if(data&&data.pageCount)state.pageCount=data.pageCount;
+  if(data&&data.desiredDate)state.desiredDate=data.desiredDate;
+  if(state.stage==='discover'){if(state.jobType)state.stage='audience'}
+  else if(state.stage==='audience'){state.audience=text;state.stage='materials'}
+  else if(state.stage==='materials'){state.materials=text;state.stage='timing'}
+  else if(state.stage==='timing'){state.deadlineText=data&&data.desiredDate?data.desiredDate:text;state.stage='summary'}
+}
+function replyFor(data){
+  if(data&&data.wantsManager){
+    if(state.confirmed&&state.workId)return 'ได้ครับ งานนี้ส่งเข้า GO Hub แล้ว Work '+state.workId+' ตอนนี้ผมหยุดถามแบบฟอร์มไว้ตรงนี้ และให้ทีมรับต่อจาก Work นี้ครับ';
+    return 'ได้ครับ ถ้าต้องการคุยกับพนักงาน ผมจะไม่วนถามข้อมูลเดิมต่อ ตอนนี้หน้าแชตยังไม่มี live human chat โดยตรง กดยืนยัน brief ด้านขวาก่อน แล้วระบบจะสร้าง Work เข้า GO Hub ให้ทีมรับต่อครับ';
+  }
+  if(data&&data.wantsEstimate)return data.reply||'ได้ครับ ผมรับว่าอยากประเมินก่อน โดยจะไม่เดาราคาเอง ถ้าข้อมูลพอให้กดยืนยัน brief แล้วทีมจะประเมินจาก Work ที่ส่งเข้า GO Hub ครับ';
+  if(data&&typeof data.reply==='string'&&data.reply.trim())return data.reply.trim();
+  if(state.stage==='discover')return 'อยากทำงานประเภทไหนครับ? เล่าเป็นประโยคสั้น ๆ ได้เลย';
+  if(state.stage==='audience')return 'เข้าใจแล้วครับ งานนี้ทำเพื่อใคร หรืออยากให้คนดูทำอะไรต่อหลังเห็นงานนี้?';
+  if(state.stage==='materials')return 'ดีครับ ตอนนี้มีข้อมูล ไฟล์เดิม หรือ reference อะไรอยู่แล้วบ้าง?';
+  if(state.stage==='timing')return 'รับทราบครับ มีวันที่อยากใช้งานหรือ deadline ไหม ถ้ายังไม่มีก็บอกว่า “ยังไม่กำหนด” ได้';
+  return 'จับโจทย์ได้แล้วครับ ตรวจสอบสรุปด้านขวา แล้วกดยืนยัน brief ได้เลย';
+}
 function briefBody(latestInterpretation){return {version:'1',briefId:briefId,clientId:clientId,conversationId:conversationId,status:state.confirmed?'CONFIRMED':'DRAFT',stage:state.stage,brief:{goal:state.goal,jobType:state.jobType,audience:state.audience,materials:state.materials,pageCount:state.pageCount,package:state.package,desiredDate:state.desiredDate,deadlineText:state.deadlineText},latestInterpretation:latestInterpretation||null,updatedAt:new Date().toISOString()}}
 async function upsertBrief(latestInterpretation){const response=await fetch('/api/v1/brief/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(latestInterpretation))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_UPSERT_FAILED');state.bridgeStatus='DRAFT_SAVED';save();return body}
 async function confirmBrief(){const response=await fetch('/api/v1/brief/confirm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(briefBody(null))});const body=await response.json().catch(function(){return {}});if(!response.ok)throw new Error(body.code||'BRIEF_CONFIRM_FAILED');state.bridgeStatus='CONFIRMED';state.workId=body.workId||body.office?.workId||null;state.workStatus=body.work?.status||body.office?.work?.status||null;state.workCreated=Boolean(body.workCreated||body.office?.workCreated);save();return body}
-async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,jobType:state.jobType,package:state.package}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ระบบช่วยจับโจทย์ไม่ได้ชั่วคราวครับ ลองส่งข้อความอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
+async function submitText(text){text=String(text||'').trim();if(!text||send.disabled)return;addMessage('user',text);send.disabled=true;send.textContent='…';try{const response=await fetch('/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({version:'1',clientId:clientId,conversationId:conversationId,text:text,context:{surface:'SPECTRUMSALE',stage:state.stage,jobType:state.jobType,package:state.package,confirmed:state.confirmed,workId:state.workId}})});const data=await response.json();if(!response.ok)throw new Error(data.code||'REQUEST_FAILED');advanceFromText(text,data);try{await upsertBrief(data)}catch(error){state.bridgeStatus='BRIDGE_PENDING';save()}addMessage('assistant',replyFor(data));save();renderBrief();renderQuick()}catch(error){addMessage('assistant','ตอนนี้ระบบช่วยจับโจทย์ไม่ได้ชั่วคราวครับ ลองส่งข้อความอีกครั้งได้เลย');}finally{send.disabled=false;send.textContent='ส่ง';input.focus()}}
 document.getElementById('composer').addEventListener('submit',function(event){event.preventDefault();submitText(input.value);input.value=''})
 input.addEventListener('keydown',function(event){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('composer').requestSubmit()}})
 document.getElementById('reset').addEventListener('click',function(){localStorage.removeItem(STORAGE_KEY);state={...defaultState};render()})
