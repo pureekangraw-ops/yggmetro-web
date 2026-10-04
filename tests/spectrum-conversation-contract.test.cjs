@@ -124,3 +124,15 @@ test('team call prechecks with GO before durable handoff and resumes handoff aft
   assert.ok(helper.indexOf("askWhisper('CUSTOMER_REQUESTS_TEAM'")<helper.indexOf("finalizeTeamHandoff()"));
   assert.match(page,/if\(state\.teamRequestPending\)await finalizeTeamHandoff\(\)/);
 });
+
+
+test('mobile client stays within viewport and team CTA is contextual/secondary',async()=>{
+  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
+  assert.match(page,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(page,/html,body\{overflow-x:hidden\}/);
+  assert.match(page,/\.shell,\.workspace,\.chat,\.panel\{width:100%;max-width:100%;min-width:0\}/);
+  assert.match(page,/\.brief-action\.primary\{background:rgba\(255,255,255,.07\);color:var\(--muted\)/);
+  assert.match(page,/const showTeam=state\.confirmed\|\|state\.teamRequestPending\|\|state\.stage==='summary'/);
+  assert.match(page,/confirmButton\.closest\('\.brief-actions'\)\.hidden=!showTeam/);
+  assert.match(page,/confirmButton\.textContent=state\.confirmed\?'ส่งแล้ว':state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
+});
