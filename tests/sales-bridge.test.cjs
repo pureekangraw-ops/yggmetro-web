@@ -65,3 +65,14 @@ test('brief bridge forwards storefront service context without creating authorit
  assert.equal(seen.body.brief.jobType,'WEB_EXPERIENCE');
  assert.equal(seen.body.authority,undefined);
 });
+
+
+test('SPECTRUM chat keeps a bounded viewport and scrolls messages internally',async()=>{
+ const {default:web}=await load();
+ const response=await web.fetch(new Request('https://yggmetro.com/client'),{});
+ const html=await response.text();
+ assert.equal(response.status,200);
+ assert.match(html,/\.chat\{height:620px;max-height:72dvh;min-height:0/);
+ assert.match(html,/\.messages\{flex:1;min-height:0;[^}]*overflow-y:auto/);
+ assert.match(html,/@media\(max-width:840px\)[^{]*\{[^}]*\.chat\{height:560px;max-height:68dvh;min-height:0\}/);
+});
