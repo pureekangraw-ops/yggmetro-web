@@ -18,3 +18,17 @@ test("METRO mobile stores only route URLs and no provider secret fields",()=>{
   assert.doesNotMatch(html,/<input[^>]+(?:id|name)=["'][^"']*(?:key|password|secret|token)[^"']*["']/i);
   assert.doesNotMatch(js,/OPENAI_API_KEY|GOHUB_MASTER_KEY|GOHUB_OWNER_PASSCODE|GOHUB_OFFICE_SESSION_KEY/i);
 });
+
+test("METRO Android installs an owner-enabled floating overlay bubble contract",()=>{
+  const patch=read("metro-android/scripts/install-bubble.mjs");
+  const html=read("metro-android/www/index.html");
+  const js=read("metro-android/www/app.js");
+  const workflow=read(".github/workflows/metro-android-build.yml");
+  assert.match(patch,/SYSTEM_ALERT_WINDOW/);
+  assert.match(patch,/TYPE_APPLICATION_OVERLAY/);
+  assert.match(patch,/startForeground/);
+  assert.match(patch,/registerPlugin\(MetroBubblePlugin\.class\)/);
+  assert.match(html,/id="bubbleToggle"/);
+  assert.match(js,/MetroBubble/);
+  assert.match(workflow,/Patch native floating bubble/);
+});
