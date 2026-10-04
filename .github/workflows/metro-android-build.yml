@@ -35,6 +35,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Generate Android project
         run: npx cap add android
+      - name: Patch native floating bubble
+        run: node scripts/install-bubble.mjs
       - name: Sync web assets
         run: npx cap sync android
       - name: Build installable debug APK
