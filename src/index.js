@@ -381,12 +381,13 @@ async function handleSalesEvent(request,env){
 }
 const salesObserverScript=`<script>
 (function(){
- const key='ygg-sales-observations-v1';let sending=false;
+ const key='ygg-sales-observations-v1';let sending=false;let briefStarted=false;
  function load(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return []}}
  function save(queue){try{localStorage.setItem(key,JSON.stringify(queue));return true}catch{return false}}
  async function flush(){if(sending)return;sending=true;try{let queue=load();while(queue.length){const response=await fetch('/api/v1/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(queue[0])});if(!response.ok)break;const current=load().filter(function(e){return e.eventId!==queue[0].eventId});save(current);queue=current;}}catch{}finally{sending=false}}
  function observe(type){let source='direct';try{if(document.referrer)source=new URL(document.referrer).hostname}catch{}const queue=load();if(queue.length>=200)return;queue.push({eventId:'EV-'+crypto.randomUUID(),type:type,page:location.pathname,source:source});if(save(queue))flush();}
- observe('PAGE_VIEW');document.addEventListener('click',function(event){const link=event.target.closest('a[href]');if(!link)return;let target;try{target=new URL(link.href)}catch{return}if(target.origin===location.origin && target.pathname==='/client')observe('SERVICE_INTEREST');});window.addEventListener('online',flush);setInterval(flush,30000);flush();
+ function startBrief(){if(briefStarted)return;briefStarted=true;observe('BRIEF_STARTED')}
+ observe('PAGE_VIEW');document.addEventListener('click',function(event){const clicked=event.target;if(clicked.closest('.quick'))startBrief();const link=clicked.closest('a[href]');if(!link)return;let target;try{target=new URL(link.href)}catch{return}if(target.origin===location.origin&&target.pathname==='/client')observe(target.searchParams.get('service')?'SERVICE_INTEREST':'CTA_CLICK')});document.addEventListener('input',function(event){const target=event.target;if(!briefStarted&&target.id==='input'&&target.value.trim())startBrief()});window.addEventListener('online',flush);setInterval(flush,30000);flush();
 })();
 </script>`;
 
