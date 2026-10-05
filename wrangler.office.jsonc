@@ -3,6 +3,12 @@
   "name": "yggmetro-office",
   "main": "src/office-index.js",
   "compatibility_date": "2026-10-01",
+  "routes": [
+    {
+      "pattern": "office.yggmetro.com",
+      "custom_domain": true
+    }
+  ],
   "services": [
     {
       "binding": "GO_HUB",
@@ -15,4 +21,3 @@
     "run_worker_first": ["/", "/health", "/office", "/office/*"]
   }
 }
-
