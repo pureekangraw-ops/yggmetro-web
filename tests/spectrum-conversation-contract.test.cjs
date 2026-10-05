@@ -148,4 +148,7 @@ test('responsive sales surfaces keep mobile actions tappable and progress readab
   assert.match(client,/\.progress\{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax\(76px,1fr\);overflow-x:auto/);
   assert.match(client,/\.progress-step\{min-width:0;padding:10px 6px;font-size:\.68rem/);
   assert.match(client,/\.quick button\{[^}]*min-height:44px/);
+  assert.match(client,/\.brief-action\{min-height:44px/);
+  assert.match(client,/const activeStep=document\.querySelector\('\.progress-step\.active'\)/);
+  assert.match(client,/activeStep\.scrollIntoView\(\{behavior:'smooth',block:'nearest',inline:'center'\}\)/);
 });
