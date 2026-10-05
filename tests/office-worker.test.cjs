@@ -1,5 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {pathToFileURL}=require('node:url'),path=require('node:path');
+const fs=require('node:fs');
 const load=()=>import(pathToFileURL(path.resolve(__dirname,'../src/office-index.js')).href+'?t='+Date.now());
 
 test('health names the separate Office surface and GO Hub authority',async()=>{
@@ -84,4 +85,10 @@ test('payment status is relayed without local confirmation or reinterpretation',
  const response=await office.fetch(new Request('https://office.yggmetro.com/office/api/payments'),env);
  assert.equal(response.status,202);
  assert.deepEqual(await response.json(),payload);
+});
+
+test('Office deploy smoke waits for worker propagation before failing',()=>{
+ const workflow=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/office-deploy.yml'),'utf8');
+ assert.match(workflow,/for\s*\(let attempt=1;attempt<=10;attempt\+\+\)/);
+ assert.match(workflow,/await new Promise\(resolve=>setTimeout\(resolve,2000\)\)/);
 });

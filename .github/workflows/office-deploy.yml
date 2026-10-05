@@ -48,8 +48,14 @@ jobs:
           const payload=await subdomainRes.json().catch(()=>null),subdomain=String(payload?.result?.subdomain||'').trim();
           if(!subdomainRes.ok||!subdomain)throw new Error('Unable to resolve workers.dev subdomain');
           const origin=`https://yggmetro-office.${subdomain}.workers.dev`;
-          const healthRes=await fetch(origin+'/health',{headers:{'cache-control':'no-cache'}}),health=await healthRes.json().catch(()=>null);
-          if(!healthRes.ok||health?.service!=='yggmetro-office'||health?.authorityOwner!=='go-hub')throw new Error('Office health readback failed');
+          let healthRes,health;
+          for(let attempt=1;attempt<=10;attempt++){
+            healthRes=await fetch(origin+'/health',{headers:{'cache-control':'no-cache'}});
+            health=await healthRes.json().catch(()=>null);
+            if(healthRes.ok&&health?.service==='yggmetro-office'&&health?.authorityOwner==='go-hub')break;
+            if(attempt<10)await new Promise(resolve=>setTimeout(resolve,2000));
+          }
+          if(!healthRes?.ok||health?.service!=='yggmetro-office'||health?.authorityOwner!=='go-hub')throw new Error(`Office health readback failed: status=${healthRes?.status||'none'} service=${String(health?.service||'missing')}`);
           const loginRes=await fetch(origin+'/office/login'),login=await loginRes.text();
           if(!loginRes.ok||!login.includes('Owner workspace · secure entry'))throw new Error('Office login readback failed');
           const cssRes=await fetch(origin+'/go-hub-office-surface.css'),css=await cssRes.text();
