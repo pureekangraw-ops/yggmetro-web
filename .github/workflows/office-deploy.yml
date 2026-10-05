@@ -1,0 +1,60 @@
+name: YGG METRO Office Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [office]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yggmetro-office-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-office:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Preflight deployment credentials
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo "::error::CLOUDFLARE_API_TOKEN is unavailable"; exit 1; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID}" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is unavailable"; exit 1; }
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Test exact Office source
+        run: npm test
+      - name: Verify exact Office source boundary
+        run: |
+          node --check src/office-index.js
+          node --check src/office-shell.mjs
+          node --check office-public/go-hub-office-surface.js
+          node --check office-public/go-hub-office-login.js
+          node scripts/check-office-boundary.mjs
+      - name: Deploy yggmetro-office
+        run: npx wrangler deploy --config wrangler.office.jsonc
+      - name: Verify workers.dev Office surface
+        run: |
+          node --input-type=module <<'NODE'
+          const accountId=process.env.CLOUDFLARE_ACCOUNT_ID,token=process.env.CLOUDFLARE_API_TOKEN;
+          const subdomainRes=await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/subdomain`,{headers:{authorization:`Bearer ${token}`}});
+          const payload=await subdomainRes.json().catch(()=>null),subdomain=String(payload?.result?.subdomain||'').trim();
+          if(!subdomainRes.ok||!subdomain)throw new Error('Unable to resolve workers.dev subdomain');
+          const origin=`https://yggmetro-office.${subdomain}.workers.dev`;
+          const healthRes=await fetch(origin+'/health',{headers:{'cache-control':'no-cache'}}),health=await healthRes.json().catch(()=>null);
+          if(!healthRes.ok||health?.service!=='yggmetro-office'||health?.authorityOwner!=='go-hub')throw new Error('Office health readback failed');
+          const loginRes=await fetch(origin+'/office/login'),login=await loginRes.text();
+          if(!loginRes.ok||!login.includes('Owner workspace · secure entry'))throw new Error('Office login readback failed');
+          const cssRes=await fetch(origin+'/go-hub-office-surface.css'),css=await cssRes.text();
+          if(!cssRes.ok||!css.includes('.office-body'))throw new Error('Office asset readback failed');
+          const gateRes=await fetch(origin+'/office',{redirect:'manual'});
+          if(gateRes.status!==303||!String(gateRes.headers.get('location')||'').endsWith('/office/login'))throw new Error(`Office authority/auth guard failed: ${gateRes.status}`);
+          console.log(`Office workers.dev smoke passed at ${origin}`);
+          NODE
