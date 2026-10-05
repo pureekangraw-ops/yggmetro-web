@@ -13,6 +13,19 @@ test('public event intake rejects payment claims',async()=>{
  const {default:web}=await load();const response=await web.fetch(new Request('https://yggmetro.com/api/v1/events',{method:'POST',body:JSON.stringify({eventId:'EV-3',type:'PAYMENT_CONFIRMED',page:'/'})}),{});assert.equal(response.status,400);
 });
 
+test('storefront observer emits the missing funnel stages without customer content',async()=>{
+ const {default:web}=await load();
+ const home=await (await web.fetch(new Request('https://yggmetro.com/'),{})).text();
+ const client=await (await web.fetch(new Request('https://yggmetro.com/client'),{})).text();
+ const observer=client.slice(client.lastIndexOf('<script>'));
+ assert.match(home,/target\.searchParams\.get\('service'\)\?'SERVICE_INTEREST':'CTA_CLICK'/);
+ assert.match(client,/let briefStarted=false/);
+ assert.match(client,/target\.id==='input'&&target\.value\.trim\(\)/);
+ assert.match(client,/(?:clicked|target)\.closest\('\.quick'\)/);
+ assert.match(client,/observe\('BRIEF_STARTED'\)/);
+ assert.doesNotMatch(observer,/briefId|clientId|conversationId|goal|messages/);
+});
+
 test('checkout request forwards identity only and preserves payment authority in GO Hub',async()=>{
  const {default:web}=await load();let seen;
  const env={GO_HUB:{fetch:async r=>{seen={url:r.url,headers:Object.fromEntries(r.headers),body:await r.json()};return Response.json({
