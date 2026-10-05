@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yggmetro-office",
+  "main": "src/office-index.js",
+  "compatibility_date": "2026-10-01",
+  "services": [
+    {
+      "binding": "GO_HUB",
+      "service": "go-hub"
+    }
+  ],
+  "assets": {
+    "directory": "./office-public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/health", "/office", "/office/*"]
+  }
+}
+

@@ -1,0 +1,29 @@
+name: YGG METRO Office Safety Gate
+
+on:
+  pull_request:
+    branches: [office]
+  push:
+    branches: [office]
+
+permissions:
+  contents: read
+
+jobs:
+  office-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Full repository regression tests
+        run: npm test
+      - name: Office worker syntax
+        run: |
+          node --check src/office-index.js
+          node --check src/office-shell.mjs
+          node --check office-public/go-hub-office-surface.js
+          node --check office-public/go-hub-office-login.js
+      - name: Authority boundary check
+        run: node scripts/check-office-boundary.mjs
