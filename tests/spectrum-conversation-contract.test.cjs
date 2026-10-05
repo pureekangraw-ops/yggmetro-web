@@ -136,3 +136,16 @@ test('mobile client stays within viewport and team CTA is contextual/secondary',
   assert.match(page,/confirmButton\.closest\('\.brief-actions'\)\.hidden=!showTeam/);
   assert.match(page,/confirmButton\.textContent=state\.confirmed\?'ส่งแล้ว':state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
 });
+
+test('responsive sales surfaces keep mobile actions tappable and progress readable',async()=>{
+  const mod=await load();
+  const home=await (await mod.default.fetch(new Request('https://yggmetro.com/'),{})).text();
+  const client=await (await mod.default.fetch(new Request('https://yggmetro.com/client'),{})).text();
+  assert.match(home,/@media\(max-width:640px\)[^{]*\{[^}]*body\{/);
+  assert.match(home,/\.actions\{display:grid;grid-template-columns:1fr\}/);
+  assert.match(home,/\.actions \.button\{width:100%;min-height:52px\}/);
+  assert.match(home,/\.feature \.button\{width:100%;min-height:52px/);
+  assert.match(client,/\.progress\{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax\(76px,1fr\);overflow-x:auto/);
+  assert.match(client,/\.progress-step\{min-width:0;padding:10px 6px;font-size:\.68rem/);
+  assert.match(client,/\.quick button\{[^}]*min-height:44px/);
+});
