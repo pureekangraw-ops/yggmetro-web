@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const files=['src/office-index.js','src/office-shell.mjs','office-public/go-hub-office-surface.js','office-public/go-hub-office-login.js'];
+const files=['src/office-index.js','src/office-shell.mjs','office-public/go-hub-office-surface.js','office-public/go-hub-office-login.js','office-public/office-payment-monitor.mjs'];
 const sources=files.map(file=>[file,fs.readFileSync(file,'utf8')]);
 const worker=sources.find(([file])=>file==='src/office-index.js')[1];
 
@@ -17,4 +17,3 @@ for(const [file,source] of sources){
  for(const [pattern,label] of forbidden)if(pattern.test(source))throw new Error(`${label} detected in ${file}`);
 }
 console.log('Office authority boundary checks passed.');
-

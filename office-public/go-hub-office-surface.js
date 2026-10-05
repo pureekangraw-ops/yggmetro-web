@@ -1,3 +1,5 @@
+import {paymentMonitorLines,paymentNeedsGoReview} from "/office-payment-monitor.mjs";
+
 function b64urlToBytes(value){
   const s=String(value||"").replace(/-/g,"+").replace(/_/g,"/");
   const p=s+"=".repeat((4-s.length%4)%4);
@@ -580,7 +582,7 @@ async function loadOverviewSales(append=false){
  status.textContent='ในรายการนี้: เปิดหน้า '+views+' → กดเริ่ม '+ctaClicks+' → สนใจบริการ '+interest+' → เริ่มบรีฟ '+started+' → บรีฟที่รับเข้า '+briefs.length;
  for(const q of data.quotes||[]){overviewCard(overviewQuotes,q.customerId+' · '+q.workId,q.status,[q.quoteId+' · '+q.amount+' '+q.currency,q.status==='QUOTE_SENT'?'ใช้สร้าง checkout ได้':'ยังเป็นร่าง ห้ามสร้าง checkout',q.sentAt?'ส่งเมื่อ '+displayTime(q.sentAt):'']);}
  if(overviewQuotes&&!(data.quotes||[]).length)overviewText(overviewQuotes,'p','ยังไม่มีใบเสนอราคาจาก Office','office-muted');
- for(const p of data.payments||[]){overviewCard(payments,p.customerId+' · '+p.workId,p.status,[p.quoteId+' · '+p.amount+' '+p.currency,'อ้างอิง '+(p.providerReference||'UNKNOWN'),'พร้อมเริ่มงาน '+p.fulfillmentReadiness,'หลักฐาน '+(p.evidenceFreshness?.state||'UNKNOWN')+' · '+displayTime(p.providerObservedAt),'ถัดไป '+p.nextAction]);}
+ for(const p of data.payments||[]){const lines=paymentMonitorLines(p,displayTime);lines.push(paymentNeedsGoReview(p)?'GO review REQUIRED · automation/SPECTRUMSALE ห้ามยืนยันเอง':'GO review NOT REQUIRED · ยังไม่มีเหตุการณ์เงินจริงที่ต้องยืนยัน');overviewCard(payments,p.customerId+' · '+(p.jobId||p.workId),p.status,lines);}
  if(payments&&!(data.payments||[]).length)overviewText(payments,'p','ยังไม่มีรายการชำระเงินจาก provider','office-muted');
  }catch{status.textContent='ตอนนี้อ่านข้อมูลหน้าร้านไม่ได้'+(loadedSales.size?' · ด้านล่างเป็นข้อมูลครั้งก่อน':'');}
 }
