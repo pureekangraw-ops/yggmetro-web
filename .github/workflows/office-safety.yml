@@ -24,6 +24,7 @@ jobs:
           node --check src/office-index.js
           node --check src/office-shell.mjs
           node --check office-public/go-hub-office-surface.js
+          node --check office-public/office-payment-monitor.mjs
           node --check office-public/go-hub-office-login.js
       - name: Authority boundary check
         run: node scripts/check-office-boundary.mjs
