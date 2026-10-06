@@ -404,7 +404,7 @@ body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,
 @media(max-width:840px){.intro{display:block}.intro-note{max-width:none;margin-top:14px;text-align:left}.workspace{grid-template-columns:1fr}.brief{position:static}.chat{height:520px;max-height:68dvh;min-height:0}}
 @media(max-width:560px){html,body{overflow-x:hidden}.page{padding:16px 12px 24px;overflow-x:hidden}.shell,.workspace,.chat,.panel{width:100%;max-width:100%;min-width:0}.top{margin-bottom:22px}.back{font-size:.76rem}.intro{margin-bottom:14px}.intro h1{font-size:clamp(2.5rem,13.5vw,4.2rem);line-height:.98}.intro p,.intro-note{font-size:.8rem;line-height:1.42}.progress{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(76px,1fr);overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:none;margin-bottom:10px;gap:4px}.progress::-webkit-scrollbar{display:none}.progress-step{min-width:0;padding:10px 6px;font-size:.68rem;letter-spacing:0;text-align:center;scroll-snap-align:start}.progress-step span{font-size:.6rem}.chat{height:clamp(360px,56dvh,500px);min-height:0;max-height:500px;border-radius:18px}.chat-head,.messages,.quick,.composer{padding-left:12px;padding-right:12px}.chat-head{padding-top:12px;padding-bottom:10px;min-width:0}.chat-head>div{min-width:0}.chat-head strong{font-size:.88rem}.chat-head small{font-size:.72rem}.messages{flex:1 1 auto;min-height:0;max-height:none;padding-top:12px;padding-bottom:12px}.message{max-width:90%;font-size:.89rem;padding:12px 13px}.quick{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}.quick::-webkit-scrollbar{display:none}.quick button{white-space:nowrap;flex:0 0 auto;min-height:44px}.brief-actions{padding:0 12px 8px!important;margin-top:0;justify-content:flex-end}.brief-action{min-height:44px;padding:0 11px;border-radius:999px;font-size:.74rem;font-weight:650}.brief-action.primary{background:rgba(255,255,255,.07);color:var(--muted);border-color:var(--line)}.composer{padding-top:9px;padding-bottom:12px;align-items:stretch;flex-direction:row}.composer textarea{min-height:44px;max-height:96px;padding:11px 12px}.send{min-width:54px;min-height:44px}.brief{padding:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.message{animation:none}}
-</style></head><body><main class="page">
+</style></head><body data-surface="shop"><main class="page">
 <header class="top"><a class="brand" href="/">YGG METRO</a><a class="back" href="/">กลับหน้าแรก ↗</a></header>
 <section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · SPECTRUMSALE · <span id="service-context" class="service-label">INTAKE</span></div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p><span id="service-hint" class="service-hint">เริ่มจากโจทย์จริงของคุณ</span></div><div class="intro-note">SPECTRUMSALE จะช่วยจับประเด็น ถามเท่าที่จำเป็น และจัดรายละเอียดให้พร้อมส่งต่อทีม</div></div>
 <nav class="progress" aria-label="สถานะการรับ brief"><div class="progress-step active" data-stage="discover"><span>01</span>โจทย์</div><div class="progress-step" data-stage="audience"><span>02</span>คนดู</div><div class="progress-step" data-stage="materials"><span>03</span>ของที่มี</div><div class="progress-step" data-stage="timing"><span>04</span>เวลา</div><div class="progress-step" data-stage="summary"><span>05</span>สรุป</div></nav>
@@ -583,7 +583,7 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 @media(max-width:640px){body{background-attachment:scroll;background-position:center}#services{background-position:center top}.container{width:min(100% - 32px,1180px)}.top{padding:18px 16px}.topnav a{display:none}.hero{min-height:720px;padding:112px 0 52px}.hero h1{font-size:clamp(3.2rem,16vw,5.5rem)}.actions{display:grid;grid-template-columns:1fr}.actions .button{width:100%;min-height:52px}.hero-note{width:100%}.section{padding:58px 0}.section-head{display:block}.section-head p{margin-top:12px}.service-grid{grid-template-columns:1fr}.card{min-height:190px}.process{gap:26px}.feature{display:block;padding:24px}.feature .button{width:100%;min-height:52px;margin-top:24px}.foot{display:block}.foot span{display:block;margin-top:8px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}.button:hover{transform:none}}
 </style></head>
-<body><main class="page">
+<body data-surface="shop"><main class="page">
 <header class="top"><a class="brand" href="/" aria-label="YGG METRO home">YGG METRO</a><nav class="topnav" aria-label="เมนูหลัก"><a href="#services">บริการ</a><a href="#process">วิธีทำงาน</a><a class="shop" href="/client">เริ่มคุยงาน</a></nav></header>
 <section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO คือแพลตฟอร์มสร้างสรรค์และหน้าร้านดิจิทัลของเราเอง ช่วยเปลี่ยนโจทย์ ไฟล์ หรือ brief ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ SPECTRUMSALE</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
 <section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ SPECTRUMSALE เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
@@ -597,9 +597,25 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 <footer class="container foot"><span>YGG METRO · Shop</span><span>Presentation · Visual · Digital · YGG Lab</span></footer>
 </main></body></html>`
 
+const officeHtml = `<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YGG METRO · Office</title><meta name="description" content="YGG METRO Office — พื้นที่สำหรับการดำเนินงานและการทำงานภายใน">
+<style>
+:root{color-scheme:dark;--ink:#f7f8fa;--muted:rgba(247,248,250,.7);--line:rgba(255,255,255,.16);--warm:#f5c78b}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090c10;color:var(--ink)}body{min-height:100svh;background:radial-gradient(circle at 80% 10%,rgba(245,199,139,.14),transparent 28%),linear-gradient(145deg,#111a28,#090c10 60%)}.page{min-height:100svh;display:flex;flex-direction:column}.top{display:flex;align-items:center;justify-content:space-between;padding:24px max(20px,calc((100% - 1180px)/2));border-bottom:1px solid var(--line)}.brand{font-size:.74rem;font-weight:800;letter-spacing:.2em}.surface{color:var(--warm);font-size:.7rem;font-weight:800;letter-spacing:.18em}.container{width:calc(100% - 40px);max-width:1180px;margin:0 auto}.hero{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.45fr);gap:48px;align-items:center;padding:80px 0}.eyebrow{color:var(--warm);font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.hero h1{margin:16px 0 20px;font-size:clamp(4rem,10vw,8rem);line-height:.84;letter-spacing:-.08em}.hero p{max-width:560px;color:var(--muted);font-size:1.1rem;line-height:1.7}.note{padding:22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05);color:var(--muted);line-height:1.6}.note strong{display:block;color:#fff;margin-bottom:8px}.link{display:inline-flex;margin-top:28px;padding:12px 16px;border:1px solid var(--line);border-radius:12px;color:#fff;text-decoration:none}.foot{padding:24px 0;color:rgba(255,255,255,.45);font-size:.78rem;border-top:1px solid var(--line)}@media(max-width:700px){.hero{grid-template-columns:1fr;padding:56px 0}.hero h1{font-size:clamp(3.7rem,18vw,6rem)}}
+</style></head><body data-surface="office"><main class="page"><header class="top"><span class="brand">YGG METRO</span><span class="surface">OFFICE</span></header><section class="container hero"><div><div class="eyebrow">YGG METRO · Office</div><h1>พื้นที่ทำงาน<br>ของเมือง</h1><p>Office เป็นพื้นผิวสำหรับการดำเนินงานของ YGG METRO แยกจากหน้าร้านอย่างชัดเจน หน้านี้เป็นจุดเริ่มต้นของออฟฟิศ และยังไม่ประกาศความสามารถภายในที่ยังไม่ได้เชื่อมต่อ</p><a class="link" href="https://shop.yggmetro.com/">ไปหน้าร้าน YGG METRO →</a></div><aside class="note"><strong>Office surface</strong>การแยกหน้าตาม hostname ทำงานจาก Worker เดียวกัน โดยใช้พื้นผิวของ Office แยกจาก Shop</aside></section><footer class="container foot">YGG METRO · Office</footer></main></body></html>`;
+
+function surfaceForHostname(hostname) {
+  const host = String(hostname || "").toLowerCase().split(":")[0];
+  if (host === "office.yggmetro.com") return "office";
+  if (host === "shop.yggmetro.com" || host === "yggmetro.com" || host === "localhost" || host === "127.0.0.1" || host.endsWith(".workers.dev")) return "shop";
+  return null;
+}
+
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const surface = surfaceForHostname(url.hostname);
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
@@ -617,10 +633,13 @@ export default {
       return handleBriefConfirm(request, env);
     }
     if (url.pathname === "/client" || url.pathname === "/client/") {
+      if (surface !== "shop") return new Response("Not Found",{status:404});
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
+    if (surface === "office") return new Response(request.method==="HEAD"?null:officeHtml,{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
+    if (surface !== "shop") return new Response("Host Not Configured",{status:421,headers:{"content-type":"text/plain; charset=utf-8"}});
     return new Response(request.method==="HEAD"?null:html.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
 };
