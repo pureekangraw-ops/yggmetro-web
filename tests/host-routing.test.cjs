@@ -13,7 +13,7 @@ test('shop hostname serves the storefront surface',async()=>{
   const {default:web}=await load();
   const {response,body}=await page(web,'shop.yggmetro.com');
   assert.equal(response.status,200);
-  assert.match(body,/<title>YGG METRO · Creative Services & Digital Assets<\\/title>/);
+  assert.match(body,/<title>YGG METRO · Creative Services & Digital Assets<\/title>/);
   assert.match(body,/data-surface="shop"/);
   assert.doesNotMatch(body,/YGG METRO · Office/);
 });
@@ -22,7 +22,7 @@ test('office hostname serves a distinct office surface',async()=>{
   const {default:web}=await load();
   const {response,body}=await page(web,'office.yggmetro.com');
   assert.equal(response.status,200);
-  assert.match(body,/<title>YGG METRO · Office<\\/title>/);
+  assert.match(body,/<title>YGG METRO · Office<\/title>/);
   assert.match(body,/data-surface="office"/);
   assert.match(body,/OFFICE/);
   assert.doesNotMatch(body,/YGG METRO · Shop/);
