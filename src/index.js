@@ -596,15 +596,21 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 <a class="card" data-service="lab" href="/client?service=lab"><small>04 · YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p><div class="go">ดูของที่กำลังทำ →</div></a>
 </div></div></section>
 <section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>SPECTRUMSALE ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
-<section id="root-causes" class="section"><div class="container"><div class="promptbase-showcase">
+<!-- SHOP_ONLY_ROOT_CAUSES_START --><section id="root-causes" class="section"><div class="container"><div class="promptbase-showcase">
 <div class="promptbase-copy"><div class="eyebrow">Featured Lab App · PromptBase</div><h2>ROOT CAUSES<br>Analysis App</h2><p>เครื่องมือสำหรับแยกปัญหาออกจากอาการ มองหาสาเหตุที่อยู่ลึกลงไป และจัดโครงประเด็นก่อนตัดสินใจต่อ ทดลองใช้ตัวแอปได้จากหน้า YGG METRO โดยตรง</p>
 <div class="promptbase-meta"><a href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer"><img class="promptbase-thumb" src="https://assets.promptbase.com/Thumbnails%2FEuTuD26RrB4BLGzAzQjD%2Fresized%2F1791174418058_100x100.webp" alt="ROOT CAUSES Analysis App on PromptBase" loading="lazy"></a><div class="promptbase-links"><a href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer">ROOT CAUSES Analysis App</a><span>Available on PromptBase</span></div></div>
 <a class="promptbase-open" href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer">เปิดหน้าแอปบน PromptBase →</a></div>
 <div class="promptbase-frame-wrap"><iframe class="promptbase-frame" src="https://promptbase.com/embed/root-causes-analysis" title="ROOT CAUSES Analysis App" loading="lazy" allow="clipboard-write"></iframe></div>
-</div></div></section>
+</div></div></section><!-- SHOP_ONLY_ROOT_CAUSES_END -->
 <section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ SPECTRUMSALE</a></div></div></section>
 <footer class="container foot"><span>YGG METRO · Shop</span><span>Presentation · Visual · Digital · YGG Lab</span></footer>
 </main></body></html>`
+
+export function renderHomePage(hostname="") {
+  const host=String(hostname||"").trim().toLowerCase();
+  if (host === "shop.yggmetro.com") return html;
+  return html.replace(/<!-- SHOP_ONLY_ROOT_CAUSES_START -->[\\s\\S]*?<!-- SHOP_ONLY_ROOT_CAUSES_END -->/g,"");
+}
 
 export default {
   async fetch(request, env) {
@@ -630,6 +636,7 @@ export default {
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    return new Response(request.method==="HEAD"?null:html.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
+    const home=renderHomePage(url.hostname);
+    return new Response(request.method==="HEAD"?null:home.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
 };
