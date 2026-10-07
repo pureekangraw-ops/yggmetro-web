@@ -609,7 +609,7 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 export function renderHomePage(hostname="") {
   const host=String(hostname||"").trim().toLowerCase();
   if (host === "shop.yggmetro.com") return html;
-  return html.replace(/<!-- SHOP_ONLY_ROOT_CAUSES_START -->[\\s\\S]*?<!-- SHOP_ONLY_ROOT_CAUSES_END -->/g,"");
+  return html.replace(/<!-- SHOP_ONLY_ROOT_CAUSES_START -->[\s\S]*?<!-- SHOP_ONLY_ROOT_CAUSES_END -->/g,"");
 }
 
 export default {
