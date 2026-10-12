@@ -20,7 +20,7 @@ test('shop surfaces category filters, sorting, and non-misleading availability l
  const body=await (await web.fetch(new Request('https://shop.yggmetro.com/shop'),{})).text();
  for(const term of ['data-filter="all"','data-filter="planning"','data-filter="business"','data-filter="analysis"','data-filter="creative"','product-sort','name-asc','name-desc','aria-live="polite"']) assert.ok(body.includes(term),term);
  assert.match(body,/PENDING APPROVAL/);
- assert.match(body,/Release candidate/);
+ assert.match(body,/release candidate/i);
  assert.match(body,/ราคายังไม่ยืนยัน/);
 });
 
@@ -40,6 +40,6 @@ test('store policies disclose that first-party checkout and delivery are not con
   const response=await web.fetch(new Request('https://shop.yggmetro.com'+path),{});
   assert.equal(response.status,200,path);
   const body=await response.text();
-  assert.match(body,/ยังไม่มี Stripe Checkout/);
+  assert.match(body,/ยังไม่เปิด Stripe Checkout/);
  }
 });

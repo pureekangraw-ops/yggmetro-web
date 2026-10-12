@@ -6,11 +6,11 @@ const LAND_PLANNER_IMAGE = "data:image/webp;base64,UklGRoYrAABXRUJQVlA4IHorAACwL
 const products = [
   {
     slug: "land-planner", name: "Land Planner", label: "วางแปลนที่ดิน",
-    category: "planning", type: "เครื่องมือฟรี", stage: "available",
-    status: "ใช้ฟรี · เปิดใช้งานได้", price: "ฟรี",
-    priceNote: "เปิดเครื่องมือได้จากหน้าสาธารณะ",
+    category: "planning", type: "เครื่องมือเว็บ · Release candidate", stage: "candidate",
+    status: "Release candidate · ฟรี", price: "ฟรี",
+    priceNote: "ยังไม่เปิดรับชำระหรือส่งมอบผ่านเว็บไซต์นี้",
     href: "https://yggmetro-space.notion.site/Land-Planner-3f77043d986181eba969c8235e49ff29",
-    cta: "เปิดเครื่องมือฟรี",
+    cta: "ดูตัวอย่าง",
     short: "แปลงหน่วยที่ดินและทดลองจัดวางบ้าน สวน หรือสระน้ำบนแปลน 2 มิติ",
     headline: "จัดพื้นที่ให้เห็นภาพ ก่อนเริ่มลงมือ",
     features: ["แปลงเมตร ฟุต ตารางเมตร ตารางวา งาน และไร่", "กำหนดขนาดแปลงและจัดวางสิ่งปลูกสร้างบนแปลน 2 มิติ", "เปิดดูแปลนเต็มจอและปรับตำแหน่งวัตถุ"],
@@ -22,8 +22,8 @@ const products = [
   {
     slug: "root-cause", name: "ROOT CAUSE v3", label: "วิเคราะห์สาเหตุของปัญหา",
     category: "analysis", type: "PromptBase App", stage: "available",
-    status: "เปิดใช้ผ่าน PromptBase", price: "ดูราคาปัจจุบันบน PromptBase",
-    priceNote: "การรันใช้เครดิตตามเงื่อนไขบน PromptBase",
+    status: "LIVE · PromptBase", price: "US$6.99*",
+    priceNote: "*ราคาตามบันทึกเดิม; ตรวจราคาปัจจุบันก่อนซื้อ",
     href: "https://promptbase.com/app/root-causes-analysis", cta: "ดูแอปบน PromptBase",
     short: "จัดโครงปัญหา แยกหลักฐาน สมมติฐาน และคำถามที่ยังต้องตรวจ",
     headline: "แยกสิ่งที่เห็น ออกจากสาเหตุที่ยังต้องพิสูจน์",
@@ -34,8 +34,8 @@ const products = [
   {
     slug: "adaptive-lens", name: "Adaptive Lens System", label: "เลือกมุมมองให้เหมาะกับโจทย์",
     category: "analysis", type: "AI skill", stage: "available",
-    status: "วางขายบน PromptBase", price: "ดูราคาปัจจุบันบน PromptBase",
-    priceNote: "รายละเอียดและราคาปัจจุบันอยู่บนหน้าขาย",
+    status: "LIVE · PromptBase + Notion", price: "US$6.99",
+    priceNote: "ราคาหน้าขาย PromptBase ที่ตรวจสอบแล้ว",
     href: "https://promptbase.com/skill/adaptive-lens-system", cta: "ดูหน้าขายบน PromptBase",
     short: "กรอบคำสั่งให้ AI เลือกมุมมองวิเคราะห์ที่เหมาะกับโจทย์ โดยไม่กำหนดจำนวนหรือขั้นตอนตายตัว",
     headline: "ให้โจทย์กำหนดมุมมองที่จำเป็น",
@@ -49,7 +49,7 @@ const products = [
     category: "business", type: "Notion template", stage: "available",
     status: "LIVE · Notion Marketplace", price: "US$9",
     priceNote: "ราคาตามบันทึกสถานะสินค้า · ตรวจรายการปัจจุบันก่อนซื้อ",
-    href: "/contact?service=lab", cta: "ขอลิงก์รายการขาย",
+    href: "/contact?service=lab", cta: "สอบถามลิงก์ซื้อ",
     short: "ติดตามออเดอร์ สถานะชำระเงิน และบันทึกงานร้านในพื้นที่เดียว",
     headline: "เปิดมาเช็กงานร้าน แล้วรู้ว่าต้องทำอะไรต่อ",
     features: ["จัดการออเดอร์ สถานะ และกำหนดส่งใน Notion", "ใช้ Quick Tools ช่วยนับหรือคำนวณ แล้วบันทึกผลกลับเอง", "แยกข้อมูลร้านใน Notion ออกจากเครื่องมือคำนวณ"],
@@ -60,9 +60,9 @@ const products = [
   {
     slug: "finance-simulator", name: "Personal Finance Simulator", label: "จำลองแผนกู้ หนี้ และเงินออม",
     category: "planning", type: "ชุดเครื่องมือดิจิทัล", stage: "candidate",
-    status: "Release candidate · ยังไม่ยืนยันช่องทางขาย", price: "ราคายังไม่ยืนยัน",
+    status: "Release candidate · ราคายังไม่ยืนยัน", price: "ราคายังไม่ยืนยัน",
     priceNote: "ยังไม่เปิดรับชำระเงินจากเว็บไซต์นี้",
-    href: "/contact?service=lab", cta: "สอบถามสถานะ",
+    href: "/contact?service=lab", cta: "สอบถามรายละเอียด",
     short: "เครื่องมือ 3 ตัวสำหรับทดลองตัวเลขสินเชื่อ วางแผนปลดหนี้ และตั้งเป้าหมายเงินออม",
     headline: "เปรียบเทียบแผนจากสมมติฐานของคุณ",
     features: ["Loan Planner — ทดลองค่างวด ดอกเบี้ย และเงินคงเหลือ", "Debt Payoff Planner — เปรียบเทียบ Snowball และ Avalanche", "Savings Goal Planner — ทดลองเงินออมและระยะเวลา"],
@@ -76,7 +76,7 @@ const products = [
     category: "creative", type: "Notion template", stage: "review",
     status: "PENDING APPROVAL · Notion Marketplace", price: "ราคาเปิดตัว US$19",
     priceNote: "สถานะ Marketplace ยังรออนุมัติ · ยังไม่ยืนยันช่องทางชำระเงินปัจจุบัน",
-    href: "/contact?service=lab", cta: "สอบถามสถานะการเปิดขาย",
+    href: "/contact?service=lab", cta: "สอบถามสถานะ",
     short: "สร้างสถานที่หลายยุค แล้วต่อยอดความต่างให้เป็นเบาะแสและเส้นทางค้นพบ",
     headline: "หนึ่งสถานที่ หลายยุค และเรื่องราวที่ค่อย ๆ เปิดเผย",
     features: ["เริ่มจากสถานที่ปัจจุบันและอดีต", "สร้างร่องรอย เบาะแส และ Reveal Ladder", "มี Quick Start และตัวอย่าง The Sunken Archive"],
@@ -180,7 +180,7 @@ function policyPage(path) {
     "/refunds": ["การคืนเงิน", "ตรวจสอบนโยบายคืนเงินของแพลตฟอร์มที่รับชำระเงิน"]
   };
   const [title, description] = labels[path] || labels["/policies"];
-  const body = `${intro(path, title)}<section class="page-hero"><div class="wrap page-heading"><div class="eyebrow">Before you buy</div><h1>${E(title)}</h1><p>${E(description)}</p></div></section><section class="section"><div class="wrap text-page"><div class="policy-alert"><strong>ขอบเขตที่ยืนยันได้ตอนนี้</strong>เว็บไซต์ร้านค้านี้ยังไม่มี Stripe Checkout สำหรับการซื้อสินค้าและไม่มีระบบส่งไฟล์หลังชำระเงินโดยตรง รายการที่พร้อมซื้อจะพาไปยังแพลตฟอร์มของผู้ขาย ส่วนรายการที่ยังไม่พร้อมจะไม่มีปุ่มชำระเงิน</div>${path === "/privacy" ? `<h2>ข้อมูลการซื้อ</h2><p>เมื่อซื้อผ่าน PromptBase, Notion Marketplace หรือแพลตฟอร์มอื่น การชำระเงินและข้อมูลคำสั่งซื้ออยู่ภายใต้แพลตฟอร์มนั้น โปรดอ่านประกาศความเป็นส่วนตัวของแพลตฟอร์มก่อนซื้อ</p><h2>การติดต่อ</h2><p>หน้าติดต่อของ YGG METRO ใช้ช่องทางคุยงานที่มีอยู่แล้ว ขณะนี้ยังไม่พบประกาศความเป็นส่วนตัวของ YGG METRO ที่ยืนยันวิธีเก็บ ระยะเวลาเก็บ หรือผู้รับข้อมูลได้ จึงไม่ควรส่งเลขบัตร รหัสผ่าน หรือข้อมูลอ่อนไหวผ่านช่องทางสอบถาม</p>` : path === "/terms" ? `<h2>เงื่อนไขก่อนชำระ</h2><p>รายละเอียดสินค้า รูปแบบไฟล์ ความเข้ากันได้ ราคา การอนุญาตใช้ และการส่งมอบ ให้ตรวจจากหน้ารายการและข้อกำหนดของผู้ขายบนแพลตฟอร์มที่รับชำระเงินจริงก่อนยืนยันคำสั่งซื้อ</p><h2>รายการที่ยังไม่พร้อมขาย</h2><p>รายการที่ระบุว่า Release candidate หรือ Pending approval ยังไม่ใช่คำยืนยันว่ารับชำระเงินได้จากเว็บไซต์นี้</p>` : path === "/refunds" ? `<h2>การคืนเงิน</h2><p>ยังไม่พบแหล่งข้อมูลยืนยันนโยบายคืนเงินเฉพาะของ YGG METRO สำหรับเว็บไซต์นี้ จึงไม่ควรสรุปว่าออเดอร์คืนเงินได้หรือไม่ได้โดยไม่มีหลักฐาน</p><p>สำหรับรายการที่ซื้อผ่านแพลตฟอร์มภายนอก ให้ตรวจเงื่อนไขและติดต่อผู้ขายผ่านแพลตฟอร์มนั้นก่อนหรือหลังซื้อ ตามช่องทางที่แพลตฟอร์มกำหนด</p>` : `<h2>การชำระเงินและรับสินค้า</h2><p>สินค้าที่ซื้อได้จะระบุแพลตฟอร์มในหน้ารายละเอียดสินค้า การชำระเงินและส่งมอบดำเนินการโดยแพลตฟอร์มนั้น ไม่ใช่ปุ่ม Success หรือข้อความกลับมายังเว็บไซต์นี้</p><h2>นโยบายเฉพาะของ YGG METRO</h2><p>ยังไม่พบเอกสารต้นทางที่ยืนยันนโยบายความเป็นส่วนตัว เงื่อนไขการซื้อ และการคืนเงินของเว็บไซต์นี้ครบถ้วน หน้านี้จึงแจ้งข้อจำกัดตามหลักฐาน ไม่ได้สร้างคำรับรองทางกฎหมายขึ้นใหม่</p>`}<div class="policy-links"><a class="policy-link" href="/shop"><b>กลับไปดูสินค้า</b><span>ตรวจสถานะและช่องทางของแต่ละรายการ</span></a><a class="policy-link" href="/contact"><b>สอบถามก่อนซื้อ</b><span>เปิดช่องทางติดต่อที่มีอยู่</span></a></div></div></section>`;
+  const body = `${intro(path, title)}<section class="page-hero"><div class="wrap page-heading"><div class="eyebrow">Before you buy</div><h1>${E(title)}</h1><p>${E(description)}</p></div></section><section class="section"><div class="wrap text-page"><div class="policy-alert"><strong>ขอบเขตที่ยืนยันได้ตอนนี้</strong>เว็บไซต์ร้านค้านี้ยังไม่เปิด Stripe Checkout หรือส่งไฟล์โดยตรงสำหรับสินค้าจริง รายการที่พร้อมซื้อจะพาไปยังแพลตฟอร์มของผู้ขาย ส่วนรายการที่ยังไม่พร้อมจะไม่มีปุ่มชำระเงิน</div>${path === "/privacy" ? `<h2>ข้อมูลการซื้อ</h2><p>เมื่อซื้อผ่าน PromptBase, Notion Marketplace หรือแพลตฟอร์มอื่น การชำระเงินและข้อมูลคำสั่งซื้ออยู่ภายใต้แพลตฟอร์มนั้น โปรดอ่านประกาศความเป็นส่วนตัวของแพลตฟอร์มก่อนซื้อ</p><h2>การติดต่อ</h2><p>หน้าติดต่อของ YGG METRO ใช้ช่องทางคุยงานที่มีอยู่แล้ว ขณะนี้ยังไม่พบประกาศความเป็นส่วนตัวของ YGG METRO ที่ยืนยันวิธีเก็บ ระยะเวลาเก็บ หรือผู้รับข้อมูลได้ จึงไม่ควรส่งเลขบัตร รหัสผ่าน หรือข้อมูลอ่อนไหวผ่านช่องทางสอบถาม</p>` : path === "/terms" ? `<h2>เงื่อนไขก่อนชำระ</h2><p>รายละเอียดสินค้า รูปแบบไฟล์ ความเข้ากันได้ ราคา การอนุญาตใช้ และการส่งมอบ ให้ตรวจจากหน้ารายการและข้อกำหนดของผู้ขายบนแพลตฟอร์มที่รับชำระเงินจริงก่อนยืนยันคำสั่งซื้อ</p><h2>รายการที่ยังไม่พร้อมขาย</h2><p>รายการที่ระบุว่า Release candidate หรือ Pending approval ยังไม่ใช่คำยืนยันว่ารับชำระเงินได้จากเว็บไซต์นี้</p>` : path === "/refunds" ? `<h2>การคืนเงิน</h2><p>ยังไม่พบแหล่งข้อมูลยืนยันนโยบายคืนเงินเฉพาะของ YGG METRO สำหรับเว็บไซต์นี้ จึงไม่ควรสรุปว่าออเดอร์คืนเงินได้หรือไม่ได้โดยไม่มีหลักฐาน</p><p>สำหรับรายการที่ซื้อผ่านแพลตฟอร์มภายนอก ให้ตรวจเงื่อนไขและติดต่อผู้ขายผ่านแพลตฟอร์มนั้นก่อนหรือหลังซื้อ ตามช่องทางที่แพลตฟอร์มกำหนด</p>` : `<h2>การชำระเงินและรับสินค้า</h2><p>สินค้าที่ซื้อได้จะระบุแพลตฟอร์มในหน้ารายละเอียดสินค้า การชำระเงินและส่งมอบดำเนินการโดยแพลตฟอร์มนั้น ไม่ใช่ปุ่ม Success หรือข้อความกลับมายังเว็บไซต์นี้</p><h2>นโยบายเฉพาะของ YGG METRO</h2><p>ยังไม่พบเอกสารต้นทางที่ยืนยันนโยบายความเป็นส่วนตัว เงื่อนไขการซื้อ และการคืนเงินของเว็บไซต์นี้ครบถ้วน หน้านี้จึงแจ้งข้อจำกัดตามหลักฐาน ไม่ได้สร้างคำรับรองทางกฎหมายขึ้นใหม่</p>`}<div class="policy-links"><a class="policy-link" href="/shop"><b>กลับไปดูสินค้า</b><span>ตรวจสถานะและช่องทางของแต่ละรายการ</span></a><a class="policy-link" href="/contact"><b>สอบถามก่อนซื้อ</b><span>เปิดช่องทางติดต่อที่มีอยู่</span></a></div></div></section>`;
   return shell(title, description, path, body);
 }
 function notFound(path) {
