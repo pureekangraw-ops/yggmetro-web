@@ -637,7 +637,7 @@ export default {
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    if(url.hostname==="shop.yggmetro.com" && (url.pathname==="/" || url.pathname.startsWith("/products/"))){
+    if(url.hostname==="shop.yggmetro.com"){
       const page=renderShop(url.pathname);
       return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
