@@ -54,4 +54,21 @@ $("#delete").onclick=async()=>{const id=$("#id").value;if(id&&confirm("ลบร
 $("#unlock").onclick=unlock;$("#master").onkeydown=e=>{if(e.key==="Enter")unlock()};$("#lock").onclick=lock;$("#add").onclick=()=>openForm();$("#close").onclick=$("#cancel").onclick=()=>$("#dlg").close();$("#type").onchange=syncType;$("#search").oninput=render;$("#filter").onchange=render;
 document.addEventListener("click",ev=>{const c=ev.target.closest("[data-copy]");if(c)copy($("#"+c.dataset.copy).value);const s=ev.target.closest("[data-show]");if(s){const i=$("#"+s.dataset.show);i.type=i.type==="password"?"text":"password"}const o=ev.target.closest("[data-open]");if(o){const u=$("#"+o.dataset.open).value;if(u){const safe=safeUrl(u);if(safe)location.href=safe;else toast("URL ไม่ปลอดภัย")}}});
 $("#export").onclick=()=>{const payload=localStorage.getItem(DATA_KEY),savedSalt=localStorage.getItem(SALT_KEY);if(!payload||!savedSalt)return toast("ยังไม่มีข้อมูล");const body={format:"YGG-VAULT-ENCRYPTED",version:1,salt:savedSalt,payload:JSON.parse(payload),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(body,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="YGG-VAULT-BACKUP.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
-$("#import").onchange=async ev=>{const file=ev.target.files[0];if(!file)return;try{const body=JSON.parse(await file.text());if(body.format!=="YGG-VAULT-ENCRYPTED"||!body.salt||!body.payload)throw new Error("bad");localStorage.setItem(SALT_KEY,body.salt);localStorage.setItem(DATA_KEY,JSON.stringify(body.payload));toast("Imported — Lock/Unlock ใหม่")}catch{toast("Backup ไม่ถูกต้อง")}ev.target.value=""};
+function validBackup(body){
+  if(body?.format!=="YGG-VAULT-ENCRYPTED"||body.version!==1||typeof body.salt!=="string"||!body.payload||body.payload.version!==1)return false;
+  try{return unb64(body.salt).length===16&&unb64(body.payload.iv).length===12&&unb64(body.payload.ciphertext).length>=16}catch{return false}
+}
+$("#import").onchange=async ev=>{
+  const file=ev.target.files[0];if(!file)return;
+  try{
+    if(file.size>5*1024*1024)throw new Error("Backup too large");
+    const body=JSON.parse(await file.text());if(!validBackup(body))throw new Error("Invalid backup");
+    if(localStorage.getItem(DATA_KEY)||localStorage.getItem(SALT_KEY)){
+      if(!confirm("การนำเข้าจะเขียนทับ Vault เดิมทั้งหมด กรุณา Export สำรองข้อมูลเดิมก่อน ต้องการดำเนินการต่อหรือไม่?"))return;
+    }
+    localStorage.setItem(SALT_KEY,body.salt);
+    localStorage.setItem(DATA_KEY,JSON.stringify(body.payload));
+    lock();toast("Imported — ปลดล็อกด้วยรหัสของ Backup");
+  }catch{toast("Backup ไม่ถูกต้องหรือมีขนาดใหญ่เกินไป")}
+  finally{ev.target.value=""}
+};
