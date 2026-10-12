@@ -1,3 +1,4 @@
+import { renderShop } from "./shop.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MODEL = "gpt-5.4-mini";
 const WHISPER_MODEL = "gpt-6-luna";
@@ -608,7 +609,7 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 
 export function renderHomePage(hostname="") {
   const host=String(hostname||"").trim().toLowerCase();
-  if (host === "shop.yggmetro.com") return html;
+  if (host === "shop.yggmetro.com") return renderShop().html;
   return html.replace(/<!-- SHOP_ONLY_ROOT_CAUSES_START -->[\s\S]*?<!-- SHOP_ONLY_ROOT_CAUSES_END -->/g,"");
 }
 
@@ -636,6 +637,10 @@ export default {
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
+    if(url.hostname==="shop.yggmetro.com" && (url.pathname==="/" || url.pathname.startsWith("/products/"))){
+      const page=renderShop(url.pathname);
+      return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
+    }
     const home=renderHomePage(url.hostname);
     return new Response(request.method==="HEAD"?null:home.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
