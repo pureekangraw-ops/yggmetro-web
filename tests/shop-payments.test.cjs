@@ -91,7 +91,7 @@ async function sendWebhook(web, runtime, event, sig) {
 }
 function paidEvent(order, id = 'evt_test_paid_001', overrides = {}) {
   return { id, type: 'checkout.session.completed', data: { object: {
-    id: 'cs_test_fixture_001', mode: 'payment', payment_status: 'paid', currency: 'usd', amount_total: 100,
+    id: 'cs_test_fixture_001', livemode: false, mode: 'payment', payment_status: 'paid', currency: 'usd', amount_total: 100,
     client_reference_id: order.id, metadata: { order_id: order.id, fixture_sku: 'stripe-test-digital-fixture' }, ...overrides
   } } };
 }
@@ -178,6 +178,8 @@ test('duplicate and mismatched Stripe events are safe and cannot change another 
   const { body: other } = await createOrder(web, runtime);
   const mismatched = await sendWebhook(web, runtime, paidEvent(row, 'evt_test_mismatch', { amount_total: 9999 }));
   assert.equal(mismatched.status, 200);
+  const liveModeEvent = await sendWebhook(web, runtime, paidEvent(row, 'evt_test_live_mode', { livemode: true }));
+  assert.equal((await liveModeEvent.json()).ignored, true);
   assert.equal((await (await web.fetch(new Request(`https://shop.yggmetro.com/api/test/orders/${other.orderToken}`), runtime)).json()).status, 'pending');
   assert.equal(runtime.db.orders.get(row.id).status, 'paid');
 });

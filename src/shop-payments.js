@@ -112,7 +112,7 @@ async function stripeWebhook(request, env) {
   if (!event?.id || !event?.type) return error("INVALID_EVENT", 400);
   if (!["checkout.session.completed", "checkout.session.async_payment_succeeded"].includes(event.type)) return json({ ok: true, ignored: true });
   const session = event.data?.object;
-  if (!session || session.mode !== "payment" || session.payment_status !== "paid" || session.currency !== FIXTURE_CURRENCY || session.amount_total !== FIXTURE_AMOUNT || session.metadata?.fixture_sku !== FIXTURE_SKU || !session.id?.startsWith("cs_test_")) return json({ ok: true, ignored: true });
+  if (!session || session.livemode !== false || session.mode !== "payment" || session.payment_status !== "paid" || session.currency !== FIXTURE_CURRENCY || session.amount_total !== FIXTURE_AMOUNT || session.metadata?.fixture_sku !== FIXTURE_SKU || !session.id?.startsWith("cs_test_")) return json({ ok: true, ignored: true });
   const orderId = session.client_reference_id || session.metadata?.order_id;
   if (!orderId || orderId !== session.metadata?.order_id) return json({ ok: true, ignored: true });
   try {
