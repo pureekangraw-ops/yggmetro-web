@@ -637,6 +637,7 @@ export default {
       return handleBriefConfirm(request, env);
     }
     if (url.pathname === "/client" || url.pathname === "/client/") {
+      if (url.hostname === "office.yggmetro.com") return new Response("Not Found",{status:404});
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
