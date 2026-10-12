@@ -24,17 +24,18 @@ async function unlock(){
 function lock(){key=null;entries=[];$("#master").value="";$("#vault").classList.add("hidden");$("#auth").classList.remove("hidden");$("#lock").classList.add("hidden")}
 async function copy(value){if(!value)return toast("ช่องนี้ว่าง");try{await navigator.clipboard.writeText(value)}catch{const t=document.createElement("textarea");t.value=value;document.body.append(t);t.select();document.execCommand("copy");t.remove()}toast("Copied");setTimeout(()=>navigator.clipboard&&navigator.clipboard.writeText("").catch(()=>{}),45000)}
 function escapeHtml(value=""){const div=document.createElement("div");div.textContent=value;return div.innerHTML}
+function safeUrl(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:null}catch{return null}}
 function render(){
   const q=$("#search").value.trim().toLowerCase(),group=$("#filter").value;
   const list=entries.filter(e=>(!group||e.group===group)&&(!q||[e.title,e.username,e.type,e.status,e.url,e.notes].join(" ").toLowerCase().includes(q)));
-  $("#list").innerHTML=list.map(e=>`<article class="card entry" data-id="${e.id}">
+  $("#list").innerHTML=list.map(e=>`<article class="card entry" data-id="${escapeHtml(String(e.id))}">
     <div class="entryTop"><div><div class="entryTitle">${escapeHtml(e.title)}</div><div class="chips"><span class="chip">${escapeHtml(e.group)}</span><span class="chip">${escapeHtml(e.type)}</span><span class="chip">${escapeHtml(e.status)}</span></div></div><button class="ghost edit">Edit</button></div>
     ${e.username?`<div class="meta">ID: ${escapeHtml(e.username)}</div>`:""}${e.url?`<div class="meta">${escapeHtml(e.url)}</div>`:""}
     <div class="entryBtns">${e.username?'<button class="ghost quickId">Copy ID</button>':""}${(e.secret||e.clientSecret)?'<button class="ghost quickSecret">Copy Secret</button>':""}${e.url?'<button class="ghost quickOpen">Open URL</button>':""}</div></article>`).join("");
   $$(".edit").forEach(b=>b.onclick=()=>openForm(b.closest(".entry").dataset.id));
   $$(".quickId").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);copy(e.username)});
   $$(".quickSecret").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);copy(e.clientSecret||e.secret)});
-  $$(".quickOpen").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);if(e.url)location.href=e.url});
+  $$(".quickOpen").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);{const u=safeUrl(e.url);if(u){const safe=safeUrl(u);if(safe)location.href=safe;else toast("URL ไม่ปลอดภัย")};else toast("URL ไม่ปลอดภัย")}});
 }
 function syncType(){
   const oauth=$("#type").value==="OAuth",identifier=$("#type").value==="Identifier";
