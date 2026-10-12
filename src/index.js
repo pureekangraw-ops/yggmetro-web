@@ -1,3 +1,4 @@
+import { renderOfficePage } from "./office.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MODEL = "gpt-5.4-mini";
 const WHISPER_MODEL = "gpt-6-luna";
@@ -615,6 +616,10 @@ export function renderHomePage(hostname="") {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.hostname === "office.yggmetro.com" && (url.pathname === "/" || url.pathname === "/office")) {
+      if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
+      return new Response(request.method === "HEAD" ? null : renderOfficePage(),{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","referrer-policy":"no-referrer","content-security-policy":"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+    }
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
@@ -632,6 +637,7 @@ export default {
       return handleBriefConfirm(request, env);
     }
     if (url.pathname === "/client" || url.pathname === "/client/") {
+      if (url.hostname === "office.yggmetro.com") return new Response("Not Found",{status:404});
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
