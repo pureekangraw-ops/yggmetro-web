@@ -22,6 +22,13 @@ test('Vault backup rejects malformed encrypted payloads', () => {
   assert.equal(validBackup({...good, salt:'bad'}), false);
   assert.equal(validBackup({...good, payload:{...good.payload, iv:'bad'}}), false);
 });
-test('Vault escapes imported IDs in HTML attribute', () => {
-  assert.match(source, /data-id="\$\{escapeHtml\(String\(e\.id\)\)\}"/);
+test('Vault escapes quotes in imported IDs before inserting into HTML attributes', () => {
+  assert.match(source, /data-id="\$\{escapeAttr\(String\(e\.id\)\)\}"/);
+  const expression = source.match(/^function escapeAttr\(value=""\)\{.*\}$/m)?.[0];
+  assert.ok(expression, 'escapeAttr helper must exist');
+  const ctx = { escapeHtml: value => String(value) };
+  vm.runInNewContext(expression, ctx);
+  assert.equal(ctx.escapeAttr('id" onclick="alert(1)'), 'id&quot; onclick=&quot;alert(1)');
+  assert.equal(ctx.escapeAttr("id' data-x='1"), 'id&#39; data-x=&#39;1');
+  assert.equal(ctx.escapeAttr('safe-id'), 'safe-id');
 });
