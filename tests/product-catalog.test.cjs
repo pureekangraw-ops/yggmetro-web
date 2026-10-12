@@ -19,19 +19,21 @@ test('shop surfaces category filters, sorting, and non-misleading availability l
  const {default:web}=await load();
  const body=await (await web.fetch(new Request('https://shop.yggmetro.com/shop'),{})).text();
  for(const term of ['data-filter="all"','data-filter="planning"','data-filter="business"','data-filter="analysis"','data-filter="creative"','product-sort','name-asc','name-desc','aria-live="polite"']) assert.ok(body.includes(term),term);
- assert.match(body,/PENDING APPROVAL/);
+ assert.match(body,/LIVE · Notion Marketplace/);
  assert.match(body,/release candidate/i);
- assert.match(body,/ราคายังไม่ยืนยัน/);
+ assert.match(body,/US\$19 \(draft\)/);
 });
 
 test('unknown product returns 404 and release candidates do not expose checkout',async()=>{
  const {default:web}=await load();
  assert.equal((await web.fetch(new Request('https://shop.yggmetro.com/products/missing'),{})).status,404);
- for(const slug of ['finance-simulator','lost-era']){
-  const body=await (await web.fetch(new Request('https://shop.yggmetro.com/products/'+slug),{})).text();
-  assert.match(body,/ยังไม่เปิดชำระเงินหรือส่งมอบผ่านเว็บไซต์นี้/);
-  assert.doesNotMatch(body,/buy\.stripe\.com|checkout\.stripe\.com|<form[^>]+payment|PaymentIntent/);
- }
+ const finance=await (await web.fetch(new Request('https://shop.yggmetro.com/products/finance-simulator'),{})).text();
+ assert.match(finance,/Release candidate · Notion Marketplace draft/);
+ assert.match(finance,/ยังไม่เปิดชำระเงินหรือส่งมอบผ่านเว็บไซต์นี้/);
+ const lost=await (await web.fetch(new Request('https://shop.yggmetro.com/products/lost-era'),{})).text();
+ assert.match(lost,/LIVE · Notion Marketplace/);
+ assert.match(lost,/สอบถามลิงก์ซื้อ/);
+ for(const body of [finance,lost]) assert.doesNotMatch(body,/buy\.stripe\.com|checkout\.stripe\.com|<form[^>]+payment|PaymentIntent/);
 });
 
 test('store policies disclose that first-party checkout and delivery are not configured',async()=>{

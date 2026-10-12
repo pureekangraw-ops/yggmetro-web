@@ -200,5 +200,5 @@ test('public catalog has no Stripe checkout path or test fixture product', async
   const { default: web } = await load();
   const shop = await (await web.fetch(new Request('https://shop.yggmetro.com/shop'), {})).text();
   assert.doesNotMatch(shop, /stripe-test-digital-fixture|api\/test\/checkout|checkout\.stripe\.com/);
-  for (const term of ['Release candidate · ฟรี', 'US$6.99*', 'LIVE · PromptBase + Notion', 'PENDING APPROVAL · Notion Marketplace', 'ราคายังไม่ยืนยัน']) assert.ok(shop.includes(term), term);
+  for (const term of ['Release candidate · Notion draft', 'US$6.99*', 'LIVE · PromptBase / DRAFT · Notion', 'LIVE · Notion Marketplace', 'US$19 (draft)']) assert.ok(shop.includes(term), term);
 });
