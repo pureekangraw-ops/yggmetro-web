@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync('ygg-vault-android/www/app.js', 'utf8');
 function helper(name) {
   const expression = name === 'safeUrl' ? source.match(/function safeUrl\(value\)\{[^\n]+/)[0] : source.slice(source.indexOf('function validBackup(body){'), source.indexOf('$("#import").onchange='));
-  const ctx = { URL, atob, Uint8Array };
+  const ctx = { URL, atob, Uint8Array, unb64: value => Uint8Array.from(atob(value), c => c.charCodeAt(0)) };
   vm.runInNewContext(expression, ctx);
   return ctx[name];
 }
