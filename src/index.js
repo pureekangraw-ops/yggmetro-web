@@ -617,6 +617,11 @@ export function renderHomePage(hostname="") {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/assets/shop/")) {
+      if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
+      if (!env?.ASSETS) return new Response("Assets unavailable",{status:503,headers:{"cache-control":"no-store"}});
+      return env.ASSETS.fetch(request);
+    }
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
