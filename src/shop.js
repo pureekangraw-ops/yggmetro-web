@@ -1,4 +1,4 @@
-import manifest from "../public/assets/shop/manifest.json";
+import manifest from "../public/assets/shop/manifest.json" with { type: "json" };
 import { shopChatWidget } from "./shop-assistant.js";
 const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const products=[
