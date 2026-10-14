@@ -13,8 +13,10 @@ Source of truth: this repository. Do not use Google Drive as a required intermed
 
 ## Website and Figma
 
-Website image URL after deployment: `/assets/shop/<filename>` **only if** the site's hosting build publishes the public directory. Verify the current Worker/static-asset configuration before wiring this URL into customer-facing pages.
+Wrangler publishes `public` with the ASSETS binding. Website image URL after deployment: `/assets/shop/<filename>`. Missing shop assets return 404 rather than homepage HTML. Preview configuration is enabled; sales backend bindings are not inherited into previews.
+
+Portfolio entries (`category: "portfolio"`) appear in the homepage gallery. For a product cover, add `product` matching its existing slug, for example `{"file":"land-planner.png","alt":"Land Planner screenshot","category":"product","product":"land-planner"}`. The same image appears in the collection and detail page without cropping. Products without images keep their original cards.
 
 Figma does not automatically sync from GitHub. Use Figma's connected tools to place the reviewed image into an existing Figma node; verify the image hash/render after insertion. Do not persist expiring Figma upload URLs in repository secrets.
 
-This PR provides the versioned image source, manifest and CI checks. It does NOT yet provide automatic GitHub-to-Figma sync, public deployment, or payment changes.
+This PR provides the versioned image source, manifest, Worker asset serving, gallery/product rendering and regression checks. Real PNG placement and Figma readback are still required before end-to-end verification. It does not provide automatic GitHub-to-Figma sync or production publication.
