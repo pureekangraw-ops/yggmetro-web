@@ -1,0 +1,24 @@
+name: Figma icon upload bridge
+on:
+  workflow_dispatch:
+    inputs:
+      icon_filename:
+        description: 'PNG basename in private Drive ZIP (e.g. 01_home.png)'
+        required: true
+        default: '01_home.png'
+        type: string
+permissions:
+  contents: read
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload selected PNG to Figma
+        env:
+          GOOGLE_DRIVE_ACCESS_TOKEN: ${{ secrets.GOOGLE_DRIVE_ACCESS_TOKEN }}
+          GOOGLE_DRIVE_ZIP_FILE_ID: ${{ secrets.GOOGLE_DRIVE_ZIP_FILE_ID }}
+          FIGMA_SUBMIT_URL: ${{ secrets.FIGMA_SUBMIT_URL }}
+          ICON_FILENAME: ${{ inputs.icon_filename }}
+        run: python3 scripts/figma_icon_upload.py
