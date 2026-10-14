@@ -8,5 +8,11 @@
       "binding": "GO_HUB",
       "service": "go-hub"
     }
-  ]
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
+  "previews": {}
 }
