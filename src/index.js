@@ -1,4 +1,5 @@
-import { renderShop } from "./shop.js";
+import { renderShop, getShopPublicCatalog } from "./shop.js";
+import { handleShopAssistant } from "./shop-assistant.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const MODEL = "gpt-5.4-mini";
 const WHISPER_MODEL = "gpt-6-luna";
@@ -618,6 +619,11 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
+    }
+    if (url.pathname === "/api/v1/shop/assistant") {
+      if (url.hostname !== "shop.yggmetro.com") return json({ok:false,code:"SHOP_ONLY"},404);
+      if (rateLimited(request,"shop-assistant")) return json({ok:false,code:"RATE_LIMITED"},429);
+      return handleShopAssistant(request,getShopPublicCatalog());
     }
     if (url.pathname === "/api/v1/events") return handleSalesEvent(request,env);
     if (url.pathname === "/api/v1/payment/checkout") return handlePaymentCheckout(request,env);
