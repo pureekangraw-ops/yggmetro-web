@@ -25,7 +25,7 @@ test("public catalog chat answers from shop data without provider or payment cla
   global.fetch=async()=>{throw Error("public shop chat must never call an external model")};
   const ask=async(message,host="shop.yggmetro.com")=>{
     const response=await web.fetch(new Request("https://"+host+"/api/v1/shop/assistant",{
-      method:"POST",headers:{"content-type":"application/json","cf-connecting-ip":"go-chat-test-"+message.slice(0,16)},
+      method:"POST",headers:{"content-type":"application/json","cf-connecting-ip":"go-chat-test"},
       body:JSON.stringify({message})
     }),{OPENAI_API_KEY:"present-but-unused"});
     return {status:response.status,data:await response.json()};
