@@ -3,7 +3,7 @@ const load=()=>import('../src/index.js');
 const page=async(path,env={})=>{const {default:web}=await load();return web.fetch(new Request('https://shop.yggmetro.com'+path),env)};
 test('home is a visual entrance with separate catalog, work and service destinations',async()=>{
  const html=await(await page('/')).text();
- for(const href of ['/shop','/portfolio','/services','/how-to-buy','/client'])assert.ok(html.includes('href="'+href+'"'));
+ for(const href of ['/shop','/portfolio','/custom-order','/how-to-buy'])assert.ok(html.includes('href="'+href+'"'));
  assert.match(html,/id="showcase"/);assert.match(html,/cloud-hero\.jpg/);
  assert.doesNotMatch(html,/id="products"|id="services"|id="how"|<iframe/);
  for(const script of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>new Function(script[1]));

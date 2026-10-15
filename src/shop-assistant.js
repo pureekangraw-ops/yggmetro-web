@@ -19,10 +19,10 @@ export function answerShopQuestion(text,catalog) {
   const matches=catalog.filter(p=>MATCHERS.some(([slug,re])=>slug===p.slug&&re.test(question)) ||
     p.name.toLocaleLowerCase().length>3 && question.toLocaleLowerCase().includes(p.name.toLocaleLowerCase()));
   if (/จ่าย.*แล้ว|ชำระ.*แล้ว|โอน.*แล้ว|คืนเงิน|refund|payment.*(?:paid|done)|เลข.*ออเดอร์/i.test(question)) {
-    return {reply:"เรื่องการชำระเงินและคำสั่งซื้อต้องตรวจจากระบบจริงครับ ผมยังตรวจยอดหรือยืนยันสถานะไม่ได้ โปรดติดต่อทีมผ่านหน้าคุยงาน และอย่าส่งข้อมูลบัตรหรือรหัสผ่านในแชตนี้",links:[{label:"ติดต่อทีม",url:"/client?service=lab"}]};
+    return {reply:"เรื่องการชำระเงินและคำสั่งซื้อต้องตรวจจากระบบจริงครับ ผมยังตรวจยอดหรือยืนยันสถานะไม่ได้ โปรดติดต่อทีมผ่านหน้าคุยงาน และอย่าส่งข้อมูลบัตรหรือรหัสผ่านในแชตนี้",links:[{label:"ติดต่อทีม",url:"/custom-order"}]};
   }
   if (/ติดต่อ|คุยกับคน|คนจริง|พนักงาน|เจ้าหน้าที่|ทีมงาน|human/i.test(question)) {
-    return {reply:"หากต้องการให้ทีมรับเรื่อง สามารถเปิดหน้าคุยงานเพื่อส่งรายละเอียดได้ครับ ผมไม่สามารถยืนยันได้ว่ามีเจ้าหน้าที่ออนไลน์อยู่ในขณะนี้",links:[{label:"เปิดหน้าคุยงาน",url:"/client?service=lab"}]};
+    return {reply:"หากต้องการให้ทีมรับเรื่อง สามารถเปิดหน้าคุยงานเพื่อส่งรายละเอียดได้ครับ ผมไม่สามารถยืนยันได้ว่ามีเจ้าหน้าที่ออนไลน์อยู่ในขณะนี้",links:[{label:"เปิดหน้าคุยงาน",url:"/custom-order"}]};
   }
   if (matches.length) {
     const picks=matches.slice(0,2);
@@ -39,7 +39,7 @@ export function answerShopQuestion(text,catalog) {
     const picks=featured.map(slug=>catalog.find(p=>p.slug===slug)).filter(Boolean);
     return {reply:"ยินดีต้อนรับครับ 💙 ผม GO ผู้ช่วยข้อมูลสินค้าของ YGG METRO\n\nร้านมีเครื่องมือวางแผน เทมเพลต และเครื่องมือ AI เช่น\n"+picks.map(p=>"• "+p.name+" — "+p.price+" ("+p.status+")").join("\n")+"\n\nบางรายการขายผ่านแพลตฟอร์มปลายทาง และบางรายการยังไม่เปิดขายตรงบนเว็บนี้ครับ สนใจงานประเภทไหนเป็นพิเศษ?",links:linksFor(picks)};
   }
-  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถคุยรายละเอียดกับทีมผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/shop"},{label:"คุยงานกับทีม",url:"/client?service=lab"}]};
+  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถคุยรายละเอียดกับทีมผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/shop"},{label:"คุยงานกับทีม",url:"/custom-order"}]};
 }
 export async function handleShopAssistant(request,catalog) {
   const headers={"cache-control":"no-store","x-content-type-options":"nosniff"};
@@ -80,13 +80,13 @@ const CHAT_CSS = [
 "@media(max-width:540px){#go-sales-root{right:12px;bottom:max(12px,env(safe-area-inset-bottom))}#go-sales-panel{width:calc(100vw - 24px);height:min(570px,calc(100dvh - 76px))}}"
 ].join("");
 const CHAT_HTML = [
-'<aside id="go-sales-root" aria-label="ผู้ช่วยข้อมูลสินค้าของ YGG METRO">',
-'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 คุยกับ GO</button>',
-'<section id="go-sales-panel" role="dialog" aria-label="GO ผู้ช่วยเลือกสินค้า" hidden>',
-'<div id="go-sales-header"><div><strong>GO · ผู้ช่วยเลือกสินค้า</strong><small>โหมดแค็ตตาล็อก · ไม่ใช้ AI Cloud</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
+'<aside data-mode="catalog" id="go-sales-root" aria-label="ผู้ช่วยข้อมูลสินค้าของ YGG METRO">',
+'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel"><img src="/assets/shop/icons/chat.svg" alt="" width="24" height="24"> คุยกับ HERMES</button>',
+'<section id="go-sales-panel" role="dialog" aria-label="HERMES" hidden>',
+'<div id="go-sales-header"><div><strong>HERMES</strong><small>สอบถามสินค้า · คุยเรื่องงาน</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
 '<div id="go-sales-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>',
-'<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="ข้อความถึง GO"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
-'<p id="go-sales-note">ตอบจากข้อมูลสินค้าในร้าน · ไม่ตรวจออเดอร์หรือรับข้อมูลบัตร · หากต้องการคุยงาน กดเมนูคุยงาน</p>',
+'<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="ข้อความถึง HERMES"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
+'<p id="go-sales-note">ตอบจากข้อมูลสินค้าในร้าน · ไม่ตรวจออเดอร์หรือรับข้อมูลบัตร · หากต้องการส่งรายละเอียดงาน ใช้หน้า Custom Order</p>',
 '</section></aside>'
 ].join("");
 function clientChat() {
@@ -99,7 +99,7 @@ function clientChat() {
   const form=root.querySelector("#go-sales-form");
   const input=root.querySelector("#go-sales-input");
   const send=root.querySelector("#go-sales-send");
-  const allowedLink=url=>typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/shop");
+  const allowedLink=url=>typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/shop"||url==="/custom-order");
   function push(role,text,links) {
     const bubble=document.createElement("div");
     bubble.className="go-sales-bubble"+(role==="customer"?" customer":"");
@@ -119,7 +119,7 @@ function clientChat() {
   launcher.addEventListener("click",()=>{
     launcher.hidden=true;launcher.setAttribute("aria-expanded","true");
     panel.hidden=false;input.focus();
-    if(!messages.childNodes.length)push("assistant","สวัสดีครับ 💙 ผม GO ช่วยแนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
+    if(!messages.childNodes.length)push("assistant","สวัสดีครับ 💙 HERMES ช่วยแนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
   });
   function close(){panel.hidden=true;launcher.hidden=false;launcher.setAttribute("aria-expanded","false");launcher.focus()}
   closer.addEventListener("click",close);
@@ -140,6 +140,5 @@ function clientChat() {
     finally{send.disabled=false;input.disabled=false;input.focus()}
   });
 }
-export function shopChatWidget(){
-  return "<style>"+CHAT_CSS+"</style>"+CHAT_HTML+"<script>("+clientChat.toString()+")();</script>";
-}
+const HERMES_STYLE=`#go-sales-root{color:#14254b}#go-sales-launcher{min-width:180px;min-height:56px;background:#e2d4fb;border:0;color:#14254b;box-shadow:0 4px 20px #14254b16}#go-sales-launcher:hover{background:#d2bff6}#go-sales-panel{width:min(420px,calc(100vw - 32px));height:min(600px,calc(100dvh - 110px));background:white;color:#14254b;border:1px solid #e0e7f5;border-radius:24px;box-shadow:0 8px 32px #14254b2e;animation:hermes-up .28s ease-out}#go-sales-header{background:white;border:0;padding:20px 24px}#go-sales-header strong{font-size:22px}#go-sales-header small{font-size:13px;color:#5c7097}#go-sales-close{color:#14254b;border:0;min-height:44px;min-width:44px}#go-sales-messages{padding:12px 24px}.go-sales-bubble{background:#edf3ff;color:#14254b;border-radius:16px;padding:16px}.go-sales-bubble.customer{background:#377ded;color:white}.go-sales-link{color:#235fc3;border-color:#b8cdf5}#go-sales-form{margin:8px 24px 16px;padding:8px;background:#edf3ff;border:0;border-radius:12px}#go-sales-input{background:transparent;color:#14254b;border:0;padding:10px}#go-sales-send{background:#377ded;color:white;min-width:56px}#go-sales-note{color:#5c7097;padding:0 24px 18px;font-size:11px}#go-sales-root button:focus-visible,#go-sales-root textarea:focus-visible,#go-sales-root a:focus-visible{outline-color:#377ded}@keyframes hermes-up{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:translateY(0)}}@media(max-width:540px){#go-sales-panel{width:calc(100vw - 24px);height:min(520px,calc(100dvh - 150px))}}@media(prefers-reduced-motion:reduce){#go-sales-panel{animation:none}}`;
+export function shopChatWidget(){return "<style>"+CHAT_CSS+HERMES_STYLE+"</style>"+CHAT_HTML+"<script>("+clientChat.toString()+")();</script>";}

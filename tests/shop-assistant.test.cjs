@@ -11,7 +11,7 @@ test("GO chat appears only on shop pages, including detail pages",async()=>{
     const html=await response.text();
     assert.match(html,/id="go-sales-launcher"/);
     assert.match(html,/id="go-sales-messages"/);
-    assert.match(html,/โหมดแค็ตตาล็อก/);
+    assert.match(html,/data-mode="catalog"/);assert.match(html,/คุยกับ HERMES/);
     const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
     for(const source of scripts)assert.doesNotThrow(()=>new Function(source));
   }
