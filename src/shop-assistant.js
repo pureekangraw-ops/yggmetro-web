@@ -39,7 +39,7 @@ export function answerShopQuestion(text,catalog) {
     const picks=featured.map(slug=>catalog.find(p=>p.slug===slug)).filter(Boolean);
     return {reply:"ยินดีต้อนรับครับ 💙 ผม GO ผู้ช่วยข้อมูลสินค้าของ YGG METRO\n\nร้านมีเครื่องมือวางแผน เทมเพลต และเครื่องมือ AI เช่น\n"+picks.map(p=>"• "+p.name+" — "+p.price+" ("+p.status+")").join("\n")+"\n\nบางรายการขายผ่านแพลตฟอร์มปลายทาง และบางรายการยังไม่เปิดขายตรงบนเว็บนี้ครับ สนใจงานประเภทไหนเป็นพิเศษ?",links:linksFor(picks)};
   }
-  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถคุยรายละเอียดกับทีมผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/#products"},{label:"คุยงานกับทีม",url:"/client?service=lab"}]};
+  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถคุยรายละเอียดกับทีมผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/shop"},{label:"คุยงานกับทีม",url:"/client?service=lab"}]};
 }
 export async function handleShopAssistant(request,catalog) {
   const headers={"cache-control":"no-store","x-content-type-options":"nosniff"};
@@ -99,7 +99,7 @@ function clientChat() {
   const form=root.querySelector("#go-sales-form");
   const input=root.querySelector("#go-sales-input");
   const send=root.querySelector("#go-sales-send");
-  const allowedLink=url=>typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/#products");
+  const allowedLink=url=>typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/shop");
   function push(role,text,links) {
     const bubble=document.createElement("div");
     bubble.className="go-sales-bubble"+(role==="customer"?" customer":"");

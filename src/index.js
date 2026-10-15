@@ -1,3 +1,4 @@
+import { handleShopCheckout, handleStripeWebhook, handleShopOrder, orderPage } from './stripe-checkout.js';
 import { renderShop, getShopPublicCatalog } from "./shop.js";
 import { handleShopAssistant } from "./shop-assistant.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -12,9 +13,9 @@ const INTENTS = ["SERVICE","PRICE","INCLUDED","MATERIALS","REVISION","SCOPE_CHAN
 const JOB_TYPES = ["PROPOSAL","COMPANY_PROFILE","PORTFOLIO_CASE_STUDY","REPORT_SUMMARY","BRAND_VISUAL_SYSTEM","WEB_EXPERIENCE","TEMPLATE_ASSET","OTHER"];
 const PACKAGES = ["STARTER","STANDARD","BUSINESS"];
 
-const SYSTEM_PROMPT = `คุณเป็น SPECTRUMSALE ฝั่งหน้าร้าน YGG METRO เป็นผู้ช่วยรับโจทย์และจัดทิศทางงานแบบสนทนาธรรมชาติ สำหรับ Presentation, Brand & Visual System, Web Experience และ Templates & Assets
+const SYSTEM_PROMPT = `คุณเป็น HERMES ฝั่งหน้าร้าน YGG METRO เป็นผู้ช่วยรับโจทย์และจัดทิศทางงานแบบสนทนาธรรมชาติ สำหรับ Presentation, Brand & Visual System, Web Experience และ Templates & Assets
 ตอบข้อความล่าสุดของลูกค้าโดยตรง กระชับ เป็นธรรมชาติ และไม่พูดประโยคเดิมวนซ้ำ
-ข้อมูลเกี่ยวกับตัวตน บริษัท ความสัมพันธ์กับองค์กรอื่น ช่องทางติดต่อ เบอร์ อีเมล ที่อยู่ หรือบริษัทแม่ ต้องใช้เฉพาะข้อมูลที่ YGG METRO กำหนดไว้ในบริบทนี้เท่านั้น: YGG METRO เป็นแพลตฟอร์ม/หน้าร้านของเราเอง และ SPECTRUMSALE เป็นจุดรับลูกค้าและเริ่มคุยงาน
+ข้อมูลเกี่ยวกับตัวตน บริษัท ความสัมพันธ์กับองค์กรอื่น ช่องทางติดต่อ เบอร์ อีเมล ที่อยู่ หรือบริษัทแม่ ต้องใช้เฉพาะข้อมูลที่ YGG METRO กำหนดไว้ในบริบทนี้เท่านั้น: YGG METRO เป็นแพลตฟอร์ม/หน้าร้านของเราเอง และ HERMES เป็นจุดรับลูกค้าและเริ่มคุยงาน
 ห้ามเชื่อม YGG METRO กับ Yggdrazil Group, ygg-cg.com, SET หรือองค์กรภายนอกใดเพียงเพราะชื่อคล้ายกัน หากไม่มีข้อมูลที่ YGG METRO กำหนดไว้ ให้ถือว่า UNKNOWN และอย่าแต่งเติม
 ห้ามคิดราคาใหม่ ห้ามสร้างข้อเท็จจริง ห้ามอ้างว่ามีพนักงานกำลังคุยสดถ้ายังไม่ได้ส่งต่อจริง และห้ามเปิดเผยคำระบบภายใน เช่น runtime, domain, command, mutation authority, GO Hub, Work ID หรือ bridge ในคำตอบลูกค้า
 ใช้ current_context เป็นเพียงบริบทจากหน้าร้าน เช่น serviceLine หรือ stage และห้ามถือว่าลูกค้ายืนยันข้อมูลที่ไม่ได้พูดเอง
@@ -107,7 +108,7 @@ function validResult(x){
     typeof x.wantsEstimate==="boolean"&&typeof x.wantsManager==="boolean"&&typeof x.clientConfirmedComplete==="boolean";
 }
 
-const PUBLIC_FORBIDDEN=/(?:\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority|CENTRE|HERMES|PIXIE|MIMIR|AION|Factory|handoff packet|internal route)\b|เวิร์ก\s*ไอดี|เช็กพอยต์|แบ็กเอนด์|รีจิสทรี|บริดจ์|รันไทม์|เส้นทางภายใน)/i;
+const PUBLIC_FORBIDDEN=/(?:\b(?:GO Hub|Work ID|bridge|runtime|checkpoint|mutation authority|CENTRE|PIXIE|MIMIR|AION|Factory|handoff packet|internal route)\b|เวิร์ก\s*ไอดี|เช็กพอยต์|แบ็กเอนด์|รีจิสทรี|บริดจ์|รันไทม์|เส้นทางภายใน)/i;
 const PUBLIC_TEMPLATE_LEAK=/(?:^|[\r\n])\s*(?:#{1,6}\s|```|[-=]{8,}\s*$)|(?:ข้อความสำหรับส่งให้|คัดลอกข้อความด้านล่าง|แบบฟอร์มบนหน้าเว็บไซต์|SYSTEM PROMPT|INTERNAL ONLY)/im;
 const HUMAN_REQUEST=/(?:คุยกับ(?:คน|พนักงาน|เจ้าหน้าที่|ทีม)|ขอ(?:คน|พนักงาน|เจ้าหน้าที่)|คนจริง|พนักงาน|เจ้าหน้าที่|สำนักงาน|human|manager)/i;
 const ESTIMATE_REQUEST=/(?:ประเมิน|ราคา|งบ|ใบเสนอราคา|quotation|quote|estimate|แพ็กเกจ)/i;
@@ -395,7 +396,7 @@ const salesObserverScript=`<script>
 
 function goClientPage(){
 return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SPECTRUMSALE · YGG METRO</title><meta name="description" content="คุยกับ SPECTRUMSALE เพื่อจัดโจทย์และส่งรายละเอียดให้ทีม YGG METRO">
+<title>HERMES · YGG METRO</title><meta name="description" content="คุยกับ HERMES เพื่อจัดโจทย์และส่งรายละเอียดให้ทีม YGG METRO">
 <style>
 :root{color-scheme:dark;--bg:#080b10;--panel:rgba(18,24,34,.82);--panel-2:rgba(10,14,21,.78);--line:rgba(255,255,255,.13);--text:#f5f7fa;--muted:rgba(245,247,250,.64);--warm:#f5c78b;--green:#a7f3d0;--service-accent:#f5c78b;--service-glow:rgba(245,199,139,.22)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%}body{min-height:100svh;color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg) url("https://raw.githubusercontent.com/pureekangraw-ops/yggmetro-web/main/home-bg.webp") center/cover fixed no-repeat}
@@ -408,9 +409,9 @@ body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.message{animation:none}}
 </style></head><body><main class="page">
 <header class="top"><a class="brand" href="/">YGG METRO</a><a class="back" href="/">กลับหน้าแรก ↗</a></header>
-<section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · SPECTRUMSALE · <span id="service-context" class="service-label">INTAKE</span></div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p><span id="service-hint" class="service-hint">เริ่มจากโจทย์จริงของคุณ</span></div><div class="intro-note">SPECTRUMSALE จะช่วยจับประเด็น ถามเท่าที่จำเป็น และจัดรายละเอียดให้พร้อมส่งต่อทีม</div></div>
+<section class="shell"><div class="intro"><div><div class="eyebrow">YGG METRO · HERMES · <span id="service-context" class="service-label">INTAKE</span></div><h1>เริ่มจาก<br>โจทย์ของคุณ</h1><p>เล่าสิ่งที่อยากทำมาได้เลย ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p><span id="service-hint" class="service-hint">เริ่มจากโจทย์จริงของคุณ</span></div><div class="intro-note">HERMES จะช่วยจับประเด็น ถามเท่าที่จำเป็น และจัดรายละเอียดให้พร้อมส่งต่อทีม</div></div>
 <nav class="progress" aria-label="สถานะการรับ brief"><div class="progress-step active" data-stage="discover"><span>01</span>โจทย์</div><div class="progress-step" data-stage="audience"><span>02</span>คนดู</div><div class="progress-step" data-stage="materials"><span>03</span>ของที่มี</div><div class="progress-step" data-stage="timing"><span>04</span>เวลา</div><div class="progress-step" data-stage="summary"><span>05</span>สรุป</div></nav>
-<div class="workspace"><section class="panel chat" aria-label="บทสนทนา SPECTRUMSALE"><div class="chat-head"><div><strong>คุยกับ SPECTRUMSALE</strong><br><small>เล่าโจทย์มาได้เลย เดี๋ยวช่วยจัดให้</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><div class="brief-actions" style="padding:0 20px 14px"><button class="brief-action primary" id="confirm" type="button">ส่งรายละเอียดให้ทีม</button></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section><div hidden aria-hidden="true"><span id="status"></span><div id="brief-list"></div><div id="missing"></div><button id="copy" type="button"></button></div></div></section></main>
+<div class="workspace"><section class="panel chat" aria-label="บทสนทนา HERMES"><div class="chat-head"><div><strong>คุยกับ HERMES</strong><br><small>เล่าโจทย์มาได้เลย เดี๋ยวช่วยจัดให้</small></div><button class="reset" id="reset" type="button">เริ่มใหม่</button></div><div id="messages" class="messages" aria-live="polite"></div><div id="quick" class="quick" aria-label="ตัวเลือกเริ่มต้น"></div><div class="brief-actions" style="padding:0 20px 14px"><button class="brief-action primary" id="confirm" type="button">ส่งรายละเอียดให้ทีม</button></div><form id="composer" class="composer"><textarea id="input" rows="1" maxlength="2000" placeholder="พิมพ์โจทย์ของคุณ เช่น อยากทำ company profile ประมาณ 12 หน้า" aria-label="ข้อความ brief"></textarea><button class="send" id="send" type="submit">ส่ง</button></form></section><div hidden aria-hidden="true"><span id="status"></span><div id="brief-list"></div><div id="missing"></div><button id="copy" type="button"></button></div></div></section></main>
 <script>
 const STORAGE_KEY='yggmetro-spectrumsale-v1';
 const clientKey='yggmetro-spectrumsale-client-id-v1',conversationKey='yggmetro-spectrumsale-conversation-id-v1',briefKey='yggmetro-spectrumsale-brief-id-v1';
@@ -457,7 +458,7 @@ function renderBrief(){
   renderProgress()
 }
 function renderQuick(){const options=state.stage==='discover'?(entry?.quick||['Company Profile','Brand / Visual','หน้าเว็บ','Template / Asset']):state.stage==='summary'?['ข้อมูลถูกต้องแล้ว','ขอแก้ข้อมูล']:['อยากประเมินก่อน','ขอคุยกับคน'];quick.innerHTML=options.map(function(text){return '<button type="button" data-quick="'+escapeHtml(text)+'">'+escapeHtml(text)+'</button>'}).join('');quick.querySelectorAll('button').forEach(function(button){button.addEventListener('click',function(){submitText(button.dataset.quick)})})}
-function render(){renderMessages();renderBrief();renderQuick();if(!state.messages.length)addMessage('assistant',entry?.opening||'สวัสดีครับ ผม SPECTRUMSALE เล่าโจทย์ที่อยากทำมาได้เลย\\nจะเป็น Presentation, Brand & Visual, Web Experience หรือ Template / Asset ก็ได้',false)}
+function render(){renderMessages();renderBrief();renderQuick();if(!state.messages.length)addMessage('assistant',entry?.opening||'สวัสดีครับ ผม HERMES เล่าโจทย์ที่อยากทำมาได้เลย\\nจะเป็น Presentation, Brand & Visual, Web Experience หรือ Template / Asset ก็ได้',false)}
 function advanceFromText(text,data){
   if(data&&(data.wantsManager||data.wantsEstimate||['PRICE','PRE_ESTIMATE','HELP'].includes(data.intent)))return;
   if(!state.goal)state.goal=text;
@@ -518,7 +519,7 @@ async function submitText(text){
    const go=await askGo('ACTIVE_TAKEOVER',text);addMessage('assistant',go.reply);
    if(!state.goActive){
     if(state.teamRequestPending)await finalizeTeamHandoff();
-    else addMessage('assistant','โอเคครับ จุดนี้ชัดแล้ว เดี๋ยว SPECTRUMSALE รับช่วงต่อครับ');
+    else addMessage('assistant','โอเคครับ จุดนี้ชัดแล้ว เดี๋ยว HERMES รับช่วงต่อครับ');
    }
    renderBrief();renderQuick();return;
   }
@@ -562,7 +563,7 @@ render();
 const html = `<!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>YGG METRO · Creative Services & Digital Assets</title><meta name="description" content="YGG METRO คือแพลตฟอร์มสร้างสรรค์และหน้าร้านดิจิทัลสำหรับ presentation, visual systems, web experiences และ digital assets ช่วยเปลี่ยนไอเดีย ไฟล์ และ brief ที่ยังไม่เป็นรูปให้พร้อมใช้งานจริง"><link rel="canonical" href="https://yggmetro.com/">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://yggmetro.com/#organization","name":"YGG METRO","alternateName":"YGG METRO Shop","url":"https://yggmetro.com/","description":"Standalone creative service and digital asset platform for presentations, visual systems, web experiences, templates and digital assets."},{"@type":"WebSite","@id":"https://yggmetro.com/#website","url":"https://yggmetro.com/","name":"YGG METRO","publisher":{"@id":"https://yggmetro.com/#organization"}},{"@type":"Service","@id":"https://yggmetro.com/#spectrum-intake","name":"SPECTRUMSALE project intake","serviceType":"Creative project consultation and intake","provider":{"@id":"https://yggmetro.com/#organization"},"url":"https://yggmetro.com/client","description":"Official YGG METRO project-intake surface for turning loose ideas, files and unfinished briefs into a clear project direction."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://yggmetro.com/#organization","name":"YGG METRO","alternateName":"YGG METRO Shop","url":"https://yggmetro.com/","description":"Standalone creative service and digital asset platform for presentations, visual systems, web experiences, templates and digital assets."},{"@type":"WebSite","@id":"https://yggmetro.com/#website","url":"https://yggmetro.com/","name":"YGG METRO","publisher":{"@id":"https://yggmetro.com/#organization"}},{"@type":"Service","@id":"https://yggmetro.com/#spectrum-intake","name":"HERMES project intake","serviceType":"Creative project consultation and intake","provider":{"@id":"https://yggmetro.com/#organization"},"url":"https://yggmetro.com/client","description":"Official YGG METRO project-intake surface for turning loose ideas, files and unfinished briefs into a clear project direction."}]}</script>
 <style>
 :root{color-scheme:dark;--ink:#f7f8fa;--muted:rgba(247,248,250,.68);--line:rgba(255,255,255,.16);--glass:rgba(10,15,22,.46);--warm:#f5c78b}
 *{box-sizing:border-box}html{scroll-behavior:smooth}html,body{margin:0;min-height:100%}
@@ -590,21 +591,21 @@ body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle a
 </style></head>
 <body><main class="page">
 <header class="top"><a class="brand" href="/" aria-label="YGG METRO home">YGG METRO</a><nav class="topnav" aria-label="เมนูหลัก"><a href="#services">บริการ</a><a href="#process">วิธีทำงาน</a><a class="shop" href="/client">เริ่มคุยงาน</a></nav></header>
-<section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO คือแพลตฟอร์มสร้างสรรค์และหน้าร้านดิจิทัลของเราเอง ช่วยเปลี่ยนโจทย์ ไฟล์ หรือ brief ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ SPECTRUMSALE</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
-<section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ SPECTRUMSALE เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
+<section class="hero"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow">Creative systems · visual work</div><h1>ทำให้งาน<br>ไปต่อได้</h1><p>YGG METRO คือแพลตฟอร์มสร้างสรรค์และหน้าร้านดิจิทัลของเราเอง ช่วยเปลี่ยนโจทย์ ไฟล์ หรือ brief ที่ยังไม่เป็นรูป ให้กลายเป็น presentation, visual system และ web experience ที่พร้อมนำไปใช้จริง</p><div class="actions"><a class="button primary" href="/client">เริ่มคุยกับ HERMES</a><a class="button ghost" href="#services">ดูบริการ</a></div></div><aside class="hero-note"><strong>เริ่มจากสิ่งที่คุณมี</strong>เล่าโจทย์ ไฟล์ หรือสิ่งที่ยังจัดไม่ลงตัว แล้วให้เราเข้าไปช่วยจัดโครงให้ชัดขึ้น</aside></div></section>
+<section id="services" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">What we make</div><h2>บริการที่พา<br>งานเดินหน้า</h2></div><p>เลือกจากปัญหาที่อยากแก้ แล้วคุยกับ HERMES เพื่อเริ่มต้นจากโจทย์จริงของคุณ</p></div><div class="service-grid">
 <a class="card" data-service="presentation" href="/client?service=presentation"><small>01 · Presentation</small><h3>Company & Pitch</h3><p>จัดโครงเรื่อง ออกแบบสไลด์ และทำงานนำเสนอให้พร้อมใช้จริง</p><div class="go">เริ่มคุยงาน →</div></a>
 <a class="card" data-service="visual" href="/client?service=visual"><small>02 · Visual</small><h3>Brand & Visual System</h3><p>วางทิศทางแบรนด์ งานภาพ และ visual language ให้ทั้งระบบไปทางเดียวกัน</p><div class="go">คุยเรื่องทิศทาง →</div></a>
 <a class="card" data-service="digital" href="/client?service=digital"><small>03 · Digital</small><h3>Web Experience</h3><p>ออกแบบหน้าเว็บ เดโม และประสบการณ์ดิจิทัลที่เล่าเรื่องผ่านบรรยากาศ</p><div class="go">เริ่มวางหน้าเว็บ →</div></a>
 <a class="card" data-service="lab" href="/client?service=lab"><small>04 · YGG Lab</small><h3>Templates & Assets</h3><p>เทมเพลต ธีม และของดาวน์โหลดจากงานทดลองของ YGG METRO</p><div class="go">ดูของที่กำลังทำ →</div></a>
 </div></div></section>
-<section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>SPECTRUMSALE ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
+<section id="process" class="section"><div class="container process"><div class="process-intro"><div class="eyebrow">How it works</div><h2>ไม่ต้องพร้อม<br>ตั้งแต่แรก</h2><p>ส่งสิ่งที่มีมาได้เลย เราจะช่วยแยกโจทย์และพาไปสู่รูปแบบงานที่คุยต่อได้ง่ายขึ้น</p></div><div class="steps"><div class="step"><div class="step-index">01</div><div><h3>เล่าโจทย์</h3><p>บอกว่าอยากทำอะไร มีข้อมูลหรือไฟล์อะไรอยู่แล้ว และติดตรงไหน</p></div></div><div class="step"><div class="step-index">02</div><div><h3>จัดทิศทาง</h3><p>HERMES ช่วยจับประเภทงาน ขอบเขต และสิ่งที่ต้องตัดสินใจก่อนเริ่ม</p></div></div><div class="step"><div class="step-index">03</div><div><h3>คุยงานที่เหมาะ</h3><p>เมื่อภาพชัดขึ้น เราจึงค่อยเลือกวิธีทำงานและขยับไปสู่รายละเอียด</p></div></div></div></div></section>
 <!-- SHOP_ONLY_ROOT_CAUSES_START --><section id="root-causes" class="section"><div class="container"><div class="promptbase-showcase">
 <div class="promptbase-copy"><div class="eyebrow">Featured Lab App · PromptBase</div><h2>ROOT CAUSES<br>Analysis App</h2><p>เครื่องมือสำหรับแยกปัญหาออกจากอาการ มองหาสาเหตุที่อยู่ลึกลงไป และจัดโครงประเด็นก่อนตัดสินใจต่อ ทดลองใช้ตัวแอปได้จากหน้า YGG METRO โดยตรง</p>
 <div class="promptbase-meta"><a href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer"><img class="promptbase-thumb" src="https://assets.promptbase.com/Thumbnails%2FEuTuD26RrB4BLGzAzQjD%2Fresized%2F1791174418058_100x100.webp" alt="ROOT CAUSES Analysis App on PromptBase" loading="lazy"></a><div class="promptbase-links"><a href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer">ROOT CAUSES Analysis App</a><span>Available on PromptBase</span></div></div>
 <a class="promptbase-open" href="https://promptbase.com/app/root-causes-analysis" target="_blank" rel="noopener noreferrer">เปิดหน้าแอปบน PromptBase →</a></div>
 <div class="promptbase-frame-wrap"><iframe class="promptbase-frame" src="https://promptbase.com/embed/root-causes-analysis" title="ROOT CAUSES Analysis App" loading="lazy" allow="clipboard-write"></iframe></div>
 </div></div></section><!-- SHOP_ONLY_ROOT_CAUSES_END -->
-<section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ SPECTRUMSALE</a></div></div></section>
+<section class="section"><div class="container"><div class="feature"><div><div class="eyebrow">Selected work · YGG METRO</div><h2>มีโจทย์อยู่ในหัว<br>ให้เราช่วยจัดมัน</h2><p>เริ่มจากข้อความสั้น ๆ ก็ได้ ไม่ต้องเตรียม brief ให้สมบูรณ์ก่อน</p></div><a class="button primary" href="/client">คุยกับ HERMES</a></div></div></section>
 <footer class="container foot"><span>YGG METRO · Shop</span><span>Presentation · Visual · Digital · YGG Lab</span></footer>
 </main></body></html>`
 
@@ -617,11 +618,21 @@ export function renderHomePage(hostname="") {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if(url.pathname.startsWith("/assets/shop/")){if(!["GET","HEAD"].includes(request.method))return new Response("Method Not Allowed",{status:405});return env.ASSETS?env.ASSETS.fetch(request):new Response("Not Found",{status:404});}
+    if(url.hostname === 'shop.yggmetro.com') {
+      if(url.pathname === '/api/v1/shop/checkout') {
+        if(rateLimited(request,'shop-checkout'))return json({ok:false,code:'RATE_LIMITED'},429);
+        return handleShopCheckout(request,env,getShopPublicCatalog());
+      }
+      if(url.pathname === '/api/v1/stripe/webhook') return handleStripeWebhook(request,env);
+      if(url.pathname === '/api/v1/shop/order' || url.pathname === '/api/v1/shop/order/download') return handleShopOrder(request,env);
+      if(url.pathname === '/order')return new Response(['GET','HEAD'].includes(request.method)?(request.method==='HEAD'?null:orderPage):'Method Not Allowed',{status:['GET','HEAD'].includes(request.method)?200:405,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
+    }
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
     if (url.pathname === "/api/v1/shop/assistant") {
-      if (url.hostname !== "shop.yggmetro.com") return json({ok:false,code:"SHOP_ONLY"},404);
+      if (url.hostname !== "shop.yggmetro.com" && env?.PREVIEW_SHOP!=="true") return json({ok:false,code:"SHOP_ONLY"},404);
       if (rateLimited(request,"shop-assistant")) return json({ok:false,code:"RATE_LIMITED"},429);
       return handleShopAssistant(request,getShopPublicCatalog());
     }
@@ -643,8 +654,8 @@ export default {
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    if(url.hostname==="shop.yggmetro.com" && (url.pathname==="/" || url.pathname.startsWith("/products/"))){
-      const page=renderShop(url.pathname);
+    if((url.hostname==="shop.yggmetro.com" || env?.PREVIEW_SHOP==="true") && !url.pathname.startsWith("/api/")){
+      const page=renderShop(url.pathname,env);
       return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     const home=renderHomePage(url.hostname);
