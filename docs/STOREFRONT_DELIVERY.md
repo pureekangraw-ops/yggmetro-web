@@ -53,3 +53,7 @@ Run `npm ci`, `npm test`, `npx wrangler deploy --dry-run`. Tests use SQLite for 
 - Local browser preview could not connect to the local development port from the separate cloud browser, so no desktop/mobile visual acceptance is claimed.
 - A preview workflow is prepared to upload an inactive Worker version when the PR is opened; it has not run.
 - GitHub publication was rejected by automatic approval review because explicit authorization for the external repository destination was required. No branch publication, PR, merge or production deploy is claimed.
+
+## Publication and preview follow-up
+
+The user explicitly authorized GitHub publication and preview on 2026-10-15. PR #48 is open. The Safety Gate was fixed to install dependencies from the lockfile and passed on GitHub. The preview workflow runs all 44 tests successfully, then fails with Cloudflare authentication errors 10000/9109 from the existing GitHub token. An inactive, read-only visual preview was therefore uploaded through the connected Cloudflare API. It uses the same compiled pages, proxies only public repository images pinned to a commit, and blocks mutating API requests except the zero-provider-cost product assistant. It does not test real intake submission or payment. The active production deployment remains unchanged. Desktop browser checks covered the hero image, carousel interaction, catalog page, portfolio and HERMES intake. Mobile viewport acceptance is still pending.
