@@ -5,9 +5,15 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "test:e2e": "node tests/e2e/storefront.cjs"
   },
   "devDependencies": {
+    "playwright": "^1.62.1",
     "wrangler": "^4.0.0"
-  }
+  },
+  "dependencies": {
+    "stripe": "^23.0.0"
+  },
+  "type": "module"
 }

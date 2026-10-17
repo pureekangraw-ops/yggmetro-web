@@ -28,7 +28,10 @@ jobs:
           test -n "${CLOUDFLARE_ACCOUNT_ID}" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is not available to yggmetro-web"; exit 1; }
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+
+      - name: Run regression tests before deployment
+        run: npm test
 
       - name: Deploy yggmetro-web
         run: npx wrangler deploy
