@@ -8,6 +8,6 @@ test('checkout only offers configured goods and never exposes delivery keys',asy
  const html=(await page('/products/finance-simulator',env)).html;assert.match(html,/data-add-to-cart="finance-simulator"/);assert.doesNotMatch(html,/private\/shop-home.zip|rk_test_fixture|whsec_fixture/);
  const plain=(await page('/products/finance-simulator')).html;assert.doesNotMatch(plain,/<button[^>]+data-add-to-cart/);
 });
-test('shared navigation uses concise text labels and keeps heading art for page titles',async()=>{
- const html=(await page('/')).html;assert.match(html,/href="\/shop"/);assert.match(html,/<span class="nav-label">Home<\/span>/);assert.match(html,/<span class="nav-label">Custom Order<\/span>/);assert.doesNotMatch(html,/nav[^]*?headings\/home\.png/);
+test('navigation keeps its existing heading-art layout with accessible page labels',async()=>{
+ const html=(await page('/')).html;assert.match(html,/href="\/shop"/);assert.match(html,/aria-label="Home"/);assert.match(html,/aria-label="Custom Order"/);assert.match(html,/headings\/home\.png/);assert.match(html,/headings\/custom-order\.png/);assert.doesNotMatch(html,/nav-label/);
 });

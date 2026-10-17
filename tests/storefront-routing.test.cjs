@@ -50,21 +50,23 @@ test('home is the entry with one primary menu and decorative assets never become
  assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
 });
 
-test('home leads with a clear product promise and two useful starting points',async()=>{
+test('home preserves the existing hero and carousel while speaking to customer needs',async()=>{
  const home=await(await page('/')).text();
- assert.match(home,/<h1>คิดให้ชัด<br><em>วางแผนให้เป็น<\/em><br>แล้วลงมือได้จริง<\/h1>/);
- assert.match(home,/href="\/shop">เลือกเครื่องมือ/);
- assert.match(home,/href="\/products\/land-planner">ลองใช้เครื่องมือฟรี/);
- assert.match(home,/class="wrap home-hero-grid"/);
- assert.match(home,/class="home-proof"/);
+ assert.match(home,/class="brand-hero"/);
+ assert.match(home,/class="slide-layout"/);
+ assert.doesNotMatch(home,/home-hero-grid|home-proof|เลือกเครื่องมือ/);
+ assert.match(home,/เมื่อเจอปัญหาซับซ้อน ให้แยกสิ่งที่รู้กับสิ่งที่ยังต้องตรวจ/);
+ assert.match(home,/ให้ AI เลือกมุมมองที่เหมาะกับโจทย์/);
+ assert.match(home,/ดูรายละเอียด/);
 });
 
-test('shop filters become open chips and search gets a usable responsive column',async()=>{
+test('shop keeps its existing sidebar and responsive catalog layout',async()=>{
  const shop=await(await page('/shop')).text();
- assert.match(shop,/\.catalog-layout\{display:block\}/);
- assert.match(shop,/\.catalog-layout \.filters\{display:flex;flex-direction:row/);
- assert.match(shop,/\.catalog-tools\{display:grid;grid-template-columns:minmax\(0,1fr\) 200px/);
- assert.match(shop,/\.catalog-tools input,.catalog-tools select\{width:100%;min-width:0;min-height:54px\}/);
+ assert.match(shop,/\.catalog-layout\{display:grid;grid-template-columns:240px minmax\(0,1fr\);gap:40px/);
+ assert.match(shop,/aria-label="หมวดสินค้า"/);
+ assert.match(shop,/id="catalog-search"/);
+ assert.match(shop,/id="catalog-sort"/);
+ assert.match(shop,/@media\(max-width:680px\)/);assert.match(shop,/grid-template-columns:1fr/);
 });
 
 test('floating GO launcher yields to visible controls and custom-order guidance is explicit',async()=>{
