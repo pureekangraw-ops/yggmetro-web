@@ -617,6 +617,10 @@ export function renderHomePage(hostname="") {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.hostname === "shop.yggmetro.com" && url.pathname.startsWith("/assets/shop/")) {
+      if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed", {status:405,headers:{allow:"GET, HEAD"}});
+      return env.ASSETS ? env.ASSETS.fetch(request) : new Response("Not Found", {status:404});
+    }
     if (url.pathname === "/health") {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
@@ -643,7 +647,7 @@ export default {
       return new Response(request.method==="HEAD"?null:goClientPage().replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    if(url.hostname==="shop.yggmetro.com" && (url.pathname==="/" || url.pathname.startsWith("/products/"))){
+    if(url.hostname==="shop.yggmetro.com"){
       const page=renderShop(url.pathname);
       return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
