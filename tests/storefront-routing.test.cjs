@@ -23,3 +23,14 @@ test('static images use asset binding and missing assets cannot fall through to 
  assert.equal(r.headers.get('content-type'),'image/jpeg');
  assert.equal((await page('/assets/shop/missing.jpg')).status,404);
 });
+
+test('all four published products link directly to their original storefront',async()=>{
+ const links={ 'root-cause':'https://promptbase.com/app/root-causes-analysis', 'adaptive-lens':'https://promptbase.com/skill/adaptive-lens-system', 'shop-home':'https://app.notion.com/templates/shop-home', 'lost-era':'https://app.notion.com/templates/lost-era-layered-worldbuilding-kit' };
+ const shop=await(await page('/shop')).text();
+ for(const [slug,url] of Object.entries(links)){
+  assert.ok(shop.includes('href="'+url+'"'),slug+' shop CTA');
+  const detail=await(await page('/products/'+slug)).text();
+  assert.ok(detail.includes('href="'+url+'"'),slug+' detail CTA');
+  assert.doesNotMatch(detail,/data-add-to-cart/);
+ }
+});
