@@ -41,10 +41,37 @@ test('home is the entry with one primary menu and decorative assets never become
  assert.match(home,/<link rel="canonical" href="https:\/\/shop.yggmetro.com\/">/);
  for(const route of ['/','/shop','/portfolio','/custom-order']){
   const html=await(await page(route)).text();
-  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...html.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
+  const nav=html.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)[1];
+  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...nav.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
   const main=html.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.doesNotMatch(main,/<img[^>]+src="[^" ]*(?:cloud-hero|cloud-stories|sky-studies|products\/icons|products\/landscape)/,route+' presents decoration as content');
  }
  const portfolio=await(await page('/portfolio')).text();
  assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
+});
+
+test('home preserves the existing hero and carousel while speaking to customer needs',async()=>{
+ const home=await(await page('/')).text();
+ assert.match(home,/class="brand-hero"/);
+ assert.match(home,/class="slide-layout"/);
+ assert.doesNotMatch(home,/home-hero-grid|home-proof|เลือกเครื่องมือ/);
+ assert.match(home,/เมื่อเจอปัญหาซับซ้อน ให้แยกสิ่งที่รู้กับสิ่งที่ยังต้องตรวจ/);
+ assert.match(home,/ให้ AI เลือกมุมมองที่เหมาะกับโจทย์/);
+ assert.match(home,/ดูรายละเอียด/);
+});
+
+test('shop keeps its existing sidebar and responsive catalog layout',async()=>{
+ const shop=await(await page('/shop')).text();
+ assert.match(shop,/\.catalog-layout\{display:grid;grid-template-columns:240px minmax\(0,1fr\);gap:40px/);
+ assert.match(shop,/aria-label="หมวดสินค้า"/);
+ assert.match(shop,/id="catalog-search"/);
+ assert.match(shop,/id="catalog-sort"/);
+ assert.match(shop,/@media\(max-width:680px\)/);assert.match(shop,/grid-template-columns:1fr/);
+});
+
+test('floating GO launcher yields to visible controls and custom-order guidance is explicit',async()=>{
+ const order=await(await page('/custom-order')).text();
+ assert.match(order,/ส่งข้อมูลเพื่อประเมินขอบเขตและราคาเบื้องต้น ก่อนตกลงเริ่มงาน/);
+ assert.match(order,/data-obscured='true'/);
+ assert.match(order,/syncLauncherCollision/);
 });
