@@ -10,7 +10,11 @@
     },
     {
       "binding": "PANTHEON",
-      "service": "phatheon-workhub"
+      "service": "phatheon-workhub",
+      "entrypoint": "StorefrontBridge"
     }
-  ]
+  ],
+  "vars": {
+    "BRIEF_REGISTRY_BACKEND": "go-hub"
+  }
 }

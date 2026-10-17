@@ -1,0 +1,33 @@
+{
+  "evidence_type": "LOCAL_WORKERD_D1_R2_INTEGRATION",
+  "production_verified": false,
+  "source_revisions": {
+    "factory": "6f1aaa10b1e34be8b95d54dda9ae5362424aad60"
+  },
+  "checks": [
+    {
+      "workflow": "YGG METRO -> named StorefrontBridge -> real local D1",
+      "status": "PASS",
+      "task_id": "task_28994847783f108a84cfbae95f7e0c80"
+    },
+    {
+      "workflow": "GO MCP -> OwnerBridge -> PANTHEON -> HMAC Factory LOGIC -> local R2 receipt/readback",
+      "status": "PASS",
+      "task_id": "task_5784442c691b483e9edb0cdd70ec06ad",
+      "receipt_id": "receipt-2e16aab3-6c17-4080-8ad9-32ba0a1ceb3e"
+    },
+    {
+      "workflow": "LIGHT authenticated MCP -> PANTHEON -> Factory health",
+      "status": "PASS"
+    },
+    {
+      "workflow": "Anonymous public receiver and LIGHT access denied",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "GO edge Access identity is a local fixture, not production OAuth verification.",
+    "No production resources or customer records used.",
+    "No customer-data migration or paid checkout was tested."
+  ]
+}

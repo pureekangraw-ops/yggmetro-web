@@ -1,3 +1,4 @@
+import {pantheonRegistryCall,withBriefSession} from './brief-registry.mjs';
 import { renderShop, getShopPublicCatalog } from "./shop.js";
 import { handleShopAssistant } from "./shop-assistant.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -295,6 +296,10 @@ function briefObject(value){
   };
 }
 async function callBriefRegistry(env,path,payload){
+  if(env?.BRIEF_REGISTRY_BACKEND==="pantheon"){
+    const routed=await pantheonRegistryCall(env,path,payload);
+    if(routed)return routed;
+  }
   if(!env?.GO_HUB||typeof env.GO_HUB.fetch!=="function")return {ok:false,status:503,code:"BRIEF_BRIDGE_NOT_CONFIGURED"};
   let response;
   try{
@@ -614,7 +619,7 @@ export function renderHomePage(hostname="") {
   return html.replace(/<!-- SHOP_ONLY_ROOT_CAUSES_START -->[\s\S]*?<!-- SHOP_ONLY_ROOT_CAUSES_END -->/g,"");
 }
 
-export default {
+const storefront = {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/health") {
@@ -651,3 +656,5 @@ export default {
     return new Response(request.method==="HEAD"?null:home.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
 };
+
+export default {fetch(request,env){return withBriefSession(request,env,(r,e)=>storefront.fetch(r,e));}};
