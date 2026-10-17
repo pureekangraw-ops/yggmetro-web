@@ -41,10 +41,35 @@ test('home is the entry with one primary menu and decorative assets never become
  assert.match(home,/<link rel="canonical" href="https:\/\/shop.yggmetro.com\/">/);
  for(const route of ['/','/shop','/portfolio','/custom-order']){
   const html=await(await page(route)).text();
-  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...html.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
+  const nav=html.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)[1];
+  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...nav.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
   const main=html.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.doesNotMatch(main,/<img[^>]+src="[^" ]*(?:cloud-hero|cloud-stories|sky-studies|products\/icons|products\/landscape)/,route+' presents decoration as content');
  }
  const portfolio=await(await page('/portfolio')).text();
  assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
+});
+
+test('home leads with a clear product promise and two useful starting points',async()=>{
+ const home=await(await page('/')).text();
+ assert.match(home,/<h1>คิดให้ชัด<br><em>วางแผนให้เป็น<\/em><br>แล้วลงมือได้จริง<\/h1>/);
+ assert.match(home,/href="\/shop">เลือกเครื่องมือ/);
+ assert.match(home,/href="\/products\/land-planner">ลองใช้เครื่องมือฟรี/);
+ assert.match(home,/class="wrap home-hero-grid"/);
+ assert.match(home,/class="home-proof"/);
+});
+
+test('shop filters become open chips and search gets a usable responsive column',async()=>{
+ const shop=await(await page('/shop')).text();
+ assert.match(shop,/\.catalog-layout\{display:block\}/);
+ assert.match(shop,/\.catalog-layout \.filters\{display:flex;flex-direction:row/);
+ assert.match(shop,/\.catalog-tools\{display:grid;grid-template-columns:minmax\(0,1fr\) 200px/);
+ assert.match(shop,/\.catalog-tools input,.catalog-tools select\{width:100%;min-width:0;min-height:54px\}/);
+});
+
+test('floating GO launcher yields to visible controls and custom-order guidance is explicit',async()=>{
+ const order=await(await page('/custom-order')).text();
+ assert.match(order,/ส่งข้อมูลเพื่อประเมินขอบเขตและราคาเบื้องต้น ก่อนตกลงเริ่มงาน/);
+ assert.match(order,/data-obscured='true'/);
+ assert.match(order,/syncLauncherCollision/);
 });
