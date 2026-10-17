@@ -1,12 +1,29 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs/promises');
 (async()=>{const {startPreview}=await import('../helpers/storefront-preview.mjs');const {server,origin}=await startPreview();let browser;
 try{browser=await chromium.launch({headless:true});await fs.mkdir('test-results',{recursive:true});
-for(const width of [1440,390]){const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+for(const width of [1440,708,390]){const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/cart','/checkout']){
  const response=await page.goto(origin+route);assert.equal(response.status(),200,route);
  await page.evaluate(async()=>{await Promise.all([...document.images].map(i=>i.decode().catch(()=>{})))});
  const state=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,broken:[...document.images].filter(i=>!i.naturalWidth).map(i=>i.getAttribute('src'))}));
  assert.equal(state.overflow,false,width+' '+route+' horizontal overflow');assert.deepEqual(state.broken,[],width+' '+route+' broken images');
+ if(['/','/shop','/portfolio','/custom-order'].includes(route)){
+  assert.equal(await page.locator('nav[aria-label="เมนูหลัก"]').count(),1);
+  assert.equal(await page.locator('nav [aria-current="page"]').count(),1,route+' active menu');
+  for(const href of ['/shop','/portfolio','/custom-order'])assert.equal(await page.locator('a[href="'+href+'"]').count(),1,route+' repeats '+href);
+  const background=await page.evaluate(async()=>{const bg=getComputedStyle(document.body,'::before').backgroundImage;const urls=[...bg.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(m=>m[1]);for(const url of urls){const image=new Image();image.src=url;await image.decode()}return bg});
+  assert.match(background,/\/assets\/shop\//,route+' missing page backdrop');
+  assert.equal(await page.locator('main img[src*="sky-studies"],main img[src*="cloud-stories"],main img[src*="cloud-hero"],main img[src*="products/icons"]').count(),0,route+' displays decorative asset as content');
+  if(route==='/'||route==='/portfolio')await page.screenshot({path:'test-results/'+(route==='/'?'home':'portfolio')+'-'+width+'.png',fullPage:true});
+ }
+ if(route==='/'){
+  assert.match(await page.title(),/YGG METRO/);
+  await page.locator('nav a[href="/shop"]').click();await page.waitForURL('**/shop');
+  await page.locator('.brand').click();await page.waitForURL(origin+'/');
+  assert.equal(await page.locator('.hero-home').count(),1);
+  await page.locator('#slide-next').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'Adaptive Lens System');
+  await page.locator('#slide-prev').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'ROOT CAUSE v3');
+ }
  if(route==='/shop'){assert.equal(await page.locator('[data-name="ROOT CAUSE v3"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/app/root-causes-analysis');assert.equal(await page.locator('[data-name="Adaptive Lens System"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/skill/adaptive-lens-system');assert.equal(await page.locator('[data-name="SHOP HOME"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/shop-home');assert.equal(await page.locator('[data-name="Lost Era"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/lost-era-layered-worldbuilding-kit');await page.locator('#catalog-search').fill('no-such-product-123');await page.locator('.empty-results').waitFor({state:'visible'});await page.locator('#catalog-search').fill('');await page.screenshot({path:'test-results/shop-'+width+'.png',fullPage:true})}
  if(route==='/products/finance-simulator'){
   await page.locator('[data-add-to-cart]').click();await page.waitForURL('**/cart');await page.getByRole('link',{name:'ไปหน้าชำระเงิน'}).click();await page.waitForURL('**/checkout');
