@@ -3,7 +3,7 @@ const page=async(path,env={})=>{const {default:web}=await import('../src/index.j
 test('home is an entrance and never renders the full catalog, services or FAQ',async()=>{
  const html=await(await page('/')).text();
  for(const href of ['/shop','/portfolio','/custom-order'])assert.ok(html.includes('href="'+href+'"'));
- assert.match(html,/class="entrances"/);
+ assert.doesNotMatch(html,/class="entrances"/);
  assert.match(html,/id="showcase"/);
  assert.doesNotMatch(html,/id="products"|id="services"|id="how"|<iframe|<summary>/);
  assert.doesNotMatch(html,/href="https:\/\/yggmetro.com\/"/);
@@ -33,4 +33,18 @@ test('all four published products link directly to their original storefront',as
   assert.ok(detail.includes('href="'+url+'"'),slug+' detail CTA');
   assert.doesNotMatch(detail,/data-add-to-cart/);
  }
+});
+
+test('home is the entry with one primary menu and decorative assets never become portfolio items',async()=>{
+ const home=await(await page('/')).text();
+ assert.match(home,/<body data-page="home">/);
+ assert.match(home,/<link rel="canonical" href="https:\/\/shop.yggmetro.com\/">/);
+ for(const route of ['/','/shop','/portfolio','/custom-order']){
+  const html=await(await page(route)).text();
+  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...html.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
+  const main=html.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
+  assert.doesNotMatch(main,/<img[^>]+src="[^" ]*(?:cloud-hero|cloud-stories|sky-studies|products\/icons|products\/landscape)/,route+' presents decoration as content');
+ }
+ const portfolio=await(await page('/portfolio')).text();
+ assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
 });
