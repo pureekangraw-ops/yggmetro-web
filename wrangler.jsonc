@@ -8,6 +8,10 @@
     {
       "binding": "GO_HUB",
       "service": "go-hub"
+    },
+    {
+      "binding": "PANTHEON",
+      "service": "phatheon-workhub"
     }
   ]
 }
