@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+.pantheon-rewire-e2e-*/
+*.local
+.env*

@@ -5,9 +5,12 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "test:pantheon": "node scripts/pantheon-integration.mjs"
   },
   "devDependencies": {
+    "esbuild": "0.28.2",
+    "miniflare": "5.20261012.1-beta",
     "wrangler": "^4.0.0"
   }
 }
