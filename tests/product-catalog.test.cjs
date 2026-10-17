@@ -3,7 +3,7 @@ const {pathToFileURL}=require('node:url'),path=require('node:path');
 const load=()=>import(pathToFileURL(path.resolve(__dirname,'../src/index.js')).href);
 test('shop gives all six products their own public sales page without exposing paid Notion files',async()=>{
  const {default:web}=await load();
- const home=await (await web.fetch(new Request('https://shop.yggmetro.com/'),{})).text();
+ const home=await (await web.fetch(new Request('https://shop.yggmetro.com/shop'),{})).text();
  for(const slug of ['land-planner','finance-simulator','shop-home','root-cause','adaptive-lens','lost-era']){
   assert.ok(home.includes('/products/'+slug),slug);
   const response=await web.fetch(new Request('https://shop.yggmetro.com/products/'+slug),{});
