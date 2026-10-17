@@ -24,17 +24,19 @@ async function unlock(){
 function lock(){key=null;entries=[];$("#master").value="";$("#vault").classList.add("hidden");$("#auth").classList.remove("hidden");$("#lock").classList.add("hidden")}
 async function copy(value){if(!value)return toast("ช่องนี้ว่าง");try{await navigator.clipboard.writeText(value)}catch{const t=document.createElement("textarea");t.value=value;document.body.append(t);t.select();document.execCommand("copy");t.remove()}toast("Copied");setTimeout(()=>navigator.clipboard&&navigator.clipboard.writeText("").catch(()=>{}),45000)}
 function escapeHtml(value=""){const div=document.createElement("div");div.textContent=value;return div.innerHTML}
+function escapeAttr(value=""){return escapeHtml(value).replace(/"/g,"&quot;").replace(/\x27/g,"&#39;")}
+function safeUrl(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:null}catch{return null}}
 function render(){
   const q=$("#search").value.trim().toLowerCase(),group=$("#filter").value;
   const list=entries.filter(e=>(!group||e.group===group)&&(!q||[e.title,e.username,e.type,e.status,e.url,e.notes].join(" ").toLowerCase().includes(q)));
-  $("#list").innerHTML=list.map(e=>`<article class="card entry" data-id="${e.id}">
+  $("#list").innerHTML=list.map(e=>`<article class="card entry" data-id="${escapeAttr(String(e.id))}">
     <div class="entryTop"><div><div class="entryTitle">${escapeHtml(e.title)}</div><div class="chips"><span class="chip">${escapeHtml(e.group)}</span><span class="chip">${escapeHtml(e.type)}</span><span class="chip">${escapeHtml(e.status)}</span></div></div><button class="ghost edit">Edit</button></div>
     ${e.username?`<div class="meta">ID: ${escapeHtml(e.username)}</div>`:""}${e.url?`<div class="meta">${escapeHtml(e.url)}</div>`:""}
     <div class="entryBtns">${e.username?'<button class="ghost quickId">Copy ID</button>':""}${(e.secret||e.clientSecret)?'<button class="ghost quickSecret">Copy Secret</button>':""}${e.url?'<button class="ghost quickOpen">Open URL</button>':""}</div></article>`).join("");
   $$(".edit").forEach(b=>b.onclick=()=>openForm(b.closest(".entry").dataset.id));
   $$(".quickId").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);copy(e.username)});
   $$(".quickSecret").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);copy(e.clientSecret||e.secret)});
-  $$(".quickOpen").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);if(e.url)location.href=e.url});
+  $$(".quickOpen").forEach(b=>b.onclick=()=>{const e=entries.find(x=>x.id===b.closest(".entry").dataset.id);const u=safeUrl(e?.url);if(u)location.href=u;else toast("URL ไม่ปลอดภัย")});
 }
 function syncType(){
   const oauth=$("#type").value==="OAuth",identifier=$("#type").value==="Identifier";
@@ -51,6 +53,23 @@ function openForm(id){
 $("#form").onsubmit=async ev=>{ev.preventDefault();const id=$("#id").value||crypto.randomUUID();const item={id,title:$("#title").value.trim(),group:$("#group").value,type:$("#type").value,status:$("#status").value,username:$("#username").value.trim(),secret:$("#secret").value,url:$("#url").value.trim(),notes:$("#notes").value.trim(),clientId:$("#clientId").value.trim(),clientSecret:$("#clientSecret").value,resourceUrl:$("#resourceUrl").value.trim()};const i=entries.findIndex(x=>x.id===id);if(i>=0)entries[i]=item;else entries.unshift(item);await save();$("#dlg").close();render();toast("Saved")};
 $("#delete").onclick=async()=>{const id=$("#id").value;if(id&&confirm("ลบรายการนี้?")){entries=entries.filter(x=>x.id!==id);await save();$("#dlg").close();render();toast("Deleted")}};
 $("#unlock").onclick=unlock;$("#master").onkeydown=e=>{if(e.key==="Enter")unlock()};$("#lock").onclick=lock;$("#add").onclick=()=>openForm();$("#close").onclick=$("#cancel").onclick=()=>$("#dlg").close();$("#type").onchange=syncType;$("#search").oninput=render;$("#filter").onchange=render;
-document.addEventListener("click",ev=>{const c=ev.target.closest("[data-copy]");if(c)copy($("#"+c.dataset.copy).value);const s=ev.target.closest("[data-show]");if(s){const i=$("#"+s.dataset.show);i.type=i.type==="password"?"text":"password"}const o=ev.target.closest("[data-open]");if(o){const u=$("#"+o.dataset.open).value;if(u)location.href=u}});
+document.addEventListener("click",ev=>{const c=ev.target.closest("[data-copy]");if(c)copy($("#"+c.dataset.copy).value);const s=ev.target.closest("[data-show]");if(s){const i=$("#"+s.dataset.show);i.type=i.type==="password"?"text":"password"}const o=ev.target.closest("[data-open]");if(o){const u=$("#"+o.dataset.open).value;if(u){const safe=safeUrl(u);if(safe)location.href=safe;else toast("URL ไม่ปลอดภัย")}}});
 $("#export").onclick=()=>{const payload=localStorage.getItem(DATA_KEY),savedSalt=localStorage.getItem(SALT_KEY);if(!payload||!savedSalt)return toast("ยังไม่มีข้อมูล");const body={format:"YGG-VAULT-ENCRYPTED",version:1,salt:savedSalt,payload:JSON.parse(payload),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(body,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="YGG-VAULT-BACKUP.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
-$("#import").onchange=async ev=>{const file=ev.target.files[0];if(!file)return;try{const body=JSON.parse(await file.text());if(body.format!=="YGG-VAULT-ENCRYPTED"||!body.salt||!body.payload)throw new Error("bad");localStorage.setItem(SALT_KEY,body.salt);localStorage.setItem(DATA_KEY,JSON.stringify(body.payload));toast("Imported — Lock/Unlock ใหม่")}catch{toast("Backup ไม่ถูกต้อง")}ev.target.value=""};
+function validBackup(body){
+  if(body?.format!=="YGG-VAULT-ENCRYPTED"||body.version!==1||typeof body.salt!=="string"||!body.payload||body.payload.version!==1)return false;
+  try{return unb64(body.salt).length===16&&unb64(body.payload.iv).length===12&&unb64(body.payload.ciphertext).length>=16}catch{return false}
+}
+$("#import").onchange=async ev=>{
+  const file=ev.target.files[0];if(!file)return;
+  try{
+    if(file.size>5*1024*1024)throw new Error("Backup too large");
+    const body=JSON.parse(await file.text());if(!validBackup(body))throw new Error("Invalid backup");
+    if(localStorage.getItem(DATA_KEY)||localStorage.getItem(SALT_KEY)){
+      if(!confirm("การนำเข้าจะเขียนทับ Vault เดิมทั้งหมด กรุณา Export สำรองข้อมูลเดิมก่อน ต้องการดำเนินการต่อหรือไม่?"))return;
+    }
+    localStorage.setItem(SALT_KEY,body.salt);
+    localStorage.setItem(DATA_KEY,JSON.stringify(body.payload));
+    lock();toast("Imported — ปลดล็อกด้วยรหัสของ Backup");
+  }catch{toast("Backup ไม่ถูกต้องหรือมีขนาดใหญ่เกินไป")}
+  finally{ev.target.value=""}
+};
