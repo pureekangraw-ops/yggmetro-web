@@ -41,10 +41,44 @@ test('home is the entry with one primary menu and decorative assets never become
  assert.match(home,/<link rel="canonical" href="https:\/\/shop.yggmetro.com\/">/);
  for(const route of ['/','/shop','/portfolio','/custom-order']){
   const html=await(await page(route)).text();
-  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...html.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
+  const nav=html.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)[1];
+  for(const link of ['/shop','/portfolio','/custom-order'])assert.equal([...nav.matchAll(new RegExp('href="'+link+'"','g'))].length,1,route+' repeats '+link);
   const main=html.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.doesNotMatch(main,/<img[^>]+src="[^" ]*(?:cloud-hero|cloud-stories|sky-studies|products\/icons|products\/landscape)/,route+' presents decoration as content');
  }
  const portfolio=await(await page('/portfolio')).text();
  assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
+});
+
+test('Home introduces the brand, routes visitors to the three main journeys, and shows featured work only',async()=>{
+ const home=await(await page('/')).text();
+ assert.match(home,/class="home-intro"/);
+ assert.match(home,/class="home-art"[^>]+brand-hero\.jpg/);
+ for(const href of ['/shop','/portfolio','/custom-order'])assert.ok(home.includes('href="'+href+'"'));
+ const nav=home.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)[1];
+ const destinations=home.match(/<section class="destinations"[^>]*>([\s\S]*?)<\/section>/)[1];
+ for(const href of ['/shop','/portfolio','/custom-order']){assert.equal([...nav.matchAll(new RegExp('href="'+href+'"','g'))].length,1,'one primary menu link for '+href);assert.equal([...destinations.matchAll(new RegExp('href="'+href+'"','g'))].length,1,'one destination card for '+href)}
+ assert.match(home,/id="showcase"[^>]+aria-label="ผลงานเด่น"/);
+ assert.match(home,/Featured work/);
+ const main=home.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
+ assert.doesNotMatch(main,/id="products"|id="services"|id="how"|<summary>|promptbase-frame/);
+ assert.match(home,/backgrounds\/blue-smoke\.jpg/);
+ assert.match(home,/background:linear-gradient\(180deg/);
+});
+
+test('Portfolio shows six replaceable artwork slots and working category controls',async()=>{
+ const html=await(await page('/portfolio')).text();
+ assert.match(html,/class="portfolio-grid"/);
+ assert.equal([...html.matchAll(/class="portfolio-art"/g)].length,6);
+ for(const file of ['aurora-cityscape.svg','cloudport-metropolis.svg','digital-planner-series.svg','notion-workspace.svg','creative-illustration.svg','product-design.svg'])assert.ok(html.includes('/assets/shop/portfolio/'+file));
+ for(const filter of ['illustration','ui-ux','digital-product','environment','branding'])assert.ok(html.includes('data-portfolio-filter="'+filter+'"'));
+ assert.match(html,/button\.addEventListener\('click'/);
+ assert.match(html,/href="\/how-to-buy">วิธีซื้อ \/ FAQ/);
+});
+
+test('Custom Order contains service descriptions, a clear brief form, and legacy services route aliases it',async()=>{
+ const order=await(await page('/custom-order')).text();
+ for(const text of ['งานนำเสนอและเอกสาร','แบรนด์และงานภาพ','เว็บไซต์และเครื่องมือ','เทมเพลตและสินค้าดิจิทัล','ส่งรายละเอียดงาน'])assert.ok(order.includes(text));
+ const legacy=await(await page('/services')).text();
+ assert.match(legacy,/<link rel="canonical" href="https:\/\/shop\.yggmetro\.com\/custom-order">/);
 });

@@ -60,7 +60,8 @@ const CHAT_CSS = [
 "#go-sales-root{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:1000;color:#f5f3ec;font:400 14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}",
 "#go-sales-root *{box-sizing:border-box}",
 "#go-sales-root [hidden]{display:none!important}",
-"#go-sales-launcher{display:flex;gap:10px;align-items:center;justify-content:center;min-height:52px;padding:0 19px;border-radius:999px;border:1px solid #b8f8e3;background:#b8f8e3;color:#102522;font-weight:800;box-shadow:0 6px 28px #0008;cursor:pointer}",
+"#go-sales-root[data-obscured='true']{visibility:hidden;pointer-events:none}",
+"#go-sales-launcher{display:flex;gap:8px;align-items:center;justify-content:center;min-height:48px;padding:0 14px;border-radius:999px;border:1px solid #b8f8e3;background:#b8f8e3;color:#102522;font-size:13px;font-weight:800;box-shadow:0 6px 24px #0007;cursor:pointer}",
 "#go-sales-launcher:hover{background:#d5fff0}",
 "#go-sales-panel{display:flex;flex-direction:column;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100dvh - 104px));border:1px solid #4b6b67;border-radius:19px;background:#101c20;box-shadow:0 18px 60px #000b;overflow:hidden}",
 "#go-sales-header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#193035;border-bottom:1px solid #3a5253;padding:14px 16px}",
@@ -99,6 +100,30 @@ function clientChat() {
   const form=root.querySelector("#go-sales-form");
   const input=root.querySelector("#go-sales-input");
   const send=root.querySelector("#go-sales-send");
+  let collisionFrame=0;
+  function syncLauncherCollision(){
+    if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");return}
+    const buttonRect=launcher.getBoundingClientRect();
+    const content=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button'],img,h1,h2,h3,p,li")].filter(node=>!root.contains(node)&&node.getClientRects().length);
+    const overlaps=content.some(node=>{
+      const style=getComputedStyle(node);
+      if(style.visibility==="hidden"||style.display==="none"||Number(style.opacity)===0)return false;
+      const rect=node.getBoundingClientRect();
+      return Math.min(buttonRect.right,rect.right)-Math.max(buttonRect.left,rect.left)>6&&
+        Math.min(buttonRect.bottom,rect.bottom)-Math.max(buttonRect.top,rect.top)>6;
+    });
+    if(overlaps)root.setAttribute("data-obscured","true");else root.removeAttribute("data-obscured");
+  }
+  function scheduleCollisionCheck(){
+    cancelAnimationFrame(collisionFrame);
+    collisionFrame=requestAnimationFrame(syncLauncherCollision);
+  }
+  window.addEventListener("scroll",scheduleCollisionCheck,{passive:true});
+  window.addEventListener("resize",scheduleCollisionCheck,{passive:true});
+  document.addEventListener("click",scheduleCollisionCheck,true);
+  document.addEventListener("input",scheduleCollisionCheck,true);
+  document.addEventListener("change",scheduleCollisionCheck,true);
+  scheduleCollisionCheck();
   const allowedLink=url=>typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/#products");
   function push(role,text,links) {
     const bubble=document.createElement("div");
@@ -121,7 +146,7 @@ function clientChat() {
     panel.hidden=false;input.focus();
     if(!messages.childNodes.length)push("assistant","สวัสดีครับ 💙 ผม GO ช่วยแนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
   });
-  function close(){panel.hidden=true;launcher.hidden=false;launcher.setAttribute("aria-expanded","false");launcher.focus()}
+  function close(){panel.hidden=true;launcher.hidden=false;launcher.setAttribute("aria-expanded","false");scheduleCollisionCheck();launcher.focus()}
   closer.addEventListener("click",close);
   panel.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
   input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
