@@ -21,8 +21,8 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
   await page.locator('nav a[href="/shop"]').click();await page.waitForURL('**/shop');
   await page.locator('.brand').click();await page.waitForURL(origin+'/');
   assert.equal(await page.locator('.hero-home').count(),1);
-  await page.locator('#slide-next').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'Adaptive Lens System');
-  await page.locator('#slide-prev').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'ROOT CAUSE v3');
+  await page.locator('#slide-next').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'Cloudport Metropolis');
+  await page.locator('#slide-prev').click();assert.equal(await page.locator('.slide:not([hidden]) h2').textContent(),'Aurora Cityscape');
  }
  if(route==='/shop'){
   const searchBox=await page.locator('#catalog-search').boundingBox();assert.ok(searchBox.width>=240,width+'px catalog search width');

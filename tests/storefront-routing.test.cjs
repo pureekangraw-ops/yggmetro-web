@@ -50,28 +50,35 @@ test('home is the entry with one primary menu and decorative assets never become
  assert.doesNotMatch(portfolio,/Icon Collection|Sky Stud|Landscape Study|Cloud Stories/);
 });
 
-test('home preserves the existing hero and carousel while speaking to customer needs',async()=>{
+test('Home introduces the brand, routes visitors to the three main journeys, and shows featured work only',async()=>{
  const home=await(await page('/')).text();
- assert.match(home,/class="brand-hero"/);
- assert.match(home,/class="slide-layout"/);
- assert.doesNotMatch(home,/home-hero-grid|home-proof|เลือกเครื่องมือ/);
- assert.match(home,/เมื่อเจอปัญหาซับซ้อน ให้แยกสิ่งที่รู้กับสิ่งที่ยังต้องตรวจ/);
- assert.match(home,/ให้ AI เลือกมุมมองที่เหมาะกับโจทย์/);
- assert.match(home,/ดูรายละเอียด/);
+ assert.match(home,/class="home-intro"/);
+ assert.match(home,/class="home-art"[^>]+brand-hero\.jpg/);
+ for(const href of ['/shop','/portfolio','/custom-order'])assert.ok(home.includes('href="'+href+'"'));
+ const nav=home.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)[1];
+ const destinations=home.match(/<section class="destinations"[^>]*>([\s\S]*?)<\/section>/)[1];
+ for(const href of ['/shop','/portfolio','/custom-order']){assert.equal([...nav.matchAll(new RegExp('href="'+href+'"','g'))].length,1,'one primary menu link for '+href);assert.equal([...destinations.matchAll(new RegExp('href="'+href+'"','g'))].length,1,'one destination card for '+href)}
+ assert.match(home,/id="showcase"[^>]+aria-label="ผลงานเด่น"/);
+ assert.match(home,/Featured work/);
+ const main=home.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
+ assert.doesNotMatch(main,/id="products"|id="services"|id="how"|<summary>|promptbase-frame/);
+ assert.match(home,/backgrounds\/blue-smoke\.jpg/);
+ assert.match(home,/background:linear-gradient\(180deg/);
 });
 
-test('shop keeps its existing sidebar and responsive catalog layout',async()=>{
- const shop=await(await page('/shop')).text();
- assert.match(shop,/\.catalog-layout\{display:grid;grid-template-columns:240px minmax\(0,1fr\);gap:40px/);
- assert.match(shop,/aria-label="หมวดสินค้า"/);
- assert.match(shop,/id="catalog-search"/);
- assert.match(shop,/id="catalog-sort"/);
- assert.match(shop,/@media\(max-width:680px\)/);assert.match(shop,/grid-template-columns:1fr/);
+test('Portfolio shows six replaceable artwork slots and working category controls',async()=>{
+ const html=await(await page('/portfolio')).text();
+ assert.match(html,/class="portfolio-grid"/);
+ assert.equal([...html.matchAll(/class="portfolio-art"/g)].length,6);
+ for(const file of ['aurora-cityscape.svg','cloudport-metropolis.svg','digital-planner-series.svg','notion-workspace.svg','creative-illustration.svg','product-design.svg'])assert.ok(html.includes('/assets/shop/portfolio/'+file));
+ for(const filter of ['illustration','ui-ux','digital-product','environment','branding'])assert.ok(html.includes('data-portfolio-filter="'+filter+'"'));
+ assert.match(html,/button\.addEventListener\('click'/);
+ assert.match(html,/href="\/how-to-buy">วิธีซื้อ \/ FAQ/);
 });
 
-test('floating GO launcher yields to visible controls and custom-order guidance is explicit',async()=>{
+test('Custom Order contains service descriptions, a clear brief form, and legacy services route aliases it',async()=>{
  const order=await(await page('/custom-order')).text();
- assert.match(order,/ส่งข้อมูลเพื่อประเมินขอบเขตและราคาเบื้องต้น ก่อนตกลงเริ่มงาน/);
- assert.match(order,/data-obscured='true'/);
- assert.match(order,/syncLauncherCollision/);
+ for(const text of ['งานนำเสนอและเอกสาร','แบรนด์และงานภาพ','เว็บไซต์และเครื่องมือ','เทมเพลตและสินค้าดิจิทัล','ส่งรายละเอียดงาน'])assert.ok(order.includes(text));
+ const legacy=await(await page('/services')).text();
+ assert.match(legacy,/<link rel="canonical" href="https:\/\/shop\.yggmetro\.com\/custom-order">/);
 });
