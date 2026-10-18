@@ -70,38 +70,31 @@ test('client page inline scripts compile and mobile chat stays compact',async()=
 });
 
 
-test('GO whisper and takeover use durable budget gate before model calls',async()=>{
+test('GO whisper and takeover fail closed until their budget service is mapped',async()=>{
   const mod=await load();
   const originalFetch=global.fetch;
-  const providerCalls=[];
-  global.fetch=async (request,init={})=>{
-    const body=JSON.parse(String(init.body||'{}'));providerCalls.push(body);
-    const isWhisper=body.model==='gpt-6-luna';
-    const result=isWhisper
-      ? {decision:'SPECTRUM_RETRY',focus:'logo direction',nextQuestion:'อยากเก็บอะไรจากโลโก้เดิมไว้บ้างครับ?',avoid:['อย่าถาม audience ซ้ำ']}
-      : {reply:'ถ้าจะเก็บโลโก้เดิมไว้ จุดที่อยากเปลี่ยนที่สุดคือรูปทรง สี หรือฟอนต์ครับ?',focus:'logo direction',resolved:false};
-    return Response.json({output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(result)}]}]});
-  };
-  const gateCalls=[];
-  const env={OPENAI_API_KEY:'test',GO_HUB:{fetch:async request=>{gateCalls.push(new URL(request.url).pathname);return Response.json({ok:true,allowed:true,duplicate:false,budget:{conversation:{whisper:1,takeover:0,total:1},global:{total:1}}});}}};
+  let providerCalled=false,pantheonCalled=false;
+  global.fetch=async()=>{providerCalled=true;throw new Error('provider must not be called without budget gate')};
+  const env={OPENAI_API_KEY:'test',PANTHEON_TOKEN:'t'.repeat(40),PANTHEON:{fetch:async()=>{pantheonCalled=true;return Response.json({ok:true});}}};
   try{
     const base={clientId:'CLIENT-1',conversationId:'CONV-1',brief:{goal:'แก้โลโก้'},messages:[{role:'user',text:'อยากแก้โลโก้'}]};
     let response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/whisper',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...base,requestId:'REQ-W-1',reason:'SPECTRUM_CANNOT_PROGRESS',text:'ไปต่อไม่ไหว'})}),env);
-    assert.equal(response.status,200);let body=await response.json();assert.equal(body.decision,'SPECTRUM_RETRY');assert.equal(body.model,'gpt-6-luna');
+    assert.equal(response.status,503);assert.equal((await response.json()).code,'PANTHEON_OPERATION_UNSUPPORTED');
     response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...base,requestId:'REQ-T-1',reason:'CUSTOMER_REQUESTS_TEAM',text:'ขอทีม'})}),env);
-    assert.equal(response.status,200);body=await response.json();assert.equal(body.model,'gpt-6.1-sol');assert.equal(body.resolved,false);
-    assert.deepEqual(gateCalls,['/internal/spectrum/go-budget','/internal/spectrum/go-budget']);
-    assert.equal(providerCalls[0].max_output_tokens,140);assert.equal(providerCalls[1].max_output_tokens,220);
+    assert.equal(response.status,503);assert.equal((await response.json()).code,'PANTHEON_OPERATION_UNSUPPORTED');
+    assert.equal(providerCalled,false);assert.equal(pantheonCalled,false);
   }finally{global.fetch=originalFetch}
 });
 
-test('GO budget refusal prevents expensive provider call',async()=>{
+test('GO budget refusal is explicit and does not silently turn into a PANTHEON task',async()=>{
   const mod=await load();const originalFetch=global.fetch;let providerCalled=false;
   global.fetch=async()=>{providerCalled=true;throw new Error('must not call provider')};
-  const env={OPENAI_API_KEY:'test',GO_HUB:{fetch:async()=>Response.json({ok:true,allowed:false,reason:'GO_CONVERSATION_TAKEOVER_LIMIT',budget:{conversation:{takeover:3}}})}};
+  let pantheonCalled=false;
+  const env={OPENAI_API_KEY:'test',PANTHEON_TOKEN:'t'.repeat(40),PANTHEON:{fetch:async()=>{pantheonCalled=true;return Response.json({ok:true});}}};
   try{
     const response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:'CLIENT-1',conversationId:'CONV-1',requestId:'REQ-BLOCK',reason:'ACTIVE_TAKEOVER',text:'ต่อ',messages:[],brief:{}})}),env);
-    assert.equal(response.status,429);assert.equal(providerCalled,false);
+    assert.equal(response.status,503);assert.equal((await response.json()).code,'PANTHEON_OPERATION_UNSUPPORTED');
+    assert.equal(providerCalled,false);assert.equal(pantheonCalled,false);
   }finally{global.fetch=originalFetch}
 });
 

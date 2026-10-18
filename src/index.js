@@ -172,7 +172,7 @@ function escalationBrief(value={}){
   return Object.fromEntries(["goal","jobType","audience","materials","deadlineText","serviceLine"].map(k=>[k,escalationText(brief[k],500)]).filter(([,v])=>v));
 }
 async function reserveGoBudget(env,{clientId,conversationId,requestId,kind}){
-  const result=await callBriefRegistry(env,"/internal/spectrum/go-budget",{clientId,conversationId,requestId,kind});
+  const result=await routeLegacyBridgeOperation(env,"/internal/spectrum/go-budget",{clientId,conversationId,requestId,kind});
   if(!result.ok)return {ok:false,code:result.code,status:result.status};
   const budget=result.body||{};
   if(!budget.allowed)return {ok:false,code:budget.reason||"GO_BUDGET_BLOCKED",status:429,budget:budget.budget||null};
@@ -279,6 +279,7 @@ async function handleGoClientInterpret(request,env){
 
 function briefId(value){return String(value||"").trim().slice(0,120)}
 function briefText(value,max=2000){return typeof value==="string"?value.trim().slice(0,max):""}
+function pantheonLine(value,max=2000){return briefText(value,max).replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim()}
 function briefObject(value){
   const input=value&&typeof value==="object"&&!Array.isArray(value)?value:{};
   return {
@@ -295,15 +296,70 @@ function briefObject(value){
     deadlineText:briefText(input.deadlineText,240),
   };
 }
-async function callBriefRegistry(env,path,payload){
-  if(!env?.GO_HUB||typeof env.GO_HUB.fetch!=="function")return {ok:false,status:503,code:"BRIEF_BRIDGE_NOT_CONFIGURED"};
+function pantheonTaskRequest(payload){
+  const brief=payload?.brief&&typeof payload.brief==="object"?payload.brief:{};
+  const fields=[
+    ["Brief ID",pantheonLine(payload?.briefId,120)],
+    ["Client ID",pantheonLine(payload?.clientId,120)],
+    ["Service line",pantheonLine(brief.serviceLine,80)],
+    ["Entry service",pantheonLine(brief.entryService,80)],
+    ["Source page",pantheonLine(brief.sourcePage,240)],
+    ["Job type",pantheonLine(brief.jobType,80)],
+    ["Goal",pantheonLine(brief.goal,900)],
+    ["Audience",pantheonLine(brief.audience,500)],
+    ["Materials",pantheonLine(brief.materials,700)],
+    ["Page count",Number.isInteger(brief.pageCount)?String(brief.pageCount):""],
+    ["Package",pantheonLine(brief.package,80)],
+    ["Desired date",pantheonLine(brief.desiredDate,120)],
+    ["Deadline",pantheonLine(brief.deadlineText,240)],
+  ].filter(([,value])=>value);
+  return [
+    "YGG METRO confirmed project intake. Human review is required; do not dispatch to Factory automatically.",
+    ...fields.map(([label,value])=>`${label}: ${value}`),
+  ].join("\n").slice(0,4096);
+}
+async function callPantheon(env,payload){
+  if(!env?.PANTHEON||typeof env.PANTHEON.fetch!=="function")return {ok:false,status:503,code:"PANTHEON_NOT_CONFIGURED"};
+  if(typeof env.PANTHEON_TOKEN!=="string"||env.PANTHEON_TOKEN.trim().length<32)return {ok:false,status:503,code:"PANTHEON_AUTH_NOT_CONFIGURED"};
+  const authorization=`Bearer ${env.PANTHEON_TOKEN.trim()}`;
+  const requestText=pantheonTaskRequest(payload);
+  let lookupResponse;
+  try{
+    lookupResponse=await env.PANTHEON.fetch(new Request("https://phatheon-workhub.internal/v1/intent",{
+      method:"POST",headers:{"content-type":"application/json",authorization},
+      body:JSON.stringify({intent:"LIST_TASKS"}),
+    }));
+  }catch{return {ok:false,status:502,code:"PANTHEON_LOOKUP_UNAVAILABLE"}}
+  if(!lookupResponse.ok)return {ok:false,status:502,code:"PANTHEON_LOOKUP_REJECTED"};
+  const listing=await lookupResponse.json().catch(()=>({}));
+  const briefIdLine=`Brief ID: ${pantheonLine(payload?.briefId,120)}`;
+  const existing=Array.isArray(listing?.tasks)?listing.tasks.find(task=>typeof task?.request_text==="string"&&task.request_text.split(/\r?\n/).includes(briefIdLine)):null;
+  if(existing){
+    if(typeof existing.task_id!=="string"||!/^task_[a-f0-9]{32}$/.test(existing.task_id)||typeof existing.status!=="string"){
+      return {ok:false,status:502,code:"PANTHEON_TASK_READBACK_INVALID"};
+    }
+    return {ok:true,body:{workId:existing.task_id,work:{workId:existing.task_id,status:existing.status},workCreated:false,task:existing}};
+  }
   let response;
   try{
-    response=await env.GO_HUB.fetch(new Request("https://go-hub.internal"+path,{method:"POST",headers:{"content-type":"application/json","x-yggmetro-surface":"SPECTRUMSALE"},body:JSON.stringify(payload)}));
-  }catch{return {ok:false,status:502,code:"BRIEF_BRIDGE_UNAVAILABLE"}}
+    response=await env.PANTHEON.fetch(new Request("https://phatheon-workhub.internal/v1/intent",{
+      method:"POST",
+      headers:{"content-type":"application/json",authorization},
+      body:JSON.stringify({intent:"CREATE_TASK",request:requestText}),
+    }));
+  }catch{return {ok:false,status:502,code:"PANTHEON_UNAVAILABLE"}}
   const body=await response.json().catch(()=>({}));
-  if(!response.ok)return {ok:false,status:502,code:String(body?.code||"BRIEF_BRIDGE_REJECTED")};
-  return {ok:true,body};
+  if(!response.ok)return {ok:false,status:502,code:"PANTHEON_TASK_REJECTED"};
+  if(typeof body?.task_id!=="string"||!/^task_[a-f0-9]{32}$/.test(body.task_id)||body.status!=="QUEUED"||body.executed!==false){
+    return {ok:false,status:502,code:"PANTHEON_TASK_READBACK_INVALID"};
+  }
+  return {ok:true,body:{workId:body.task_id,work:{workId:body.task_id,status:body.status},workCreated:true,task:body}};
+}
+async function routeLegacyBridgeOperation(env,path,payload){
+  // Only confirmed briefs have a safe mapping to PANTHEON. Never forward other
+  // legacy GO Hub operations to WorkHub without an explicit contract.
+  if(path==="/internal/brief/confirm")return callPantheon(env,payload);
+  return {ok:false,status:503,code:"PANTHEON_OPERATION_UNSUPPORTED"};
 }
 const PAYMENT_STATUSES=new Set(["QUOTE_DRAFT","QUOTE_SENT","PAYMENT_PENDING","PAYMENT_CONFIRMED","PAYMENT_FAILED","REFUND_PENDING","REFUNDED","DISPUTED","UNKNOWN"]);
 const CHECKOUT_INPUT_FIELDS=new Set(["customerId","quoteId","workId","idempotencyKey"]);
@@ -337,7 +393,7 @@ async function handlePaymentCheckout(request,env){
   if(!body||typeof body!=="object"||Array.isArray(body)||Object.keys(body).some(key=>!CHECKOUT_INPUT_FIELDS.has(key)))return json({ok:false,code:"PAYMENT_INPUT_FORBIDDEN"},400);
   const customerId=briefId(body.customerId),quoteId=briefId(body.quoteId),workId=briefId(body.workId),idempotencyKey=briefId(body.idempotencyKey);
   if(!customerId||!quoteId||!workId||!idempotencyKey)return json({ok:false,code:"PAYMENT_IDENTITY_REQUIRED"},400);
-  const result=await callBriefRegistry(env,"/internal/payment/checkout",{version:"1",surface:"SPECTRUMSALE",customerId,quoteId,workId,idempotencyKey,requestedAt:new Date().toISOString()});
+  const result=await routeLegacyBridgeOperation(env,"/internal/payment/checkout",{version:"1",surface:"SPECTRUMSALE",customerId,quoteId,workId,idempotencyKey,requestedAt:new Date().toISOString()});
   if(!result.ok)return json({ok:false,code:result.code,quoteId,workId},result.status);
   const readback=publicPaymentReadback(result.body);
   if(readback.error)return json({ok:false,code:readback.error,quoteId,workId},502);
@@ -356,7 +412,7 @@ async function handleBriefUpsert(request,env){
   const parsed=await readBriefBody(request);if(parsed.error)return parsed.error;
   const {body,clientId,conversationId,briefId:id}=parsed;
   const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"DRAFT",stage:briefText(body?.stage,40),brief:briefObject(body?.brief),latestInterpretation:body?.latestInterpretation&&typeof body.latestInterpretation==="object"?body.latestInterpretation:null,updatedAt:new Date().toISOString()};
-  const result=await callBriefRegistry(env,"/internal/brief/upsert",payload);
+  const result=await routeLegacyBridgeOperation(env,"/internal/brief/upsert",payload);
   if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
   return json({ok:true,status:"DRAFT",briefId:id,clientId,conversationId,registry:result.body||null});
 }
@@ -368,7 +424,7 @@ async function handleBriefConfirm(request,env){
   const brief=briefObject(body?.brief);
   const handoff=buildHandoffPacket({briefId:id,clientId,conversationId,brief,latestInterpretation:body?.latestInterpretation,recentCustomerWords:body?.recentCustomerWords});
   const payload={version:"1",briefId:id,clientId,conversationId,surface:"SPECTRUMSALE",status:"CONFIRMED",stage:"summary",brief,handoff,confirmedAt:new Date().toISOString()};
-  const result=await callBriefRegistry(env,"/internal/brief/confirm",payload);
+  const result=await routeLegacyBridgeOperation(env,"/internal/brief/confirm",payload);
   if(!result.ok)return json({ok:false,code:result.code,briefId:id,clientId,conversationId},result.status);
   const office=result.body||{};return json({ok:true,status:"CONFIRMED",briefId:id,clientId,conversationId,workId:office.workId||null,work:office.work||null,workCreated:Boolean(office.workCreated),office});
 }
@@ -379,7 +435,7 @@ async function handleSalesEvent(request,env){
   const raw=await request.text();if(raw.length>4096)return json({ok:false,code:"PAYLOAD_TOO_LARGE"},413);
   let body;try{body=JSON.parse(raw)}catch{return json({ok:false,code:"INVALID_JSON"},400)}
   if(!["PAGE_VIEW","SERVICE_INTEREST","BRIEF_STARTED","CTA_CLICK"].includes(body?.type)||!briefId(body?.eventId))return json({ok:false,code:"SALES_EVENT_INVALID"},400);
-  const result=await callBriefRegistry(env,"/internal/spectrum/event",{eventId:body.eventId,type:body.type,page:briefText(body.page,240).split(/[?#]/)[0],source:briefText(body.source,120)});
+  const result=await routeLegacyBridgeOperation(env,"/internal/spectrum/event",{eventId:body.eventId,type:body.type,page:briefText(body.page,240).split(/[?#]/)[0],source:briefText(body.source,120)});
   return result.ok?json({ok:true}):json({ok:false,code:result.code},result.status);
 }
 const salesObserverScript=`<script>
@@ -493,7 +549,7 @@ async function askGo(reason,text){const response=await fetch('/api/v1/go/takeove
 async function finalizeTeamHandoff(){
  if(state.confirmed)return;
  await confirmBrief();state.confirmed=true;state.teamRequestPending=false;state.stage='summary';save();
- addMessage('assistant','รับเรื่องแล้วครับ ทีมจะรับช่วงต่อจากข้อมูลที่คุยกันไว้');
+ addMessage('assistant','รับ brief แล้วครับ มีงานรอตรวจในระบบแล้ว ยังไม่ได้ส่งไปทำงานอัตโนมัติ');
 }
 async function handleTeamPrecheck(text){
  try{
