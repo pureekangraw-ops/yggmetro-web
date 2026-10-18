@@ -75,7 +75,7 @@ test('GO whisper and takeover fail closed until their budget service is mapped',
   const originalFetch=global.fetch;
   let providerCalled=false,pantheonCalled=false;
   global.fetch=async()=>{providerCalled=true;throw new Error('provider must not be called without budget gate')};
-  const env={OPENAI_API_KEY:'test',PANTHEON_TOKEN:'t'.repeat(40),PANTHEON:{fetch:async()=>{pantheonCalled=true;return Response.json({ok:true});}}};
+  const env={OPENAI_API_KEY:'test',PANTHEON:{ownerCall:async()=>{pantheonCalled=true;return {ok:true,result:{}};}}};
   try{
     const base={clientId:'CLIENT-1',conversationId:'CONV-1',brief:{goal:'แก้โลโก้'},messages:[{role:'user',text:'อยากแก้โลโก้'}]};
     let response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/whisper',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...base,requestId:'REQ-W-1',reason:'SPECTRUM_CANNOT_PROGRESS',text:'ไปต่อไม่ไหว'})}),env);
@@ -90,7 +90,7 @@ test('GO budget refusal is explicit and does not silently turn into a PANTHEON t
   const mod=await load();const originalFetch=global.fetch;let providerCalled=false;
   global.fetch=async()=>{providerCalled=true;throw new Error('must not call provider')};
   let pantheonCalled=false;
-  const env={OPENAI_API_KEY:'test',PANTHEON_TOKEN:'t'.repeat(40),PANTHEON:{fetch:async()=>{pantheonCalled=true;return Response.json({ok:true});}}};
+  const env={OPENAI_API_KEY:'test',PANTHEON:{ownerCall:async()=>{pantheonCalled=true;return {ok:true,result:{}};}}};
   try{
     const response=await mod.default.fetch(new Request('https://yggmetro.com/api/v1/go/takeover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({clientId:'CLIENT-1',conversationId:'CONV-1',requestId:'REQ-BLOCK',reason:'ACTIVE_TAKEOVER',text:'ต่อ',messages:[],brief:{}})}),env);
     assert.equal(response.status,503);assert.equal((await response.json()).code,'PANTHEON_OPERATION_UNSUPPORTED');

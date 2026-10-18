@@ -319,19 +319,21 @@ function pantheonTaskRequest(payload){
   ].join("\n").slice(0,4096);
 }
 async function callPantheon(env,payload){
-  if(!env?.PANTHEON||typeof env.PANTHEON.fetch!=="function")return {ok:false,status:503,code:"PANTHEON_NOT_CONFIGURED"};
-  if(typeof env.PANTHEON_TOKEN!=="string"||env.PANTHEON_TOKEN.trim().length<32)return {ok:false,status:503,code:"PANTHEON_AUTH_NOT_CONFIGURED"};
-  const authorization=`Bearer ${env.PANTHEON_TOKEN.trim()}`;
+  if(!env?.PANTHEON||typeof env.PANTHEON.ownerCall!=="function")return {ok:false,status:503,code:"PANTHEON_NOT_CONFIGURED"};
+  const callIntent=async intent=>{
+    let result;
+    try{result=await env.PANTHEON.ownerCall({operation:"intent",payload:intent})}
+    catch{return {ok:false,status:502,code:"PANTHEON_UNAVAILABLE"}}
+    if(result?.ok!==true||!result.result||typeof result.result!=="object"){
+      const upstreamStatus=Number(result?.upstream_status);
+      return {ok:false,status:upstreamStatus===503?503:502,code:String(result?.status||"PANTHEON_API_REJECTED")};
+    }
+    return {ok:true,body:result.result};
+  };
   const requestText=pantheonTaskRequest(payload);
-  let lookupResponse;
-  try{
-    lookupResponse=await env.PANTHEON.fetch(new Request("https://phatheon-workhub.internal/v1/intent",{
-      method:"POST",headers:{"content-type":"application/json",authorization},
-      body:JSON.stringify({intent:"LIST_TASKS"}),
-    }));
-  }catch{return {ok:false,status:502,code:"PANTHEON_LOOKUP_UNAVAILABLE"}}
-  if(!lookupResponse.ok)return {ok:false,status:502,code:"PANTHEON_LOOKUP_REJECTED"};
-  const listing=await lookupResponse.json().catch(()=>({}));
+  const lookup=await callIntent({intent:"LIST_TASKS"});
+  if(!lookup.ok)return {ok:false,status:lookup.status,code:"PANTHEON_LOOKUP_REJECTED"};
+  const listing=lookup.body;
   const briefIdLine=`Brief ID: ${pantheonLine(payload?.briefId,120)}`;
   const existing=Array.isArray(listing?.tasks)?listing.tasks.find(task=>typeof task?.request_text==="string"&&task.request_text.split(/\r?\n/).includes(briefIdLine)):null;
   if(existing){
@@ -340,16 +342,9 @@ async function callPantheon(env,payload){
     }
     return {ok:true,body:{workId:existing.task_id,work:{workId:existing.task_id,status:existing.status},workCreated:false,task:existing}};
   }
-  let response;
-  try{
-    response=await env.PANTHEON.fetch(new Request("https://phatheon-workhub.internal/v1/intent",{
-      method:"POST",
-      headers:{"content-type":"application/json",authorization},
-      body:JSON.stringify({intent:"CREATE_TASK",request:requestText}),
-    }));
-  }catch{return {ok:false,status:502,code:"PANTHEON_UNAVAILABLE"}}
-  const body=await response.json().catch(()=>({}));
-  if(!response.ok)return {ok:false,status:502,code:"PANTHEON_TASK_REJECTED"};
+  const created=await callIntent({intent:"CREATE_TASK",request:requestText});
+  if(!created.ok)return {ok:false,status:created.status,code:"PANTHEON_TASK_REJECTED"};
+  const body=created.body;
   if(typeof body?.task_id!=="string"||!/^task_[a-f0-9]{32}$/.test(body.task_id)||body.status!=="QUEUED"||body.executed!==false){
     return {ok:false,status:502,code:"PANTHEON_TASK_READBACK_INVALID"};
   }
