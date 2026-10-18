@@ -1,0 +1,52 @@
+{
+  "type": "LOCAL_WORKERD_NO_SECRETS_SMOKE",
+  "production_verified": false,
+  "checks": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/shop",
+      "status": 200
+    },
+    {
+      "path": "/client",
+      "status": 200
+    },
+    {
+      "path": "/health",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/brief/upsert",
+      "status": 503,
+      "code": "BRIEF_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "path": "/api/v1/brief/confirm",
+      "status": 503,
+      "code": "BRIEF_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "path": "/api/v1/events",
+      "status": 503,
+      "code": "BRIEF_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "path": "/api/v1/payment/checkout",
+      "status": 503,
+      "code": "BRIEF_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "path": "/api/v1/shop/checkout",
+      "status": 503,
+      "code": "CHECKOUT_NOT_READY"
+    },
+    {
+      "path": "/api/v1/stripe/webhook",
+      "status": 503,
+      "code": "WEBHOOK_NOT_READY"
+    }
+  ]
+}

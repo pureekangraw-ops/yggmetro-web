@@ -1,0 +1,37 @@
+{
+  "observed_at": "2026-10-18",
+  "worker": "phatheon-workhub",
+  "status": 200,
+  "bytes": 67178,
+  "required_legacy_symbols": {
+    "/internal/brief/upsert": false,
+    "/internal/brief/confirm": false,
+    "/internal/spectrum/event": false,
+    "/internal/spectrum/go-budget": false,
+    "/internal/payment/checkout": false,
+    "StorefrontBridge": false
+  },
+  "exports": "export {\n  LightBridge,\n  OwnerBridge,\n  owner_entrypoint_default as default\n};\n//# sourceMappingURL=owner-entrypoint.js.map\n\r\n--429a6797c8ece947241a56e4b6e62f3ec6753982a",
+  "auth_and_routes": [
+    "  const key = env.WORKHUB_TOKEN;",
+    "  const expected = \"Bearer \" + key;",
+    "  if (!/^Bearer [0-9a-f]{64}$/.test(supplied)) return null;",
+    "  if (request.method !== \"POST\" && !(request.method === \"GET\" && path === \"/v1/observatory/latest\")) fail2(405, \"METHOD_NOT_ALLOWED\");",
+    "  if (path === \"/v1/observatory/pair\") {",
+    "  if (path === \"/v1/observatory/latest\") {",
+    "  if (path === \"/v1/observatory/snapshot\") return json(await putSnapshot(env.DB, record.device_id, await readBody(request)));",
+    "  if (path === \"/v1/observatory/stop\") return json(await stopStream(env.DB, record.device_id, await readBody(request)));",
+    "  if (path === \"/v1/observatory/disconnect\") return json(await revokeDevice(env.DB, record.device_id));",
+    "   const response=await fetch(path,{method,headers:{\"authorization\":\"Bearer \"+token,...(body===undefined?{}:{\"content-type\":\"application/json\"})},body:body===undefined?undefined:JSON.stringify(body)});",
+    "  if (typeof env.WORKHUB_TOKEN !== \"string\" || env.WORKHUB_TOKEN.length < 32) throw new ApiError(503, \"authentication not configured\");",
+    "  const expected = \"Bearer \" + env.WORKHUB_TOKEN;",
+    "    if (path === \"/\" && request.method === \"GET\") return new Response(dashboard, { status: 200, headers: { \"content-type\": \"text/html; charset=utf-8\", \"content-security-policy\": \"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inlin",
+    "    if (path === \"/health\" && request.method === \"GET\") return reply({ ok: true, service: \"pantheon-workhub\", stage: \"primary-preview\", factory: await factoryHealth(env) });",
+    "      if (path === \"/v1/factory/health\" && request.method === \"GET\") return reply({ factory: await factoryHealth(env) });",
+    "      if (path === \"/v1/factory/preflight\" && request.method === \"POST\") return reply({ factory: await factoryPreflight(env, await bodyJson(request)) });",
+    "      if (path === \"/v1/factory/jobs\" && request.method === \"POST\") {",
+    "      if (path === \"/v1/intent\" && request.method === \"POST\") {",
+    "  if (typeof env.WORKHUB_TOKEN !== \"string\" || env.WORKHUB_TOKEN.length < 32) return fail3(\"UPSTREAM_AUTH_NOT_CONFIGURED\", 503);",
+    "    const r = await workhub.fetch(new Request(\"https://phatheon-workhub.internal\" + path, { method, headers: { authorization: \"Bearer \" + env.WORKHUB_TOKEN, \"content-type\": \"application/json\" }, ...payload ? { body: JSON.stringify(payload) } : {} }),"
+  ]
+}
