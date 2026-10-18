@@ -11,6 +11,13 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
   assert.equal(await page.locator('nav[aria-label="เมนูหลัก"]').count(),1);
   assert.equal(await page.locator('nav [aria-current="page"]').count(),1,route+' active menu');
   for(const href of ['/shop','/portfolio','/custom-order'])assert.equal(await page.locator('nav a[href="'+href+'"]').count(),1,route+' repeats '+href);
+  if(route==='/'&&width===1440){
+   await page.locator('#go-sales-launcher').click();
+   assert.equal(await page.locator('#go-sales-panel').isVisible(),true,route+' GO panel opens');
+   assert.equal(await page.locator('#go-sales-launcher').getAttribute('aria-expanded'),'true',route+' GO launcher expanded');
+   await page.locator('#go-sales-close').click();
+   assert.equal(await page.locator('#go-sales-panel').isVisible(),false,route+' GO panel closes');
+  }
   const background=await page.evaluate(async()=>{const bg=getComputedStyle(document.body,'::before').backgroundImage;const urls=[...bg.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map(m=>m[1]);for(const url of urls){const image=new Image();image.src=url;await image.decode()}return bg});
   assert.match(background,/\/assets\/shop\//,route+' missing page backdrop');
   assert.equal(await page.locator('main img[src*="sky-studies"],main img[src*="cloud-stories"],main img[src*="cloud-hero"],main img[src*="products/icons"]').count(),0,route+' displays decorative asset as content');
