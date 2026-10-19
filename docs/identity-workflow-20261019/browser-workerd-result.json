@@ -1,0 +1,25 @@
+{
+  "type": "LOCAL_WORKERD_D1_BROWSER_E2E",
+  "production_verified": false,
+  "ai_provider": "explicit output/outage fixture, not actual model inference",
+  "checks": [
+    "draft save/reload",
+    "late poll cannot overwrite another draft",
+    "submission while AI inference pending",
+    "AI - GO label from server",
+    "System outage label",
+    "submit despite AI outage",
+    "duplicate and concurrent confirm readback",
+    "foreign customer 404",
+    "sender spoof rejected",
+    "Admin authenticated read/takeover/reply",
+    "AI suppressed while Admin owns conversation",
+    "resume notice and audit",
+    "status transitions",
+    "actual text artifact/hash customer readback",
+    "390px viewport and no JS errors"
+  ],
+  "request_id": "BRIEF-d3f22cad-a6ee-4317-a391-5d24eb584473",
+  "model_fixture_calls": 3,
+  "status_events": 4
+}

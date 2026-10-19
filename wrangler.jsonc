@@ -4,12 +4,17 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "previews": {},
-  "assets": {"directory":"./public", "binding":"ASSETS", "run_worker_first":true},
-  "services": [
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "services": [],
+  "d1_databases": [
     {
-      "binding": "PANTHEON",
-      "service": "phatheon-workhub",
-      "entrypoint": "OwnerBridge"
+      "binding": "REQUESTS_DB",
+      "database_name": "pantheon-workhub",
+      "database_id": "22b59dc3-e07c-4ae7-b5b1-2646d3e8a975"
     }
   ]
 }

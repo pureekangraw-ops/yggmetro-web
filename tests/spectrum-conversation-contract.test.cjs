@@ -56,20 +56,6 @@ test('handoff packet carries context without inventing commercial truth',async()
 });
 
 
-test('client page inline scripts compile and mobile chat stays compact',async()=>{
-  const mod=await load();
-  const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});
-  const page=await response.text();
-  const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>!s.trim().startsWith('{"@context"'));
-  assert.ok(scripts.length>=2);
-  for(const script of scripts)assert.doesNotThrow(()=>new Function(script));
-  assert.match(page,/\.chat\{height:clamp\(360px,56dvh,500px\);min-height:0;max-height:500px/);
-  assert.match(page,/\.messages\{flex:1 1 auto;min-height:0;max-height:none/);
-  assert.match(page,/\.composer\{padding-top:9px;padding-bottom:12px;align-items:stretch;flex-direction:row/);
-  assert.match(page,/function scrollToLatest\(\)\{requestAnimationFrame/);
-});
-
-
 test('GO whisper and takeover fail closed until their budget service is mapped',async()=>{
   const mod=await load();
   const originalFetch=global.fetch;
@@ -98,50 +84,12 @@ test('GO budget refusal is explicit and does not silently turn into a PANTHEON t
   }finally{global.fetch=originalFetch}
 });
 
-test('client wires whisper-before-takeover and short-lived GO state',async()=>{
-  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
-  assert.match(page,/\/api\/v1\/go\/whisper/);assert.match(page,/\/api\/v1\/go\/takeover/);
-  assert.match(page,/whisperCount:0,stuckCount:0,goActive:false,goTurns:0/);
-  assert.match(page,/CUSTOMER_REQUESTS_TEAM/);assert.match(page,/state\.goTurns<3/);
-});
 
-
-test('team call prechecks with GO before durable handoff and resumes handoff after takeover',async()=>{
-  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
-  assert.match(page,/teamRequestPending:false/);
-  assert.match(page,/state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
-  const handler=page.slice(page.indexOf("confirmButton.addEventListener('click'"),page.indexOf("render();",page.indexOf("confirmButton.addEventListener('click'")));
-  assert.ok(handler.indexOf("handleTeamPrecheck(last)")>=0);
-  assert.equal(handler.indexOf("confirmBrief()"),-1);
-  const helper=page.slice(page.indexOf("async function handleTeamPrecheck"),page.indexOf("async function submitText"));
-  assert.ok(helper.indexOf("askWhisper('CUSTOMER_REQUESTS_TEAM'")<helper.indexOf("finalizeTeamHandoff()"));
-  assert.match(page,/if\(state\.teamRequestPending\)await finalizeTeamHandoff\(\)/);
-});
-
-
-test('mobile client stays within viewport and team CTA is contextual/secondary',async()=>{
-  const mod=await load();const response=await mod.default.fetch(new Request('https://yggmetro.com/client'),{});const page=await response.text();
-  assert.match(page,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(page,/html,body\{overflow-x:hidden\}/);
-  assert.match(page,/\.shell,\.workspace,\.chat,\.panel\{width:100%;max-width:100%;min-width:0\}/);
-  assert.match(page,/\.brief-action\.primary\{background:rgba\(255,255,255,.07\);color:var\(--muted\)/);
-  assert.match(page,/const showTeam=state\.confirmed\|\|state\.teamRequestPending\|\|state\.stage==='summary'/);
-  assert.match(page,/confirmButton\.closest\('\.brief-actions'\)\.hidden=!showTeam/);
-  assert.match(page,/confirmButton\.textContent=state\.confirmed\?'ส่งแล้ว':state\.teamRequestPending\?'กำลังเรียกทีม…':'คุยกับทีม'/);
-});
-
-test('responsive sales surfaces keep mobile actions tappable and progress readable',async()=>{
-  const mod=await load();
-  const home=await (await mod.default.fetch(new Request('https://yggmetro.com/'),{})).text();
-  const client=await (await mod.default.fetch(new Request('https://yggmetro.com/client'),{})).text();
-  assert.match(home,/@media\(max-width:640px\)[^{]*\{[^}]*body\{/);
-  assert.match(home,/\.actions\{display:grid;grid-template-columns:1fr\}/);
-  assert.match(home,/\.actions \.button\{width:100%;min-height:52px\}/);
-  assert.match(home,/\.feature \.button\{width:100%;min-height:52px/);
-  assert.match(client,/\.progress\{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax\(76px,1fr\);overflow-x:auto/);
-  assert.match(client,/\.progress-step\{min-width:0;padding:10px 6px;font-size:\.68rem/);
-  assert.match(client,/\.quick button\{[^}]*min-height:44px/);
-  assert.match(client,/\.brief-action\{min-height:44px/);
-  assert.match(client,/const activeStep=document\.querySelector\('\.progress-step\.active'\)/);
-  assert.match(client,/activeStep\.scrollIntoView\(\{behavior:'smooth',block:'nearest',inline:'center'\}\)/);
+test('customer and Admin pages compile, identify actual senders, and keep submission independent of AI',async()=>{
+ const {default:web}=await load();for(const route of ['/client','/admin/requests']){const page=await (await web.fetch(new Request('https://yggmetro.com'+route),{})).text();
+ for(const [,script] of page.matchAll(/<script>([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>new Function(script));
+ assert.match(page,/sender_label/);assert.match(page,/m.timestamp/);assert.match(page,/textContent=m.text/);assert.doesNotMatch(page,/innerHTML|localStorage\.setItem|OwnerBridge/);
+ assert.match(page,/max-width:700px/);assert.match(page,/min-height:44px/);
+ if(route==='/client'){assert.match(page,/ส่งคำขอ/);assert.match(page,/AI - GO/);assert.doesNotMatch(page,/askWhisper|askGo|handleTeamPrecheck/)}
+ }
 });

@@ -19,10 +19,10 @@ export function answerShopQuestion(text,catalog) {
   const matches=catalog.filter(p=>MATCHERS.some(([slug,re])=>slug===p.slug&&re.test(question)) ||
     p.name.toLocaleLowerCase().length>3 && question.toLocaleLowerCase().includes(p.name.toLocaleLowerCase()));
   if (/จ่าย.*แล้ว|ชำระ.*แล้ว|โอน.*แล้ว|คืนเงิน|refund|payment.*(?:paid|done)|เลข.*ออเดอร์/i.test(question)) {
-    return {reply:"เรื่องการชำระเงินและคำสั่งซื้อต้องตรวจจากระบบจริงครับ ผมยังตรวจยอดหรือยืนยันสถานะไม่ได้ โปรดติดต่อทีมผ่านหน้าคุยงาน และอย่าส่งข้อมูลบัตรหรือรหัสผ่านในแชตนี้",links:[{label:"ติดต่อทีม",url:"/client?service=lab"}]};
+    return {reply:"เรื่องการชำระเงินและคำสั่งซื้อต้องตรวจจากระบบจริงครับ ผมยังตรวจยอดหรือยืนยันสถานะไม่ได้ โปรดติดต่อ Admin ผ่านหน้าคุยงาน และอย่าส่งข้อมูลบัตรหรือรหัสผ่านในแชตนี้",links:[{label:"ติดต่อ Admin",url:"/client?service=lab"}]};
   }
   if (/ติดต่อ|คุยกับคน|คนจริง|พนักงาน|เจ้าหน้าที่|ทีมงาน|human/i.test(question)) {
-    return {reply:"หากต้องการให้ทีมรับเรื่อง สามารถเปิดหน้าคุยงานเพื่อส่งรายละเอียดได้ครับ ผมไม่สามารถยืนยันได้ว่ามีเจ้าหน้าที่ออนไลน์อยู่ในขณะนี้",links:[{label:"เปิดหน้าคุยงาน",url:"/client?service=lab"}]};
+    return {reply:"หากต้องการส่งคำขอให้ศูนย์รับงาน สามารถเปิดหน้าคุยงานเพื่อส่งรายละเอียดได้ครับ ผมไม่สามารถยืนยันได้ว่ามี Admin ออนไลน์อยู่ในขณะนี้",links:[{label:"เปิดหน้าคุยงาน",url:"/client?service=lab"}]};
   }
   if (matches.length) {
     const picks=matches.slice(0,2);
@@ -37,9 +37,9 @@ export function answerShopQuestion(text,catalog) {
   if (/ราคา|เท่าไหร่|ค่าบริการ|ซื้อ|ชำระ|ขาย|มีอะไร|สินค้า|product|shop|สวัสดี|hi|hello/i.test(question) || question.length<8) {
     const featured=["land-planner","root-cause","adaptive-lens","shop-home"];
     const picks=featured.map(slug=>catalog.find(p=>p.slug===slug)).filter(Boolean);
-    return {reply:"ยินดีต้อนรับครับ 💙 ผม GO ผู้ช่วยข้อมูลสินค้าของ YGG METRO\n\nร้านมีเครื่องมือวางแผน เทมเพลต และเครื่องมือ AI เช่น\n"+picks.map(p=>"• "+p.name+" — "+p.price+" ("+p.status+")").join("\n")+"\n\nบางรายการขายผ่านแพลตฟอร์มปลายทาง และบางรายการยังไม่เปิดขายตรงบนเว็บนี้ครับ สนใจงานประเภทไหนเป็นพิเศษ?",links:linksFor(picks)};
+    return {reply:"ยินดีต้อนรับครับ 💙 System แนะนำข้อมูลสินค้าของ YGG METRO\n\nร้านมีเครื่องมือวางแผน เทมเพลต และเครื่องมือ AI เช่น\n"+picks.map(p=>"• "+p.name+" — "+p.price+" ("+p.status+")").join("\n")+"\n\nบางรายการขายผ่านแพลตฟอร์มปลายทาง และบางรายการยังไม่เปิดขายตรงบนเว็บนี้ครับ สนใจงานประเภทไหนเป็นพิเศษ?",links:linksFor(picks)};
   }
-  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถคุยรายละเอียดกับทีมผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/#products"},{label:"คุยงานกับทีม",url:"/client?service=lab"}]};
+  return {reply:"ผมยังจับคู่คำถามนี้กับสินค้ารายการใดไม่ได้ครับ ตอนนี้ช่วยตอบจากแค็ตตาล็อกจริงของร้าน เช่น วางแปลนที่ดิน การเงิน วิเคราะห์ปัญหา หรือเทมเพลตจัดการร้าน\n\nหากเป็นงานที่ต้องออกแบบเฉพาะ สามารถส่งคำขอผ่านหน้าคุยงานได้ครับ",links:[{label:"เลือกดูสินค้า",url:"/#products"},{label:"ส่งคำขอ",url:"/client?service=lab"}]};
 }
 export async function handleShopAssistant(request,catalog) {
   const headers={"cache-control":"no-store","x-content-type-options":"nosniff"};
@@ -54,7 +54,7 @@ export async function handleShopAssistant(request,catalog) {
   const message=body?.message;
   if(typeof message!=="string"||message.trim().length<1||message.length>500)return respond({ok:false,code:"INVALID_MESSAGE"},400);
   const result=answerShopQuestion(message,catalog);
-  return respond({ok:true,mode:"catalog",reply:result.reply,links:result.links});
+  return respond({ok:true,sender_type:"SYSTEM",sender_id:"catalog",sender_label:"System",timestamp:new Date().toISOString(),mode:"catalog",reply:result.reply,links:result.links});
 }
 const CHAT_CSS = [
 "#go-sales-root{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:1000;color:#f5f3ec;font:400 14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}",
@@ -82,11 +82,11 @@ const CHAT_CSS = [
 ].join("");
 const CHAT_HTML = [
 '<aside id="go-sales-root" aria-label="ผู้ช่วยข้อมูลสินค้าของ YGG METRO">',
-'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 คุยกับ GO</button>',
-'<section id="go-sales-panel" role="dialog" aria-label="GO ผู้ช่วยเลือกสินค้า" hidden>',
-'<div id="go-sales-header"><div><strong>GO · ผู้ช่วยเลือกสินค้า</strong><small>โหมดแค็ตตาล็อก · ไม่ใช้ AI Cloud</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
+'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 System · แนะนำสินค้า</button>',
+'<section id="go-sales-panel" role="dialog" aria-label="System แนะนำสินค้า" hidden>',
+'<div id="go-sales-header"><div><strong>System · แนะนำสินค้า</strong><small>โหมดแค็ตตาล็อก · ไม่ใช้ AI Cloud</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
 '<div id="go-sales-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>',
-'<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="ข้อความถึง GO"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
+'<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="คำถามเกี่ยวกับสินค้า"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
 '<p id="go-sales-note">ตอบจากข้อมูลสินค้าในร้าน · ไม่ตรวจออเดอร์หรือรับข้อมูลบัตร · หากต้องการคุยงาน กดเมนูคุยงาน</p>',
 '</section></aside>'
 ].join("");

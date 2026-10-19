@@ -1,0 +1,7 @@
+
+> yggmetro-web@0.1.0 test:e2e
+> node tests/e2e/storefront.cjs
+
+Desktop/mobile storefront flow passed at 1440px
+Desktop/mobile storefront flow passed at 708px
+Desktop/mobile storefront flow passed at 390px
