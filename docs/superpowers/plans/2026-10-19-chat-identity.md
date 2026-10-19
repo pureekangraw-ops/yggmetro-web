@@ -26,4 +26,4 @@
 - [x] Implement customer and Admin views in src/request-pages.js with sender labels/timestamps, manual request submission independent of AI, draft editing, status history and delivery readback.
 - [x] Integrate routes and server-generated AI identity; label deterministic shop responses System rather than AI. Keep commerce and provider interfaces intact.
 - [x] Run full regression, real SQLite workflow, browser end-to-end customer→Admin→customer, local workerd and Wrangler dry-run; correct regressions.
-- [ ] Publish isolated branch PR with reproducible evidence, migration/credential steps and production limits. Verify remote commit/PR readback.
+- [x] Publish isolated branch PR with reproducible evidence, migration/credential steps and production limits. Verify remote commit/PR readback.
