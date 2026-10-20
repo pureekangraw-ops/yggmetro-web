@@ -1,0 +1,74 @@
+{
+  "base_commit": "6fc81162bff15d6d61e84d1f06f2b86284cdd92c",
+  "built": true,
+  "tested_locally": true,
+  "production_verified": false,
+  "unit_tests_passed": 59,
+  "real_model_inference_verified": false,
+  "files": {
+    "src/index.js": {
+      "sha256": "6abd5f1f20ef95eeb864f9da2dc64090998c05438a15aa4f7df84e1e0e40c88d",
+      "bytes": 54458
+    },
+    "src/request-workflow.js": {
+      "sha256": "4de507b0c37b7ee831522dc991884c659cc1fe427a6ca5ee134fadf8a347f3b2",
+      "bytes": 15501
+    },
+    "src/request-pages.js": {
+      "sha256": "0d8d3dc162f211217894ab2ec9150aa9600bf56e2aca5096719b4a5c5ab052af",
+      "bytes": 15715
+    },
+    "src/shop-assistant.js": {
+      "sha256": "8e45be742a479d639e644222c41857cf690e1485bbac1d16af4fec22c8b4fe22",
+      "bytes": 11663
+    },
+    "public/assets/shop/go-chat.js": {
+      "sha256": "8f0b74dc57d51544300c2d813b3f0e35b98241af0fe83fadef3d53f36b2c75da",
+      "bytes": 4871
+    },
+    "wrangler.jsonc": {
+      "sha256": "59c591ded05f22b6a1670674ec226b71720b1036ad44cacb1ab730f670f0b5f0",
+      "bytes": 460
+    },
+    "migrations/0002_request_workflow.sql": {
+      "sha256": "20327350840780ea4fba77b9a30f5efa0301b6f3a4a590521aa93c60e4d560e1",
+      "bytes": 1483
+    },
+    "tests/request-workflow.test.cjs": {
+      "sha256": "bf525ced61f2d1ab659c7e198d22e2a50bc9c44ab38ebf19c87705d9e13a23de",
+      "bytes": 11359
+    },
+    "tests/e2e/request-workflow.mjs": {
+      "sha256": "448c546b193647113424ff80d40b7bb3c2f6b7ce3d18e0525625d523ff1f0233",
+      "bytes": 14826
+    },
+    "tests/helpers/request-store.cjs": {
+      "sha256": "40a6712cea49f5ed2dd35f8c86b7335e5a02e2e9c0fe958a5f927e1c2e232df2",
+      "bytes": 722
+    },
+    "docs/identity-workflow-20261019/README.md": {
+      "sha256": "f831de2a40063c8c517cd215600ec7cae7e2601a846629257693525c6123dd83",
+      "bytes": 10906
+    },
+    "docs/identity-workflow-20261019/unit-tests.log": {
+      "sha256": "3ec574bc20ec7a31b36796290421446b31c90063ea74bb9c005f821c4fe2158a",
+      "bytes": 5748
+    },
+    "docs/identity-workflow-20261019/storefront-browser.log": {
+      "sha256": "22d5ad0c73145ddf36fcf1b1e53aa7d3cd20ecb3a03f6dcdc524691275eaf682",
+      "bytes": 206
+    },
+    "docs/identity-workflow-20261019/wrangler-dry-run.log": {
+      "sha256": "179986721eba9b05a24f744d9b3fbefd0c9a8993e0101fd96dc1f6aba8d39ce2",
+      "bytes": 596
+    },
+    "docs/identity-workflow-20261019/browser-workerd.log": {
+      "sha256": "a47fa67edea82d9e49f51383252b09982e20d85cd7a077d272d5150eb183261b",
+      "bytes": 1033
+    },
+    "docs/identity-workflow-20261019/browser-workerd-result.json": {
+      "sha256": "c7a7052f52ac30aa3962e0ddbb14c6bd674980796c41b28d6130a6864997184b",
+      "bytes": 847
+    }
+  }
+}

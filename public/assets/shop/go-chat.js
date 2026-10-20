@@ -33,10 +33,13 @@
   document.addEventListener("change",scheduleCollisionCheck,true);
   scheduleCollisionCheck();
   function allowedLink(url){return typeof url==="string" && (/^\/products\/[a-z0-9-]+$/.test(url)||/^\/client\?service=lab$/.test(url)||url==="/#products")}
-  function push(role,text,links) {
+  function push(role,text,links,metadata) {
     const bubble=document.createElement("div");
     bubble.className="go-sales-bubble"+(role==="customer"?" customer":"");
-    bubble.textContent=String(text||"");
+    const label=document.createElement("strong");label.textContent=role==="customer"?"คุณ":"System";
+    const content=document.createElement("div");content.textContent=String(text||"");
+    const time=document.createElement("time");time.textContent=new Date(metadata?.timestamp||Date.now()).toLocaleString("th-TH");
+    bubble.append(label,content,time);
     messages.appendChild(bubble);
     if(Array.isArray(links))for(const link of links.slice(0,3)){
       if(!allowedLink(link?.url))continue;
@@ -52,7 +55,7 @@
   launcher.addEventListener("click",()=>{
     launcher.hidden=true;launcher.setAttribute("aria-expanded","true");
     panel.hidden=false;input.focus();
-    if(!messages.childNodes.length)push("assistant","สวัสดีครับ 💙 ผม GO ช่วยแนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
+    if(!messages.childNodes.length)push("system","สวัสดีครับ 💙 System แนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
   });
   function close(){panel.hidden=true;launcher.hidden=false;launcher.setAttribute("aria-expanded","false");scheduleCollisionCheck();launcher.focus()}
   closer.addEventListener("click",close);
@@ -68,8 +71,8 @@
       const res=await fetch("/api/v1/shop/assistant",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({message})});
       const data=await res.json();
       if(!res.ok||!data.ok)throw new Error("shop assistant unavailable");
-      push("assistant",data.reply,data.links);
-    }catch{push("assistant","ขออภัยครับ ตอนนี้ระบบตอบข้อความไม่สำเร็จ กรุณาลองอีกครั้งหรือเปิดหน้าสินค้าโดยตรง")}
+      push("system",data.reply,data.links,data);
+    }catch{push("system","ขออภัยครับ ตอนนี้ระบบตอบข้อความไม่สำเร็จ กรุณาลองอีกครั้งหรือเปิดหน้าสินค้าโดยตรง")}
     finally{send.disabled=false;input.disabled=false;input.focus()}
   });
 
