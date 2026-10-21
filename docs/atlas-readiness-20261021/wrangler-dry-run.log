@@ -1,0 +1,15 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+
+ ⛅️ wrangler 4.151.1
+────────────────────
+✨ Read 48 files from the assets directory /workspace/shared/atlas-shop-readiness/public
+Total Upload: 943.65 KiB / gzip: 140.22 KiB
+Your Worker has access to the following bindings:
+Binding                                 Resource
+env.REQUESTS_DB (pantheon-workhub)      D1 Database
+env.ASSETS                              Assets
+
+--dry-run: exiting now.

@@ -1,0 +1,70 @@
+✖ new-request cancellation retains unsaved brief, selection and database record count (40.902601ms)
+✖ legacy-import cancellation retains the unsaved current request (19.774212ms)
+✖ failed new-request creation preserves unsaved draft and later saves the original ID (14.275203ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159.484605
+
+✖ failing tests:
+
+test at tests/request-recovery.test.cjs:52:1
+✖ new-request cancellation retains unsaved brief, selection and database record count (40.902601ms)
+  AssertionError [ERR_ASSERTION]: must not silently navigate to a new draft
+  + actual - expected
+
+  + 'BRIEF-272db0f9-0319-4a58-9773-b7cba2ffd8ad'
+  - 'BRIEF-32f48092-d7e7-4c58-9fcc-b9848dc8b646'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-shop-readiness/tests/request-recovery.test.cjs:56:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-272db0f9-0319-4a58-9773-b7cba2ffd8ad',
+    expected: 'BRIEF-32f48092-d7e7-4c58-9fcc-b9848dc8b646',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-recovery.test.cjs:62:1
+✖ legacy-import cancellation retains the unsaved current request (19.774212ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'BRIEF-fa37436d-30af-414d-900e-f031edb07466'
+  - 'BRIEF-e13177c4-97e0-4f06-91d0-e80279effb9d'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-shop-readiness/tests/request-recovery.test.cjs:67:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-fa37436d-30af-414d-900e-f031edb07466',
+    expected: 'BRIEF-e13177c4-97e0-4f06-91d0-e80279effb9d',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-recovery.test.cjs:73:1
+✖ failed new-request creation preserves unsaved draft and later saves the original ID (14.275203ms)
+  AssertionError [ERR_ASSERTION]: retry must save the original request, not create another
+  + actual - expected
+
+  + 'BRIEF-cc2009e1-8af6-4e1a-ab90-90b8bbbd822b'
+  - 'BRIEF-0b52248b-964f-4d03-ba46-e303483268b8'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-shop-readiness/tests/request-recovery.test.cjs:83:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-cc2009e1-8af6-4e1a-ab90-90b8bbbd822b',
+    expected: 'BRIEF-0b52248b-964f-4d03-ba46-e303483268b8',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,33 @@
+✔ new-request cancellation retains unsaved brief, selection and database record count (29.421446ms)
+✖ failed request selection does not overwrite a different request on the next save (30.833133ms)
+✔ legacy-import cancellation retains the unsaved current request (11.409682ms)
+✔ failed new-request creation preserves unsaved draft and later saves the original ID (14.987515ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 216.51471
+
+✖ failing tests:
+
+test at tests/request-recovery.test.cjs:66:1
+✖ failed request selection does not overwrite a different request on the next save (30.833133ms)
+  AssertionError [ERR_ASSERTION]: failed navigation must restore the old selection
+  + actual - expected
+
+  + 'BRIEF-60634af8-16a3-4b8b-8984-d919638938cc'
+  - 'BRIEF-451797a0-8b2b-4768-b293-e2cb98ebc21e'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-shop-readiness/tests/request-recovery.test.cjs:75:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-60634af8-16a3-4b8b-8984-d919638938cc',
+    expected: 'BRIEF-451797a0-8b2b-4768-b293-e2cb98ebc21e',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
