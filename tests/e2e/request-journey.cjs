@@ -55,12 +55,21 @@ async function requestFromShop(page, origin) {
   await page.goto(origin + '/shop');
   // The launcher intentionally hides when it overlaps content. Find an ordinary scroll
   // position where a customer can open it; never force-click or disable collision rules.
+  await page.evaluate(async () => {
+    [...document.images].forEach(image => { image.loading = 'eager'; });
+    await Promise.all([...document.images].map(image => image.decode().catch(() => {})));
+    await document.fonts.ready;
+  });
   const extent = await page.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; y <= extent; y += 400) {
-    await page.evaluate(top => scrollTo(0, top), y);
+  for (let y = 0; y <= extent; y += 100) {
+    // scrollTo(x,y) inherits smooth CSS scrolling: two frames can observe a transient
+    // visible launcher that hides at the final position. Settle real scroll positions.
+    await page.evaluate(top => scrollTo({top, behavior: 'instant'}), y);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     if (await page.locator('#go-sales-launcher').isVisible()) break;
   }
+  await page.screenshot({path: `test-results/request-journey/shop-entry-${page.viewportSize().width}.png`, fullPage: true});
+  assert.equal(await page.locator('#go-sales-launcher').isVisible(), true, 'catalog support launcher must be reachable at a settled scroll position');
   await page.locator('#go-sales-launcher').click();
   await page.locator('#go-sales-input').fill('ขอคุยกับพนักงาน');
   await page.locator('#go-sales-send').click();
