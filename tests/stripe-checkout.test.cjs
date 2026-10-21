@@ -13,6 +13,39 @@ function fixture(){const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync
 function checkout(extra={},origin='https://shop.yggmetro.com'){return new Request('https://shop.yggmetro.com/api/v1/shop/checkout',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({slug:'shop-home',requestId:'a'.repeat(64),...extra})})}
 const webhook=sig=>new Request('https://shop.yggmetro.com/api/v1/stripe/webhook',{method:'POST',headers:{'stripe-signature':sig},body:'{}'});
 const catalog=[{slug:'shop-home'}];
+test('sandbox checkout returns only sandbox redirects and fulfills an owned synthetic order',async t=>{
+ const {handleShopCheckout,handleStripeWebhook,handleShopOrder}=await load();const f=fixture();t.after(()=>f.db.close());
+ const origin='https://shop-sandbox.example';Object.assign(f.env,{SHOP_ENVIRONMENT:'sandbox',SHOP_SANDBOX_ORIGIN:origin});
+ const create=f.sdk.checkout.sessions.create;
+ f.sdk.checkout.sessions.create=async(body,options)=>{
+  assert.equal(body.success_url,origin+'/order?session_id={CHECKOUT_SESSION_ID}');
+  assert.equal(body.cancel_url,origin+'/checkout');
+  return create(body,options);
+ };
+ const request=new Request(origin+'/api/v1/shop/checkout',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({slug:'shop-home',requestId:'b'.repeat(64)})});
+ const response=await handleShopCheckout(request,f.env,catalog,()=>f.sdk);assert.equal(response.status,200);
+ const cookie=response.headers.get('set-cookie').split(';')[0];
+ const order=host=>new Request(host+'/api/v1/shop/order/download?session_id=cs_test_example',{headers:{cookie}});
+ assert.equal((await handleShopOrder(order(origin),f.env)).status,409);
+ const event=new Request(origin+'/api/v1/stripe/webhook',{method:'POST',headers:{'stripe-signature':'valid'},body:'{}'});
+ assert.equal((await handleStripeWebhook(event,f.env,()=>f.sdk)).status,200);
+ assert.equal(await(await handleShopOrder(order(origin),f.env)).text(),'paid-zip-content');
+ assert.equal((await handleShopOrder(order('https://shop.yggmetro.com'),f.env)).status,404);
+});
+
+test('sandbox rejects wrong origin and live configuration before provider or store access',async t=>{
+ const {handleShopCheckout,handleStripeWebhook,getShopProduct}=await load();const f=fixture();t.after(()=>f.db.close());
+ Object.assign(f.env,{SHOP_ENVIRONMENT:'sandbox',SHOP_SANDBOX_ORIGIN:'https://shop-sandbox.example'});
+ const forbidden=()=>{throw Error('provider must not be called')};
+ assert.equal((await handleShopCheckout(checkout(),f.env,catalog,forbidden)).status,403);
+ assert.equal((await handleStripeWebhook(webhook('valid'),f.env,forbidden)).status,403);
+ const sameUrlWrongOrigin=new Request('https://shop-sandbox.example/api/v1/shop/checkout',{method:'POST',headers:{origin:'https://shop.yggmetro.com','content-type':'application/json'},body:'{}'});
+ assert.equal((await handleShopCheckout(sameUrlWrongOrigin,f.env,catalog,forbidden)).status,403);
+ assert.equal(getShopProduct({...f.env,STRIPE_CHECKOUT_MODE:'live'},'shop-home'),null);
+ assert.equal(f.created,0);
+ assert.equal(f.db.prepare('SELECT count(*) AS n FROM shop_orders').get().n,0);
+});
+
 test('checkout fails closed for missing configuration, foreign origin and client prices',async()=>{
  const {handleShopCheckout,getTestProduct}=await load();const f=fixture();
  assert.equal((await handleShopCheckout(checkout(),{},catalog)).status,503);
