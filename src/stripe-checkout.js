@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
+import {shopOrigin, isShopRequest} from './shop-origin.js';
 
 const headers = {'cache-control':'no-store','x-content-type-options':'nosniff'};
 const respond = (body,status=200,extra={}) => Response.json(body,{status,headers:{...headers,...extra}});
-const origin = 'https://shop.yggmetro.com';
 const sessionPattern = /^cs_(test|live)_[A-Za-z0-9_]+$/;
 const sessionForMode=(env,id)=>sessionPattern.test(id||'')&&id.startsWith(configuration(env).live?'cs_live_':'cs_test_');
 const tokenPattern = /^[a-f0-9]{64}$/;
@@ -18,6 +18,7 @@ function configuration(env){
  catalog:live?env.STRIPE_CATALOG:env?.STRIPE_TEST_CATALOG};
 }
 export function getShopProduct(env,slug) {
+  if (!shopOrigin(env)) return null;
   const config=configuration(env);
   if(!config.enabled || !(config.live?/^(rk|sk)_live_/:/^(rk|sk)_test_/).test(config.key||'') ||
     !env?.SHOP_ORDERS?.prepare || !env?.SHOP_DOWNLOADS?.get || !env?.SHOP_DOWNLOADS?.head || !config.webhook)return null;
@@ -40,7 +41,8 @@ async function limitedBody(request,max){
 }
 export async function handleShopCheckout(request,env,catalog,client=clientFor) {
   if(request.method!=='POST')return respond({ok:false,code:'METHOD_NOT_ALLOWED'},405,{allow:'POST'});
-  if(new URL(request.url).hostname!=='shop.yggmetro.com'||request.headers.get('origin')!==origin)return respond({ok:false,code:'ORIGIN_DENIED'},403);
+  const origin = shopOrigin(env);
+  if(!isShopRequest(request,env)||request.headers.get('origin')!==origin)return respond({ok:false,code:'ORIGIN_DENIED'},403);
   if(!/^application\/json(?:;|$)/i.test(request.headers.get('content-type')||''))return respond({ok:false,code:'JSON_REQUIRED'},415);
   let body;try{body=JSON.parse(await limitedBody(request,maxBytes))}catch(e){return respond({ok:false,code:e.message==='BODY_TOO_LARGE'?'BODY_TOO_LARGE':'INVALID_JSON'},e.message==='BODY_TOO_LARGE'?413:400)}
   if(!body||Array.isArray(body)||Object.keys(body).some(k=>!['slug','requestId','email'].includes(k))||
@@ -64,6 +66,7 @@ export async function handleShopCheckout(request,env,catalog,client=clientFor) {
   }catch{return respond({ok:false,code:'CHECKOUT_UNAVAILABLE'},503)}
 }
 export async function handleStripeWebhook(request,env,client=clientFor) {
+  if(!isShopRequest(request,env))return respond({ok:false,code:'ORIGIN_DENIED'},403);
   if(request.method!=='POST')return respond({ok:false},405,{allow:'POST'});
   const config=configuration(env);
   if(!config.webhook||!env?.SHOP_ORDERS?.prepare||!(config.live?/^(rk|sk)_live_/:/^(rk|sk)_test_/).test(config.key||''))return respond({ok:false,code:'WEBHOOK_NOT_READY'},503);
@@ -84,6 +87,7 @@ export async function handleStripeWebhook(request,env,client=clientFor) {
   }catch{return respond({ok:false,code:'WEBHOOK_RETRY'},503)}
 }
 export async function handleShopOrder(request,env) {
+  if(!isShopRequest(request,env))return respond({ok:false,code:'ORDER_UNAVAILABLE'},404);
   if(!['GET','HEAD'].includes(request.method))return respond({ok:false},405,{allow:'GET, HEAD'});
   const url=new URL(request.url),id=url.searchParams.get('session_id');
   const owner=request.headers.get('cookie')?.match(/(?:^|;\s*)__Host-ygg-order=([a-f0-9]{64})(?:;|$)/)?.[1];
