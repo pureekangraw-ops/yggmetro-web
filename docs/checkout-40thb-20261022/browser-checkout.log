@@ -1,0 +1,18 @@
+✔ 40 THB mobile storefront → checkout → verified fixture webhook → owner download (955.786228ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (503.912766ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (486.887255ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (514.806714ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (635.730674ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (628.102995ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (664.549533ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (391.932102ms)
+✔ unavailable recovery storage prevents an untrackable purchase (367.309694ms)
+✔ a damaged started request is not replaced with a new purchase after reload (422.025572ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5992.290501

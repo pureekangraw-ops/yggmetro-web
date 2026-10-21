@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import {shopOrigin, isShopRequest} from './shop-origin.js';
+import {shopOrigin, isShopRequest, isShopSandbox} from './shop-origin.js';
 
 const headers = {'cache-control':'no-store','x-content-type-options':'nosniff'};
 const respond = (body,status=200,extra={}) => Response.json(body,{status,headers:{...headers,...extra}});
@@ -27,6 +27,7 @@ export function getShopProduct(env,slug) {
   if(!item || item.enabled!==true || !/^price_[A-Za-z0-9]+$/.test(item.priceId||'') ||
     !Number.isSafeInteger(item.amount)||item.amount<=0||!['usd','thb'].includes(item.currency)||
     !/^[a-zA-Z0-9][a-zA-Z0-9/_ .-]{0,180}$/.test(item.deliveryKey||'')||item.deliveryKey.includes('..'))return null;
+  if(slug==='checkout-test'&&(!isShopSandbox(env)||item.amount!==4000||item.currency!=='thb'))return null;
   return item;
 }
 export const getTestProduct=getShopProduct;
@@ -49,22 +50,54 @@ export async function handleShopCheckout(request,env,catalog,client=clientFor) {
     typeof body.slug!=='string'||!catalog.some(p=>p.slug===body.slug)||!tokenPattern.test(body.requestId||''))return respond({ok:false,code:'INVALID_CHECKOUT'},400);
   if(body.email!==undefined&&(typeof body.email!=='string'||body.email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)))return respond({ok:false,code:'EMAIL_INVALID'},400);
   const product=getShopProduct(env,body.slug);const config=configuration(env);if(!product)return respond({ok:false,code:'CHECKOUT_NOT_READY'},503);
+  // Confirm the browser can retain its owner cookie before creating a provider Session.
+  const owner=request.headers.get('cookie')?.match(/(?:^|;\s*)__Host-ygg-order=([a-f0-9]{64})(?:;|$)/)?.[1];
+  const ownerCookie=value=>cookieName+'='+value+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000';
+  if(!owner)return respond({ok:false,code:'CHECKOUT_SESSION_REQUIRED'},428,{'set-cookie':ownerCookie(token())});
   try {
-    // Delivery and price are verified before creating any checkout; a browser supplies no amounts or file keys.
-    if(!await env.SHOP_DOWNLOADS.head(product.deliveryKey))return respond({ok:false,code:'DELIVERY_NOT_READY'},503);
-    const stripe=client(env),price=await stripe.prices.retrieve(product.priceId);
-    if(price.livemode!==config.live||!price.active||price.type!=='one_time'||price.unit_amount!==product.amount||price.currency!==product.currency)return respond({ok:false,code:'PRICE_MISMATCH'},503);
-    const owner=request.headers.get('cookie')?.match(/(?:^|;\s*)__Host-ygg-order=([a-f0-9]{64})(?:;|$)/)?.[1];
-    const secret=owner||token(),digest=await hash(secret);
-    // Bind a retry to its existing owner cookie, rather than issuing access to an old session.
+    const digest=await hash(owner),stripe=client(env);
     const existing=await env.SHOP_ORDERS.prepare('SELECT session_id, token_hash FROM shop_orders WHERE request_id = ?').bind(body.requestId).first();
-    if(existing){if(!sessionForMode(env,existing.session_id))return respond({ok:false,code:'CHECKOUT_CONFLICT'},409);if(!owner||await hash(owner)!==existing.token_hash)return respond({ok:false,code:'CHECKOUT_CONFLICT'},409);const previous=await stripe.checkout.sessions.retrieve(existing.session_id);if(previous.status==='complete')return respond({ok:true,orderUrl:'/order?session_id='+encodeURIComponent(existing.session_id),testMode:!config.live});if(previous.status==='expired'||!previous.url)return respond({ok:false,code:'CHECKOUT_EXPIRED'},409);return respond({ok:true,url:previous.url,testMode:!config.live})}
-    const checkout=await stripe.checkout.sessions.create({mode:'payment',...(body.email?{customer_email:body.email}:{}),line_items:[{price:product.priceId,quantity:1}],success_url:origin+'/order?session_id={CHECKOUT_SESSION_ID}',cancel_url:origin+'/checkout',client_reference_id:body.slug,metadata:{slug:body.slug,surface:config.live?'yggmetro-store':'yggmetro-test-store'},integration_identifier:'yggmetro_web_'+body.requestId.slice(0,8).replace(/[0-9]/g,n=>String.fromCharCode(103+Number(n)))},{idempotencyKey:'yggmetro-shop-'+body.requestId});
-    if(checkout.livemode!==config.live||!sessionForMode(env,checkout.id)||!checkout.url?.startsWith('https://checkout.stripe.com/'))return respond({ok:false,code:'INVALID_PROVIDER_SESSION'},502);
-    await env.SHOP_ORDERS.prepare('INSERT INTO shop_orders (session_id, request_id, slug, price_id, amount, currency, delivery_key, token_hash, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(checkout.id,body.requestId,body.slug,product.priceId,product.amount,product.currency,product.deliveryKey,digest,'pending',Date.now()).run();
-    return respond({ok:true,url:checkout.url,testMode:!configuration(env).live},200,{'set-cookie':cookieName+'='+secret+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000'});
+    if(existing){
+      if(!sessionForMode(env,existing.session_id)||digest!==existing.token_hash)return respond({ok:false,code:'CHECKOUT_CONFLICT'},409);
+      const previous=await stripe.checkout.sessions.retrieve(existing.session_id);
+      if(previous.livemode!==config.live||previous.id!==existing.session_id)return respond({ok:false,code:'INVALID_PROVIDER_SESSION'},502);
+      if(previous.status==='complete')return respond({ok:true,orderUrl:'/order?session_id='+encodeURIComponent(existing.session_id),testMode:!config.live});
+      if(previous.status==='expired')return respond({ok:false,code:'CHECKOUT_EXPIRED'},409);
+      if(!safeCheckoutUrl(previous.url))return respond({ok:false,code:'INVALID_PROVIDER_SESSION'},502);
+      return respond({ok:true,url:previous.url,testMode:!config.live});
+    }
+    const params={mode:'payment',...(body.email?{customer_email:body.email}:{}),line_items:[{price:product.priceId,quantity:1}],success_url:origin+'/order?session_id={CHECKOUT_SESSION_ID}',cancel_url:origin+'/checkout',client_reference_id:body.slug,metadata:{slug:body.slug,surface:config.live?'yggmetro-store':'yggmetro-test-store'},integration_identifier:'yggmetro_web_'+body.requestId.slice(0,8).replace(/[0-9]/g,n=>String.fromCharCode(103+Number(n)))};
+    const parameters=JSON.stringify({live:config.live,amount:product.amount,currency:product.currency,deliveryKey:product.deliveryKey,params});
+    // This row survives a restart or provider-success/store-failure boundary. Same ID and parameters only.
+    const readAttempt=()=>env.SHOP_ORDERS.prepare('SELECT * FROM shop_checkout_attempts WHERE request_id = ?').bind(body.requestId).first();
+    const invalidAttempt=attempt=>{
+      if(attempt.token_hash!==digest||attempt.parameters!==parameters)return respond({ok:false,code:'CHECKOUT_CONFLICT'},409);
+      // Stay below Stripe's minimum 24-hour retention; old unknown outcomes require reconciliation.
+      const age=Date.now()-attempt.created_at;
+      if(!Number.isSafeInteger(attempt.created_at)||age<0||age>=23*3600000)return respond({ok:false,code:'CHECKOUT_RECONCILIATION_REQUIRED'},409);
+    };
+    let attempt=await readAttempt();
+    if(attempt){const failure=invalidAttempt(attempt);if(failure)return failure;}
+    if(!await env.SHOP_DOWNLOADS.head(product.deliveryKey))return respond({ok:false,code:'DELIVERY_NOT_READY'},503);
+    const price=await stripe.prices.retrieve(product.priceId);
+    if(price.livemode!==config.live||!price.active||price.type!=='one_time'||price.unit_amount!==product.amount||price.currency!==product.currency)return respond({ok:false,code:'PRICE_MISMATCH'},503);
+    if(!attempt){
+      await env.SHOP_ORDERS.prepare('INSERT INTO shop_checkout_attempts (request_id, token_hash, parameters, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(request_id) DO NOTHING').bind(body.requestId,digest,parameters,Date.now()).run();
+      attempt=await readAttempt();if(!attempt)throw Error('ATTEMPT_NOT_PERSISTED');
+      const failure=invalidAttempt(attempt);if(failure)return failure;
+    }
+    const checkout=await stripe.checkout.sessions.create(params,{idempotencyKey:'yggmetro-shop-'+body.requestId});
+    if(checkout.livemode!==config.live||!sessionForMode(env,checkout.id)||!safeCheckoutUrl(checkout.url))return respond({ok:false,code:'INVALID_PROVIDER_SESSION'},502);
+    await env.SHOP_ORDERS.prepare('INSERT INTO shop_orders (session_id, request_id, slug, price_id, amount, currency, delivery_key, token_hash, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(request_id) DO NOTHING').bind(checkout.id,body.requestId,body.slug,product.priceId,product.amount,product.currency,product.deliveryKey,digest,'pending',Date.now()).run();
+    const persisted=await env.SHOP_ORDERS.prepare('SELECT session_id, token_hash FROM shop_orders WHERE request_id = ?').bind(body.requestId).first();
+    if(persisted?.session_id!==checkout.id||persisted.token_hash!==digest)throw Error('ORDER_NOT_PERSISTED');
+    return respond({ok:true,url:checkout.url,testMode:!config.live},200,{'set-cookie':ownerCookie(owner)});
   }catch{return respond({ok:false,code:'CHECKOUT_UNAVAILABLE'},503)}
 }
+function safeCheckoutUrl(value){
+  try{const url=new URL(value);return url.origin==='https://checkout.stripe.com'&&!url.username&&!url.password;}catch{return false;}
+}
+
 export async function handleStripeWebhook(request,env,client=clientFor) {
   if(!isShopRequest(request,env))return respond({ok:false,code:'ORIGIN_DENIED'},403);
   if(request.method!=='POST')return respond({ok:false},405,{allow:'POST'});
