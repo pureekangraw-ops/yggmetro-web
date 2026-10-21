@@ -1,12 +1,15 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import web from '../../src/index.js';
 import requestStore from './request-store.cjs';
 
 // Isolated Node/SQLite browser harness. No production binding, credential, AI or payment.
-export async function startRequestPreview() {
+export async function startRequestPreview({adminToken} = {}) {
   const {db, env} = requestStore.fixture();
+  // Explicit synthetic fixture only; never load a credential from the environment.
+  if (adminToken) env.YGG_ADMIN_CREDENTIALS = JSON.stringify({fixture_admin: createHash('sha256').update(adminToken).digest('hex')});
   const assets = path.resolve('public');
   env.ASSETS = {async fetch(request) {
     const file = path.resolve(assets, '.' + new URL(request.url).pathname);

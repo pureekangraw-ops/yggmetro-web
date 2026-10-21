@@ -1,0 +1,39 @@
+{
+  "type": "INDEPENDENT_SYNTHETIC_ISOLATION_REVIEW",
+  "production_verified": false,
+  "checked_at": "2026-10-21T14:07:49.848Z",
+  "request_checks": 31,
+  "download_checks": 25,
+  "provider": "stubbed output; no real model or payment call",
+  "request_result": "PASS",
+  "request_ai_calls": 0,
+  "download_result": "PASS",
+  "file_reads": [
+    "cs_test_A.zip",
+    "cs_test_B.zip",
+    "cs_test_A.zip",
+    "cs_test_B.zip"
+  ],
+  "unverified_claim_probe": {
+    "status": 200,
+    "body": {
+      "intent": "HELP",
+      "jobType": null,
+      "package": null,
+      "pageCount": null,
+      "desiredDate": null,
+      "reply": "ตอนนี้ผมยังไม่ยืนยันสถานะรับงาน เริ่มงาน ส่งมอบ หรือชำระเงินจากบทสนทนาครับ กรุณาดูสถานะคำขอที่บันทึกไว้ และให้ Admin ตรวจรายการจริง",
+      "wantsEstimate": false,
+      "wantsManager": false,
+      "clientConfirmedComplete": false,
+      "sender_type": "SYSTEM",
+      "sender_id": "conversation-policy",
+      "sender_label": "System",
+      "timestamp": "2026-10-21T14:07:49.895Z",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "clientId": null,
+      "conversationId": null
+    }
+  }
+}

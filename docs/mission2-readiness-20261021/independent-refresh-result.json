@@ -1,0 +1,20 @@
+{
+  "type": "INDEPENDENT_REFRESH_LOCATOR_ISOLATION_REVIEW",
+  "checked_at": "2026-10-21T14:22:10.306Z",
+  "production_verified": false,
+  "browser_execution": false,
+  "reports": [
+    {
+      "case": "lost confirm then same-owner reload recovers existing submission using ID-only storage and zero writes",
+      "result": "PASS"
+    },
+    {
+      "case": "lost save reload rehydrates only server-owned draft; explicit retry confirms same ID",
+      "result": "PASS"
+    },
+    {
+      "case": "copied pending locator plus different owner cookie cannot read, hydrate, claim or confirm",
+      "result": "PASS"
+    }
+  ]
+}

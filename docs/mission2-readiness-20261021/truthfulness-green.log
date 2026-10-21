@@ -1,0 +1,16 @@
+✔ 30-fixture conversation contract keeps critical intents deterministic and public-safe (88.242158ms)
+✔ internal terms and system-like templates from model output are stripped before reaching customer (2.73139ms)
+✔ handoff packet carries context without inventing commercial truth (0.950864ms)
+✔ GO whisper and takeover fail closed until their budget service is mapped (6.555095ms)
+✔ GO budget refusal is explicit and does not silently turn into a PANTHEON task (0.787698ms)
+✔ customer and Admin pages compile, identify actual senders, and keep submission independent of AI (2.282011ms)
+✔ neutral-input model claims about payment, acceptance and delivery become honest System copy (2.808435ms)
+✔ request page distinguishes recorded intake from accepted work and payment (0.339112ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 206.658003

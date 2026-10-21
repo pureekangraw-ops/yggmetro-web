@@ -1,0 +1,53 @@
+✔ actual Custom Order entry bootstraps owner, saves draft, confirms, and offers owned readback (24.452529ms)
+✔ lost Custom Order confirmation response retries original request without duplicate or losing newer edits (10.149757ms)
+✔ Custom Order network failure and repeated submit preserve form and one immutable pending request (8.724544ms)
+✔ Custom Order retries a lost draft-save response and retains owner isolation when session expires (6.727265ms)
+✔ Custom Order warns before leaving edited or uncertain form, then clears warning after success (8.633111ms)
+✖ Custom Order lost-confirm response then refresh resolves the existing submission without another write (7.213709ms)
+✖ Custom Order lost-save response then refresh restores only the server-owned draft before retry (6.049211ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 5
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159.840532
+
+✖ failing tests:
+
+test at tests/custom-order-journey.test.cjs:41:1
+✖ Custom Order lost-confirm response then refresh resolves the existing submission without another write (7.213709ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /บันทึกคำขอแล้ว รอ Admin ตรวจสอบ/. Input:
+
+  ''
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/custom-order-journey.test.cjs:44:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /บันทึกคำขอแล้ว รอ Admin ตรวจสอบ/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/custom-order-journey.test.cjs:48:1
+✖ Custom Order lost-save response then refresh restores only the server-owned draft before retry (6.049211ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + ''
+  - 'Synthetic web brief'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/custom-order-journey.test.cjs:50:121)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: 'Synthetic web brief',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

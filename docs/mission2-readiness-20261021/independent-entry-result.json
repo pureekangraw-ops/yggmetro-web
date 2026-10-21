@@ -1,0 +1,25 @@
+{
+  "type": "INDEPENDENT_ENTRY_SCRIPT_ISOLATION_REVIEW",
+  "checked_at": "2026-10-21T14:16:10.427Z",
+  "production_verified": false,
+  "browser_execution": false,
+  "reports": [
+    {
+      "case": "forced request-ID collision across customers cannot claim/read/overwrite",
+      "result": "PASS",
+      "foreign_status": 404
+    },
+    {
+      "case": "cookie replaced between uncertain create and retry cannot transfer ownership",
+      "result": "PASS"
+    },
+    {
+      "case": "lost confirm response preserves immutable snapshot and one SUBMITTED event",
+      "result": "PASS"
+    },
+    {
+      "case": "failed bootstrap creates no request or session and leaks no error detail",
+      "result": "PASS"
+    }
+  ]
+}
