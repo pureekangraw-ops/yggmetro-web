@@ -23,9 +23,10 @@ test('40 THB mobile storefront → checkout → verified fixture webhook → own
  await page.getByRole('textbox',{name:'อีเมลสำหรับรายการสั่งซื้อ'}).fill('test@example.com');
  await page.screenshot({path:'test-results/checkout-40thb-mobile.png',fullPage:true});
  await submit(page);await page.waitForURL('https://checkout.stripe.com/**');assert.equal(fixture.created,1);
- const cookie=(await context.cookies(fixture.origin)).find(c=>c.name==='__Host-ygg-order');assert.equal(cookie.httpOnly,true);assert.equal(cookie.secure,true);
- const pending=await context.request.get(fixture.origin+'/api/v1/shop/order/download?session_id=cs_test_local40');assert.equal(pending.status(),409);
+ const cookie=(await context.cookies()).find(c=>c.name==='__Host-ygg-order'&&c.domain==='127.0.0.1');assert.equal(cookie.httpOnly,true);assert.equal(cookie.secure,true);
  await page.goto(fixture.origin+'/order?session_id=cs_test_local40');await page.locator('#status').filter({hasText:'กำลังรอการยืนยัน'}).waitFor();assert.equal(await page.locator('#download').isVisible(),false);
+ // Use the browser's loopback secure-context cookie rules, rather than APIRequestContext's HTTP URL filter.
+ assert.equal(await page.evaluate(async()=> (await fetch('/api/v1/shop/order/download?session_id=cs_test_local40')).status),409);
  assert.equal((await fixture.pay()).status,200);await page.locator('#check').click();await page.locator('#download').waitFor();
  const downloading=page.waitForEvent('download');await page.locator('#download').click();const download=await downloading;assert.deepEqual(await fs.readFile(await download.path()),fixture.file);
  const foreign=await browser.newContext();try{assert.equal((await foreign.request.get(fixture.origin+'/api/v1/shop/order/download?session_id=cs_test_local40')).status(),404)}finally{await foreign.close()}
