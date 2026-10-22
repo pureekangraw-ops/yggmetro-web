@@ -88,3 +88,29 @@ for(const width of [390,1440])test('sandbox resource links and images remain loc
  }
  assert.deepEqual(external,[]);assert.equal(fixture.created,0);assert.equal(fixture.db.prepare('SELECT count(*) n FROM shop_orders').get().n,0);
 });
+
+for(const width of [320,390,540,708,1440])test('mascot protects checkout notices and retains controls at '+width+'px',async t=>{
+ const {fixture,page,checkout}=await setup(t,{width});await checkout();
+ await page.emulateMedia({reducedMotion:'reduce'});
+ const protectedSelector='.test-mode,.payment-info,.commerce-status,.order-total,.cart-item';
+ async function settle(){await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))}
+ async function noOverlap(){await settle();assert.equal(await page.evaluate(selector=>{
+  const root=document.querySelector('#go-sales-root');if(getComputedStyle(root).visibility==='hidden')return false;
+  const mascot=document.querySelector('#go-mascot-dock').getBoundingClientRect();
+  return [...document.querySelectorAll(selector)].some(node=>{const r=node.getBoundingClientRect();return Math.min(mascot.right,r.right)-Math.max(mascot.left,r.left)>6&&Math.min(mascot.bottom,r.bottom)-Math.max(mascot.top,r.top)>6});
+ },protectedSelector),false,'mascot overlaps checkout information');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false)}
+ await page.locator('input[name="email"]').fill('fixture@example.com');await noOverlap();
+ await page.screenshot({path:'test-results/checkout-mascot-'+width+'.png',fullPage:true});
+ for(const y of [0,200,400,650,900,1200]){await page.evaluate(y=>scrollTo(0,y),y);await noOverlap()}
+ // Existing collision behavior can hide the dock where no safe slot remains.
+ // Find an unobstructed slot and verify minimize/open/close still work.
+ let visible=false;
+ for(const y of [0,200,400,650,900,1200,2000]){await page.evaluate(y=>scrollTo(0,y),y);await settle();if(await page.locator('#go-mascot-minimize').isVisible()){visible=true;break}}
+ assert.equal(visible,true,'mascot remains available');
+ await page.locator('#go-mascot-minimize').click();assert.equal(await page.locator('#go-mascot-image').isVisible(),false);
+ await page.locator('#go-sales-launcher').click();assert.equal(await page.locator('#go-sales-panel').isVisible(),true);
+ assert.equal(await page.locator('#go-sales-launcher').getAttribute('aria-expanded'),'true');
+ await page.locator('#go-sales-close').click();assert.equal(await page.locator('#go-sales-panel').isVisible(),false);
+ await noOverlap();assert.equal(fixture.created,0);
+});
