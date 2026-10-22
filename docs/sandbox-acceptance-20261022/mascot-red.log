@@ -17,9 +17,9 @@
 test at tests/e2e/mascot-red.tmp.cjs:92:43
 ✖ mascot protects checkout notices and retains controls at 320px (1150.423236ms)
   AssertionError [ERR_ASSERTION]: mascot overlaps checkout information
-  
+
   true !== false
-  
+
       at noOverlap (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:97:51)
       at async TestContext.<anonymous> (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:103:72)
       at async Test.run (node:internal/test_runner/test:1389:7)
@@ -35,9 +35,9 @@ test at tests/e2e/mascot-red.tmp.cjs:92:43
 test at tests/e2e/mascot-red.tmp.cjs:92:43
 ✖ mascot protects checkout notices and retains controls at 390px (578.314293ms)
   AssertionError [ERR_ASSERTION]: mascot overlaps checkout information
-  
+
   true !== false
-  
+
       at noOverlap (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:97:51)
       at async TestContext.<anonymous> (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:103:72)
       at async Test.run (node:internal/test_runner/test:1389:7)
@@ -53,9 +53,9 @@ test at tests/e2e/mascot-red.tmp.cjs:92:43
 test at tests/e2e/mascot-red.tmp.cjs:92:43
 ✖ mascot protects checkout notices and retains controls at 540px (580.152654ms)
   AssertionError [ERR_ASSERTION]: mascot overlaps checkout information
-  
+
   true !== false
-  
+
       at noOverlap (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:97:51)
       at async TestContext.<anonymous> (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:103:72)
       at async Test.run (node:internal/test_runner/test:1389:7)
@@ -71,9 +71,9 @@ test at tests/e2e/mascot-red.tmp.cjs:92:43
 test at tests/e2e/mascot-red.tmp.cjs:92:43
 ✖ mascot protects checkout notices and retains controls at 708px (568.574321ms)
   AssertionError [ERR_ASSERTION]: mascot overlaps checkout information
-  
+
   true !== false
-  
+
       at noOverlap (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:97:51)
       at async TestContext.<anonymous> (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:103:72)
       at async Test.run (node:internal/test_runner/test:1389:7)
@@ -89,9 +89,9 @@ test at tests/e2e/mascot-red.tmp.cjs:92:43
 test at tests/e2e/mascot-red.tmp.cjs:92:43
 ✖ mascot protects checkout notices and retains controls at 1440px (566.948982ms)
   AssertionError [ERR_ASSERTION]: mascot overlaps checkout information
-  
+
   true !== false
-  
+
       at noOverlap (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:97:51)
       at async TestContext.<anonymous> (/workspace/yggmetro-web/tests/e2e/mascot-red.tmp.cjs:103:72)
       at async Test.run (node:internal/test_runner/test:1389:7)

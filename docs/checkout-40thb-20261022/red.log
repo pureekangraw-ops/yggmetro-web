@@ -34,9 +34,9 @@
 test at tests/stripe-checkout.test.cjs:150:1
 ✖ first checkout establishes ownership before any provider call (1.872524ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   200 !== 428
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:154:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -51,9 +51,9 @@ test at tests/stripe-checkout.test.cjs:150:1
 test at tests/stripe-checkout.test.cjs:160:1
 ✖ concurrent retries persist one order and return the same checkout (2.31659ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   0 !== 1
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:165:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -68,9 +68,9 @@ test at tests/stripe-checkout.test.cjs:160:1
 test at tests/stripe-checkout.test.cjs:168:1
 ✖ provider success followed by D1 failure recovers with the same intent after restart (1.763063ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   0 !== 1
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:173:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -85,9 +85,9 @@ test at tests/stripe-checkout.test.cjs:168:1
 test at tests/stripe-checkout.test.cjs:179:1
 ✖ an old unresolved checkout is not retried after the provider idempotency window (2.366573ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   503 !== 409
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:185:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -102,9 +102,9 @@ test at tests/stripe-checkout.test.cjs:179:1
 test at tests/stripe-checkout.test.cjs:188:1
 ✖ an unresolved request cannot change its email or price or be taken over (1.879634ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   503 !== 409
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:192:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -119,9 +119,9 @@ test at tests/stripe-checkout.test.cjs:188:1
 test at tests/stripe-checkout.test.cjs:200:1
 ✖ missing durable-attempt migration fails before calling the provider (1.515496ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   200 !== 503
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:202:9)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {

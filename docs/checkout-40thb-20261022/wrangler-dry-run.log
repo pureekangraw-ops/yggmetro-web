@@ -10,8 +10,8 @@ Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more
 ✨ Read 48 files from the assets directory /workspace/scratch/481624336393/yggmetro-web/public
 Total Upload: 965.34 KiB / gzip: 144.84 KiB
 Your Worker has access to the following bindings:
-Binding                                 Resource         
-env.REQUESTS_DB (pantheon-workhub)      D1 Database      
-env.ASSETS                              Assets           
+Binding                                 Resource
+env.REQUESTS_DB (pantheon-workhub)      D1 Database
+env.ASSETS                              Assets
 
 --dry-run: exiting now.

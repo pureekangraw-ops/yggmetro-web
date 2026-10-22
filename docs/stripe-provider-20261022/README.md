@@ -42,4 +42,3 @@ Automatic approval review rejected sending its signing secret from Stripe to Clo
 Production merge/deploy is still pending acceptance. Existing CI107/107 + browser10/10 belongs to source commit5c13ae3 and fixture scope; these new provider observations are separate evidence.
 
 Official test data: https://docs.stripe.com/testing
-

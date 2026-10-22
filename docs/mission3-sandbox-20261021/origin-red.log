@@ -17,7 +17,7 @@ Baseline failing test output; long rendered-HTML assertion values omitted.
 test at tests/shop-sandbox.test.cjs:9:1
 ✖ isolated sandbox serves shop, assets and payment routes on its exact origin (79.817569ms)
   AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Shopping cart/. Input:
-  
+
   '<!doctype html>\n' +
     '<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n' +
     '<title>YGG METRO · Creative Services & Digital Assets</title><meta name="description" content="YGG METRO คือแพลตฟอร์มสร้างสรรค์และหน้าร้านดิจิทัลสำหรับ presentation, visual systems, web experiences และ digital assets ช่วยเปลี่ยนไอเดีย ไฟล์ และ brief ที่ยังไม่เป็นรูปให้พร้อมใช้งานจริง"><link rel="canonical" href="https://yggmetro.com/">\n' +
@@ -38,7 +38,7 @@ test at tests/shop-sandbox.test.cjs:9:1
     '.feature{padding:30px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(120deg,rgba(245,199,139,.16),rgba(255,255,255,.05) 45%,rgba(8,12,18,.62));display:flex;align-items:end;justify-content:space-between;gap:30px}.feature h2{margin:8px 0 12px;font-size:clamp(2.1rem,5vw,4rem);line-height:.95;letter-spacing:-.06em}.feature p{margin:0;max-width:540px;color:var(--muted);line-height:1.58}.feature .button{flex:0 0 auto}\n' +
     '.foot{display:flex;justify-content:space-between;gap:20px;padding:34px 0 22px;color:rgba(255,255,255,.46);font-size:.76rem;border-top:1px solid var(--line)}\n' +
     '@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:32px}.hero-note{justify-self:start;max-width:420px}.service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.process{grid-template-columns:1fr;gap:34px}.promptbase-showcase{grid-template-columns:1fr;gap:28px}.promptbase-f'... 6214 more characters
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/shop-sandbox.test.cjs:10:10)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
@@ -52,9 +52,9 @@ test at tests/shop-sandbox.test.cjs:9:1
 test at tests/shop-sandbox.test.cjs:23:1
 ✖ sandbox rejects production, foreign host and HTTP even when forwarded host claims sandbox (1.794338ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   200 !== 404
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/shop-sandbox.test.cjs:25:12)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -69,9 +69,9 @@ test at tests/shop-sandbox.test.cjs:23:1
 test at tests/shop-sandbox.test.cjs:32:1
 ✖ invalid sandbox configuration fails closed without falling back to production (0.797507ms)
   AssertionError [ERR_ASSERTION]: {"SHOP_ENVIRONMENT":"production","SHOP_SANDBOX_ORIGIN":"https://shop-sandbox.example"}
-  
+
   200 !== 404
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/shop-sandbox.test.cjs:45:14)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
@@ -87,10 +87,10 @@ test at tests/shop-sandbox.test.cjs:49:1
 ✖ sandbox pages are non-indexable and default production rendering is preserved (0.707264ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
-  
+
   + null
   - 'noindex, nofollow'
-  
+
       at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/shop-sandbox.test.cjs:51:10)
       at async Test.run (node:internal/test_runner/test:1389:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
