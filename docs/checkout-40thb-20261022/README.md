@@ -1,5 +1,7 @@
 # 40 THB sandbox storefront and recoverable checkout
 
+**Later runtime checkpoint:** [Real Stripe testmode acceptance](../stripe-provider-20261022/README.md) records the actual THB40 provider decline/success test and isolated sandbox deployment. The Live-only connector limitation below is historical; application webhook/delivery acceptance is still blocked by missing Worker secrets.
+
 BIG requested that the website pass testing and the product be priced at 40 baht. In the ongoing sandbox task, this is implemented as a distinct **sandbox-only sample**, not a repricing of the six existing products.
 
 Base: PR #63 / Mission 4 starting commit `5a15b781bba384fc0f58d87e8b263ef62e59d63e`.
