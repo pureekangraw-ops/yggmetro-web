@@ -5,7 +5,7 @@ test.before(async()=>{browser=await chromium.launch({headless:true,...(process.e
 test.after(async()=>browser?.close());
 async function setup(t,options={}){
  const {startCheckoutPreview}=await import('../helpers/checkout-preview.mjs');const fixture=await startCheckoutPreview(options);
- const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});const page=await context.newPage();page.setDefaultTimeout(5000);
+ const context=await browser.newContext({viewport:{width:options.width||390,height:844},acceptDownloads:true});const page=await context.newPage();page.setDefaultTimeout(5000);
  t.after(async()=>{await context.close();await fixture.close()});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));t.after(()=>assert.deepEqual(errors,[]));
  await page.route('https://checkout.stripe.com/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Simulated provider checkout</h1>'}));
@@ -16,22 +16,22 @@ const requestKey='yggmetro-checkout-checkout-test-test';
 const savedId=page=>page.evaluate(key=>sessionStorage.getItem(key),requestKey);
 const submit=page=>page.locator('button[form="secure-checkout-form"]').click();
 
-test('40 THB mobile storefront → checkout → verified fixture webhook → owner download',async t=>{
- const {fixture,context,page,checkout}=await setup(t);await checkout();
+for(const width of [390,1440])test('40 THB storefront → checkout → verified fixture webhook → owner download at '+width+'px',async t=>{
+ const {fixture,context,page,checkout}=await setup(t,{width});await checkout();
  assert.match(await page.locator('.order-total').innerText(),/฿40\.00/);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.getByRole('textbox',{name:'อีเมลสำหรับรายการสั่งซื้อ'}).fill('test@example.com');
- await page.screenshot({path:'test-results/checkout-40thb-mobile.png',fullPage:true});
+ await page.screenshot({path:'test-results/checkout-40thb-'+width+'.png',fullPage:true});
  await submit(page);await page.waitForURL('https://checkout.stripe.com/**');assert.equal(fixture.created,1);
  const cookie=(await context.cookies()).find(c=>c.name==='__Host-ygg-order'&&c.domain==='127.0.0.1');assert.equal(cookie.httpOnly,true);assert.equal(cookie.secure,true);
  await page.goto(fixture.origin+'/order?session_id=cs_test_local40');await page.locator('#status').filter({hasText:'กำลังรอการยืนยัน'}).waitFor();assert.equal(await page.locator('#download').isVisible(),false);
  // Use the browser's loopback secure-context cookie rules, rather than APIRequestContext's HTTP URL filter.
  assert.equal(await page.evaluate(async()=> (await fetch('/api/v1/shop/order/download?session_id=cs_test_local40')).status),409);
- assert.equal((await fixture.pay()).status,200);await page.locator('#check').click();await page.locator('#download').waitFor();
+ assert.equal((await fixture.pay()).status,200);assert.equal((await fixture.pay()).status,200);assert.equal(fixture.db.prepare('SELECT count(*) n FROM shop_orders').get().n,1);await page.locator('#check').click();await page.locator('#download').waitFor();
  const downloading=page.waitForEvent('download');await page.locator('#download').click();const download=await downloading;assert.deepEqual(await fs.readFile(await download.path()),fixture.file);
  const foreign=await browser.newContext();try{assert.equal((await foreign.request.get(fixture.origin+'/api/v1/shop/order/download?session_id=cs_test_local40')).status(),404)}finally{await foreign.close()}
  assert.equal(fixture.db.prepare('SELECT status FROM shop_orders').get().status,'paid');
- await page.screenshot({path:'test-results/order-40thb-paid.png',fullPage:true});
+ await page.screenshot({path:'test-results/order-40thb-paid-'+width+'.png',fullPage:true});
 });
 
 for(const [label,options,expectedCalls] of [['provider timeout',{failProviderOnce:true},2],['success response lost behind a gateway failure',{dropSuccessOnce:true},1],['D1 insert failure',{failStoreOnce:true},2]]){
@@ -69,4 +69,22 @@ test('a damaged started request is not replaced with a new purchase after reload
  await page.evaluate(key=>{sessionStorage.setItem(key,'damaged');sessionStorage.setItem(key+'-started','true');sessionStorage.setItem(key+'-email','test@example.com')},requestKey);
  for(let i=0;i<2;i++){await page.reload();assert.equal(await page.locator('button[form]').isDisabled(),true);assert.equal(await savedId(page),'damaged')}
  assert.equal(fixture.created,0);
+});
+
+for(const width of [390,1440])test('sandbox resource links and images remain local and resolve at '+width+'px',async t=>{
+ const {fixture,page}=await setup(t,{width});
+ // These routes contain no remote embeds; fail closed if a regression attempts external loading.
+ const external=[];await page.route('**/*',route=>{
+  if(new URL(route.request().url()).origin!==fixture.origin){external.push(route.request().url());return route.abort()}
+  return route.continue();
+ });
+ for(const route of ['/','/shop','/products/checkout-test','/cart','/checkout','/order']){
+  assert.equal((await page.goto(fixture.origin+route)).status(),200);
+  await page.evaluate(async()=>{for(const image of document.images)image.loading='eager';await Promise.all([...document.images].map(image=>image.decode().catch(()=>{})))});
+  assert.deepEqual(await page.evaluate(()=>[...document.images].filter(image=>!image.naturalWidth).map(image=>image.src)),[]);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,route);
+  const resources=await page.evaluate(()=>[...new Set([...document.querySelectorAll('img[src],script[src],link[rel="stylesheet"][href]')].map(el=>el.src||el.href))]);
+  for(const resource of resources)assert.equal((await page.request.get(resource)).status(),200,resource);
+ }
+ assert.deepEqual(external,[]);assert.equal(fixture.created,0);assert.equal(fixture.db.prepare('SELECT count(*) n FROM shop_orders').get().n,0);
 });

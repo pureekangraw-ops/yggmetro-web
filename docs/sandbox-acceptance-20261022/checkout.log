@@ -1,0 +1,30 @@
+
+> yggmetro-web@0.1.0 test:checkout
+> node --test tests/e2e/checkout.cjs
+
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 390px (1413.576815ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 1440px (1229.763514ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (756.427279ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (769.031488ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (808.30592ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (836.666144ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (846.821253ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (892.892534ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (645.418412ms)
+✔ unavailable recovery storage prevents an untrackable purchase (604.401162ms)
+✔ a damaged started request is not replaced with a new purchase after reload (651.097399ms)
+✔ sandbox resource links and images remain local and resolve at 390px (745.8692ms)
+✔ sandbox resource links and images remain local and resolve at 1440px (782.673315ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11384.530687
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice
