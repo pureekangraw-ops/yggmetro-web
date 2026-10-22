@@ -2,7 +2,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 (async()=>{const {startPreview}=await import('../helpers/storefront-preview.mjs');const {server,origin}=await startPreview();let browser;
 try{browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});await fs.mkdir('test-results',{recursive:true});
 for(const width of [1440,708,390]){const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/products/shop-home','/cart','/checkout']){
+for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/products/shop-home','/how-to-buy','/cart','/checkout']){
  const response=await page.goto(origin+route);assert.equal(response.status(),200,route);
  await page.evaluate(async()=>{const images=[...document.images];images.forEach(image=>{image.loading='eager'});await Promise.all(images.map(i=>i.decode().catch(()=>{})))});
  const state=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,broken:[...document.images].filter(i=>!i.naturalWidth).map(i=>i.getAttribute('src'))}));
@@ -35,7 +35,7 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
   const searchBox=await page.locator('#catalog-search').boundingBox();assert.ok(searchBox.width>=240,width+'px catalog search width');
   assert.equal(await page.locator('.catalog-layout .filters').isVisible(),true);
  }
- if(route==='/shop'){assert.equal(await page.locator('[data-name="ROOT CAUSE v3"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/app/root-causes-analysis');assert.equal(await page.locator('[data-name="Adaptive Lens System"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/skill/adaptive-lens-system');assert.equal(await page.locator('[data-name="SHOP HOME"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/shop-home');assert.equal(await page.locator('[data-name="Lost Era"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/lost-era-layered-worldbuilding-kit');await page.locator('#catalog-search').fill('no-such-product-123');await page.locator('.empty-results').waitFor({state:'visible'});await page.locator('#catalog-search').fill('');await page.screenshot({path:'test-results/shop-'+width+'.png',fullPage:width>390})}
+ if(route==='/shop'){const finance=page.locator('[data-name="Personal Finance Simulator"]');assert.equal(await finance.locator('.price').textContent(),'US$19');assert.equal(await finance.locator('.status').textContent(),'ขายบน Notion Marketplace');assert.equal(await finance.locator('.product-actions .btn').getAttribute('href'),'https://www.notion.com/th/templates/ygg-metro-personal-finance-simulator');assert.equal(await page.locator('[data-name="ROOT CAUSE v3"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/app/root-causes-analysis');assert.equal(await page.locator('[data-name="Adaptive Lens System"] .product-actions .btn').getAttribute('href'),'https://promptbase.com/skill/adaptive-lens-system');assert.equal(await page.locator('[data-name="SHOP HOME"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/shop-home');assert.equal(await page.locator('[data-name="Lost Era"] .product-actions .btn').getAttribute('href'),'https://app.notion.com/templates/lost-era-layered-worldbuilding-kit');await page.locator('#catalog-search').fill('no-such-product-123');await page.locator('.empty-results').waitFor({state:'visible'});await page.locator('#catalog-search').fill('');await page.screenshot({path:'test-results/shop-'+width+'.png',fullPage:width>390})}
  if(route==='/custom-order'){
   await page.locator('#custom-order-form').scrollIntoViewIfNeeded();
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
@@ -43,13 +43,37 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
   assert.equal(collision,false,width+'px floating GO obscures custom-order controls');
  }
  if(route==='/products/finance-simulator'){
-  await page.locator('[data-add-to-cart]').click();await page.waitForURL('**/cart');await page.getByRole('link',{name:'ไปหน้าชำระเงิน'}).click();await page.waitForURL('**/checkout');
-  const email=page.getByRole('textbox',{name:'อีเมลสำหรับรายการสั่งซื้อ'});await email.fill('buyer@example.com');
-  let submitted=false;await page.route('**/api/v1/shop/checkout',async route=>{const body=route.request().postDataJSON();assert.deepEqual(Object.keys(body).sort(),['email','requestId','slug']);assert.equal(body.email,'buyer@example.com');assert.equal(body.slug,'finance-simulator');submitted=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,code:'CHECKOUT_NOT_READY'})})});
-  await page.getByRole('button',{name:'ดำเนินการชำระเงิน'}).click();await page.getByRole('status').filter({hasText:'ยังเปิดหน้าชำระเงินไม่ได้'}).waitFor();assert.ok(submitted);assert.equal(await email.inputValue(),'buyer@example.com');
-  await page.screenshot({path:'test-results/checkout-'+width+'.png',fullPage:true});
+  const cta=page.getByRole('link',{name:'ซื้อ Finance Simulator บน Notion ↗',exact:true});
+  assert.equal(await cta.getAttribute('href'),'https://www.notion.com/th/templates/ygg-metro-personal-finance-simulator');
+  assert.equal(await cta.getAttribute('target'),'_blank');
+  assert.match(await cta.getAttribute('rel'),/noopener noreferrer/);
+  assert.equal(await page.locator('[data-add-to-cart]').count(),0);
+  assert.equal(await page.locator('.detail-panel .price').textContent(),'US$19');
+  assert.equal(await page.locator('.detail-panel .status').textContent(),'ขายบน Notion Marketplace');
+  assert.doesNotMatch(await page.locator('main').textContent(),/เตรียมเปิดขาย|เตรียมประกาศราคา|สอบถามวันเปิดขาย/);
+  await page.locator('#go-sales-launcher').click();
+  await page.locator('#go-sales-input').fill('Finance Simulator ซื้อได้ไหม');
+  await page.locator('#go-sales-send').click();
+  await page.locator('.go-sales-bubble').filter({hasText:'ขายบน Notion Marketplace'}).waitFor();
+  assert.match(await page.locator('#go-sales-messages').textContent(),/US\$19/);
+  await page.locator('#go-sales-close').click();
+  await page.screenshot({path:'test-results/finance-'+width+'.png',fullPage:true});
+ }
+ if(route==='/how-to-buy'){
+  await page.getByText('ซื้อสินค้าจากเว็บนี้ได้เลยไหม?',{exact:true}).click();
+  assert.match(await page.locator('.faq details[open]').textContent(),/SHOP HOME, Personal Finance Simulator และ Lost Era ไปหน้าร้าน Notion/);
+  assert.doesNotMatch(await page.locator('main').textContent(),/เตรียมเปิดขาย/);
+  await page.screenshot({path:'test-results/finance-faq-'+width+'.png',fullPage:true});
  }
 }
+const {commercePage,commerceScript}=await import('../../src/commerce-pages.js');
+const fixture=[{slug:'offline-fixture',name:'Offline fixture',label:'Fixture',amount:900,currency:'usd',testMode:true}];
+for(const path of ['/cart','/checkout'])await page.route(origin+path,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body>'+commercePage(path)+commerceScript(fixture,{})+'</body></html>'}));
+await page.evaluate(()=>localStorage.setItem('yggmetro-cart-v1','offline-fixture'));
+await page.goto(origin+'/cart');await page.getByRole('link',{name:'ไปหน้าชำระเงิน'}).click();await page.waitForURL('**/checkout');
+const email=page.getByRole('textbox',{name:'อีเมลสำหรับรายการสั่งซื้อ'});await email.fill('buyer@example.test');
+let submitted=false;await page.route('**/api/v1/shop/checkout',async route=>{const body=route.request().postDataJSON();assert.deepEqual(Object.keys(body).sort(),['email','requestId','slug']);assert.equal(body.email,'buyer@example.test');assert.equal(body.slug,'offline-fixture');submitted=true;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,code:'CHECKOUT_NOT_READY'})})});
+await page.getByRole('button',{name:'ดำเนินการชำระเงิน'}).click();await page.getByRole('status').filter({hasText:'ยังเปิดหน้าชำระเงินไม่ได้'}).waitFor();assert.ok(submitted);assert.equal(await email.inputValue(),'buyer@example.test');
 assert.deepEqual(errors,[],width+' browser errors');await page.close();console.log('Desktop/mobile storefront flow passed at '+width+'px');
 }
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve))}})().catch(e=>{console.error(e);process.exitCode=1});

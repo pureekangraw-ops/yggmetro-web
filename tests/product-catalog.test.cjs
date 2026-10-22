@@ -17,6 +17,8 @@ test('unknown product returns 404 and finance never offers an unconfigured check
  const {default:web}=await load();
  assert.equal((await web.fetch(new Request('https://shop.yggmetro.com/products/missing'),{})).status,404);
  const body=await (await web.fetch(new Request('https://shop.yggmetro.com/products/finance-simulator'),{})).text();
- assert.match(body,/เตรียมเปิดขาย/);
+ assert.match(body,/ขายบน Notion Marketplace/);
+ assert.match(body,/US\$19/);
+ assert.doesNotMatch(body,/เตรียมเปิดขาย|เตรียมประกาศราคา|สอบถามวันเปิดขาย|custom-order\?service=lab/);
  assert.doesNotMatch(body,/buy\.stripe\.com|checkout\.stripe\.com|<iframe/);
 });
