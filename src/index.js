@@ -1,3 +1,4 @@
+import {officeCommerce} from './office-commerce.js';
 import {requestWorkflow} from './request-workflow.js';
 import {requestPage} from './request-pages.js';
 import {handleShopCheckout,handleStripeWebhook,handleShopOrder,orderPage} from './stripe-checkout.js';
@@ -414,10 +415,11 @@ export default {
     const url = new URL(request.url);
     const shopRequest=isShopRequest(request,env),sandbox=isShopSandbox(env);
     if(sandbox&&!shopRequest)return json({ok:false,code:'SHOP_ONLY'},404);
+    const commerce=await officeCommerce(request,env);if(commerce)return commerce;
     const workflow=await requestWorkflow(request,env,handleGoClientInterpret);if(workflow)return workflow;
     if(url.pathname==='/requests'||url.pathname==='/admin/requests'){
       if(!['GET','HEAD'].includes(request.method))return new Response('Method Not Allowed',{status:405});
-      return new Response(request.method==='HEAD'?null:requestPage(url.pathname==='/admin/requests'),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
+      return new Response(request.method==='HEAD'?null:requestPage(url.pathname==='/admin/requests',false,sandbox),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
     }
     if (shopRequest && url.pathname.startsWith("/assets/shop/")) {
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed", {status:405,headers:{allow:"GET, HEAD"}});

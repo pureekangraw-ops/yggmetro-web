@@ -32,6 +32,31 @@ for(const width of [390,1440])test('40 THB storefront → checkout → verified 
  const foreign=await browser.newContext();try{assert.equal((await foreign.request.get(fixture.origin+'/api/v1/shop/order/download?session_id=cs_test_local40')).status(),404)}finally{await foreign.close()}
  assert.equal(fixture.db.prepare('SELECT status FROM shop_orders').get().status,'paid');
  await page.screenshot({path:'test-results/order-40thb-paid-'+width+'.png',fullPage:true});
+ // Same canonical order is visible to an explicitly granted fixture admin only.
+ await page.goto(fixture.origin+'/admin/shop');
+ await page.locator('#token').fill('invalid_fixture_'.padEnd(40,'x'));
+ await page.getByRole('button',{name:'อ่านคำสั่งซื้อ',exact:true}).click();
+ await page.locator('#notice').filter({hasText:'ADMIN_AUTH_REQUIRED'}).waitFor();
+ assert.equal(await page.locator('#orders article').count(),0);
+ await page.locator('#token').fill(fixture.adminToken);
+ await page.getByRole('button',{name:'อ่านคำสั่งซื้อ',exact:true}).click();
+ await page.locator('#orders article').filter({hasText:'cs_test_local40'}).waitFor();
+ assert.match(await page.locator('#totals').innerText(),/THB: 4000 · 1/);
+ assert.equal((await page.locator('#totals').innerText()).includes('\n'),true);
+ assert.match(await page.locator('#orders').innerText(),/ชำระยืนยันแล้ว · มีสิทธิ์ดาวน์โหลด/);
+ assert.match(await page.locator('#orders').innerText(),/การรับไฟล์: ยังไม่มีหลักฐาน/);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ assert.equal(await page.locator('#token').inputValue(),'');
+ await page.screenshot({path:'test-results/office-commerce-'+width+'.png',fullPage:true});
+ await page.locator('#logout').click();assert.equal(await page.locator('#orders article').count(),0);
+ let release,arrived;const held=new Promise(resolve=>release=resolve),started=new Promise(resolve=>arrived=resolve);
+ await page.route('**/api/v1/admin/shop/orders',async route=>{const response=await route.fetch();arrived();await held;await route.fulfill({response})});
+ await page.locator('#token').fill(fixture.adminToken);await page.getByRole('button',{name:'อ่านคำสั่งซื้อ',exact:true}).click();await started;
+ await page.locator('#logout').click();const completed=page.waitForResponse('**/api/v1/admin/shop/orders');release();await completed;
+ await page.waitForFunction(()=>!document.getElementById('more').disabled);
+ assert.equal(await page.locator('#orders article').count(),0);assert.equal(await page.locator('#totals').innerText(),'');
+
+
 });
 
 for(const [label,options,expectedCalls] of [['provider timeout',{failProviderOnce:true},2],['success response lost behind a gateway failure',{dropSuccessOnce:true},1],['D1 insert failure',{failStoreOnce:true},2]]){
