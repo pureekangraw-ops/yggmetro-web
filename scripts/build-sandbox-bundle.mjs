@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=process.cwd(),out=path.resolve(process.argv[2]||'test-results/sandbox-bundle');
 await fs.mkdir(out,{recursive:true});
+if((await fs.readdir(out)).length)throw Error('Bundle output must be empty; use a fresh directory to exclude stale or unrelated files.');
 const config=JSON.parse(await fs.readFile('docs/stripe-provider-20261022/wrangler.sandbox.jsonc','utf8'));
 if(config.name!=='yggmetro-shop-sandbox'||config.vars.SHOP_ENVIRONMENT!=='sandbox'||config.vars.STRIPE_CHECKOUT_MODE!=='test'||config.d1_databases.some(x=>x.binding!=='SHOP_ORDERS')||config.r2_buckets.some(x=>x.bucket_name!=='yggmetro-shop-sandbox-downloads'))throw Error('Unexpected sandbox scope');
 execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','deploy','--dry-run','--config','docs/stripe-provider-20261022/wrangler.sandbox.jsonc','--outdir',path.join(out,'worker')],{stdio:'inherit',env:{...process.env,XDG_CONFIG_HOME:path.join(out,'.config'),WRANGLER_SEND_METRICS:'false'}});
