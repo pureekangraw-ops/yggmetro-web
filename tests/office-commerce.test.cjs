@@ -50,3 +50,15 @@ test('Office page contains no order data and unsupported writes are rejected',as
  assert.equal((await f.officeCommerce(new Request(url,{method:'POST'}),f.env)).status,405);
  assert.equal(await f.officeCommerce(new Request('https://office.yggmetro.com/api/v1/admin/requests'),f.env),null);
 });
+test('named sandbox read shares projection without granting public admin or mutation access',async t=>{
+ const f=await fixture(t);f.insert('cs_test_one','thb',4000,'paid');f.insert('cs_live_other','usd',900,'paid');
+ const {sandboxCommerceRead}=await import('../src/sandbox/commerce-read.js');
+ const sandbox={...f.env,SHOP_ENVIRONMENT:'sandbox',SHOP_SANDBOX_ORIGIN:'https://sandbox.example',STRIPE_CHECKOUT_MODE:'test'};
+ const result=await sandboxCommerceRead(sandbox,{});
+ assert.equal(result.orders.length,1);assert.deepEqual(Object.keys(result.orders[0]).sort(),['order_id','amount_minor','currency','payment_status','download_authorized','download_evidence','customer_receipt'].sort());
+ assert.equal((await sandboxCommerceRead({...sandbox,STRIPE_CHECKOUT_MODE:'live'})).code,'SANDBOX_ONLY');
+ assert.equal((await sandboxCommerceRead(f.env)).code,'SANDBOX_ONLY');
+ for(const input of [{actor:'GO'},{operation:'refund'},{cursor:3},null,[]])assert.equal((await sandboxCommerceRead(sandbox,input)).code,'INVALID_READ_REQUEST');
+ assert.equal((await sandboxCommerceRead(sandbox,{cursor:'invalid'})).code,'INVALID_CURSOR');
+ assert.equal((await f.read({},null)).status,401);
+});

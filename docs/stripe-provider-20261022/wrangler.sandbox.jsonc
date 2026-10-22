@@ -1,6 +1,6 @@
 {
   "name": "yggmetro-shop-sandbox",
-  "main": "../../src/index.js",
+  "main": "../../src/sandbox/index.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
   "preview_urls": false,

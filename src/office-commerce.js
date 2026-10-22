@@ -19,13 +19,20 @@ export async function officeCommerce(request,env={}) {
   let grants;try{grants=JSON.parse(env.SHOP_OFFICE_READ_ACTORS||'[]')}catch{fail('COMMERCE_ACCESS_NOT_CONFIGURED',503)}
   if(!Array.isArray(grants)||!grants.every(v=>typeof v==='string'))fail('COMMERCE_ACCESS_NOT_CONFIGURED',503);
   if(!grants.includes(actor.id))fail('COMMERCE_ACCESS_DENIED',403);
+  return await readCommerceOrders(env,url.searchParams);
+ }catch(error){return reply({ok:false,code:error.status?error.message:'COMMERCE_STORE_UNAVAILABLE'},error.status||503)}
+}
+
+// Shared read-only projection. Callers must establish their own trusted boundary.
+export async function readCommerceOrders(env,params=new URLSearchParams()) {
+ try {
   if(!env.SHOP_ORDERS?.prepare)fail('COMMERCE_STORE_NOT_CONFIGURED',503);
   // Never combine live and test revenue, even if a store contains both histories.
   if(![undefined,'test','live'].includes(env.STRIPE_CHECKOUT_MODE)||(isShopSandbox(env)&&env.STRIPE_CHECKOUT_MODE==='live'))fail('COMMERCE_MODE_INVALID',503);
   const mode=env.STRIPE_CHECKOUT_MODE==='live'?'live':'test',prefix='cs_'+mode+'_%';
-  const cursor=url.searchParams.get('cursor');
+  const cursor=params.get('cursor');
   const position=cursor?/^(\d{1,16}):(cs_(?:test|live)_[A-Za-z0-9_]+)$/.exec(cursor):null;
-  if((cursor&&(!position||!Number.isSafeInteger(Number(position[1]))))||[...url.searchParams.keys()].some(k=>k!=='cursor'))fail('INVALID_CURSOR',400);
+  if((cursor&&(!position||!Number.isSafeInteger(Number(position[1]))))||[...params.keys()].some(k=>k!=='cursor'))fail('INVALID_CURSOR',400);
   // Explicit projection excludes owner hashes, checkout attempts, email and file keys.
   const rows=(await env.SHOP_ORDERS.prepare("SELECT session_id,amount,currency,status,paid_at,created_at FROM shop_orders WHERE session_id GLOB ? AND (created_at < ? OR (created_at = ? AND session_id < ?)) ORDER BY created_at DESC,session_id DESC LIMIT 101").bind(prefix.replace('%','*'),position?Number(position[1]):Number.MAX_SAFE_INTEGER,position?Number(position[1]):Number.MAX_SAFE_INTEGER,position?position[2]:'').all()).results;
   const totals=(await env.SHOP_ORDERS.prepare("SELECT currency,SUM(amount) AS amount_minor,COUNT(*) AS order_count FROM shop_orders WHERE session_id GLOB ? AND status='paid' GROUP BY currency ORDER BY currency").bind(prefix.replace('%','*')).all()).results;
