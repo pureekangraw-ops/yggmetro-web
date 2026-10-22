@@ -26,3 +26,6 @@ End: requester can inspect the actual rendered result and source; production rem
 
 ## Boundaries
 No merge or production deployment. Preview uses exported HTML, so it is not runtime API acceptance. No new real payment test is claimed. Finance listing remains pending source reconciliation. Real SHOP HOME product screenshots and product-version QA remain separate work; illustration is not evidence of the delivered template interface. No price, secret, storage or checkout logic changes.
+
+## Browser CI repair
+Initial browser run 39718797526 failed because the existing collision guard hid the floating GO launcher over the new product content. Add an inline homepage GO opener, preserve collision hiding, synchronize expanded state, and restore focus to the opener on close. Update the homepage browser journey to use this stable visible entry and include SHOP HOME in the responsive route sweep. This repairs discoverability rather than disabling the obstruction guard. Follow-up CI is required.
