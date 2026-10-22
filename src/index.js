@@ -426,7 +426,7 @@ export default {
     if(shopRequest){
       if(url.pathname==='/api/v1/shop/checkout'){
         if(rateLimited(request,'shop-checkout'))return json({ok:false,code:'RATE_LIMITED'},429);
-        return handleShopCheckout(request,env,getShopPublicCatalog());
+        return handleShopCheckout(request,env,getShopPublicCatalog(env));
       }
       if(url.pathname==='/api/v1/stripe/webhook')return handleStripeWebhook(request,env);
       if(url.pathname==='/api/v1/shop/order'||url.pathname==='/api/v1/shop/order/download')return handleShopOrder(request,env);

@@ -1,0 +1,30 @@
+✔ sandbox checkout returns only sandbox redirects and fulfills an owned synthetic order (97.938969ms)
+✔ sandbox rejects wrong origin and live configuration before provider or store access (2.146167ms)
+✔ checkout fails closed for missing configuration, foreign origin and client prices (1.379886ms)
+✔ checkout uses server price, persists pending order and issues an HttpOnly owner cookie (2.345532ms)
+✔ unavailable delivery or mismatched Stripe price cannot create a checkout (1.820277ms)
+✔ download requires owner cookie AND signed paid webhook, webhook retry is idempotent (3.371636ms)
+✔ unpaid, live, wrong amount and wrong product events never unlock delivery (4.957047ms)
+✔ async success unlocks payment only after paid event; missing order asks Stripe to retry (3.89541ms)
+✔ real Stripe SDK accepts signed payload and rejects tampering before any order write (8.511062ms)
+✔ a retry after a provider timeout uses the exact same idempotent Checkout parameters (3.071484ms)
+✔ live checkout requires explicit activation and never accepts a test price (1.338746ms)
+✔ invalid email is rejected before creating an order (0.722316ms)
+✔ test-mode orders cannot be presented as live orders after a mode switch (1.60562ms)
+✔ a delayed successful payment still delivers after the first 24 hours (1.972581ms)
+✔ a stale test checkout request returns recoverable conflict in live mode (1.644157ms)
+✔ first checkout establishes ownership before any provider call (1.6864ms)
+✔ concurrent retries persist one order and return the same checkout (1.668202ms)
+✔ provider success followed by D1 failure recovers with the same intent after restart (1.975816ms)
+✔ an old unresolved checkout is not retried after the provider idempotency window (1.730725ms)
+✔ an unresolved request cannot change its email or price or be taken over (1.976508ms)
+✔ missing durable-attempt migration fails before calling the provider (1.128136ms)
+✔ lost success response is recoverable using the cookie already established before checkout (3.242756ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 256.612746
