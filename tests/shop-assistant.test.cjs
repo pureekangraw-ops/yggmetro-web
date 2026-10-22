@@ -7,7 +7,7 @@ const load=()=>import(pathToFileURL(path.resolve(__dirname,"../src/index.js")).h
 test("GO chat appears only on shop pages, including detail pages",async()=>{
   const {default:web}=await load();
   const chatSource=fs.readFileSync(path.resolve(__dirname,"../public/assets/shop/go-chat.js"),"utf8");
-  assert.match(chatSource,/launcher\.addEventListener\("click"/);
+  assert.match(chatSource,/button\.addEventListener\("click",open\)/);
   assert.doesNotMatch(chatSource,/__name/);
   for(const path of ["/","/products/land-planner","/products/root-cause"]){
     const response=await web.fetch(new Request("https://shop.yggmetro.com"+path),{});
@@ -15,7 +15,7 @@ test("GO chat appears only on shop pages, including detail pages",async()=>{
     const html=await response.text();
     assert.match(html,/id="go-sales-launcher"/);
     assert.match(html,/id="go-sales-messages"/);
-    assert.match(html,/โหมดแค็ตตาล็อก/);
+    assert.match(html,/ช่วยค้นหาจากข้อมูลสินค้าในร้าน/);
     assert.match(html,/<script src="\/assets\/shop\/go-chat\.js" defer><\/script>/);
     const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
     for(const source of scripts)assert.doesNotThrow(()=>new Function(source));

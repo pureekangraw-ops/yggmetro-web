@@ -82,9 +82,9 @@ const CHAT_CSS = [
 ].join("");
 const CHAT_HTML = [
 '<aside id="go-sales-root" aria-label="ผู้ช่วยข้อมูลสินค้าของ YGG METRO">',
-'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 System · แนะนำสินค้า</button>',
-'<section id="go-sales-panel" role="dialog" aria-label="System แนะนำสินค้า" hidden>',
-'<div id="go-sales-header"><div><strong>System · แนะนำสินค้า</strong><small>โหมดแค็ตตาล็อก · ไม่ใช้ AI Cloud</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
+'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 GO · ช่วยเลือกสินค้า</button>',
+'<section id="go-sales-panel" role="dialog" aria-label="GO ช่วยเลือกสินค้า" hidden>',
+'<div id="go-sales-header"><div><strong>GO · ช่วยเลือกสินค้า</strong><small>ช่วยค้นหาจากข้อมูลสินค้าในร้าน</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
 '<div id="go-sales-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>',
 '<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="คำถามเกี่ยวกับสินค้า"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
 '<p id="go-sales-note">ตอบจากข้อมูลสินค้าในร้าน · ไม่ตรวจออเดอร์หรือรับข้อมูลบัตร · หากต้องการคุยงาน กดเมนูคุยงาน</p>',

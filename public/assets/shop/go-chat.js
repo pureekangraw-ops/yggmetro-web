@@ -36,7 +36,7 @@
   function push(role,text,links,metadata) {
     const bubble=document.createElement("div");
     bubble.className="go-sales-bubble"+(role==="customer"?" customer":"");
-    const label=document.createElement("strong");label.textContent=role==="customer"?"คุณ":"System";
+    const label=document.createElement("strong");label.textContent=role==="customer"?"คุณ":"GO";
     const content=document.createElement("div");content.textContent=String(text||"");
     const time=document.createElement("time");time.textContent=new Date(metadata?.timestamp||Date.now()).toLocaleString("th-TH");
     bubble.append(label,content,time);
@@ -52,12 +52,18 @@
     }
     messages.scrollTop=messages.scrollHeight;
   }
-  launcher.addEventListener("click",()=>{
+  const openers=[launcher,...document.querySelectorAll("[data-go-sales-open]")];
+  let lastOpener=launcher;
+  function open(event){
+    lastOpener=event.currentTarget;
+    openers.forEach(button=>button.setAttribute("aria-expanded","true"));
     launcher.hidden=true;launcher.setAttribute("aria-expanded","true");
+    root.removeAttribute("data-obscured");
     panel.hidden=false;input.focus();
-    if(!messages.childNodes.length)push("system","สวัสดีครับ 💙 System แนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
-  });
-  function close(){panel.hidden=true;launcher.hidden=false;launcher.setAttribute("aria-expanded","false");scheduleCollisionCheck();launcher.focus()}
+    if(!messages.childNodes.length)push("system","สวัสดีครับ 💙 GO แนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
+  }
+  openers.forEach(button=>button.addEventListener("click",open));
+  function close(){panel.hidden=true;launcher.hidden=false;openers.forEach(button=>button.setAttribute("aria-expanded","false"));scheduleCollisionCheck();lastOpener.focus()}
   closer.addEventListener("click",close);
   panel.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
   input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});

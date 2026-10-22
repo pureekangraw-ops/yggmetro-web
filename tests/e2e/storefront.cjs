@@ -2,7 +2,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 (async()=>{const {startPreview}=await import('../helpers/storefront-preview.mjs');const {server,origin}=await startPreview();let browser;
 try{browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});await fs.mkdir('test-results',{recursive:true});
 for(const width of [1440,708,390]){const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/cart','/checkout']){
+for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/products/shop-home','/cart','/checkout']){
  const response=await page.goto(origin+route);assert.equal(response.status(),200,route);
  await page.evaluate(async()=>{const images=[...document.images];images.forEach(image=>{image.loading='eager'});await Promise.all(images.map(i=>i.decode().catch(()=>{})))});
  const state=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,broken:[...document.images].filter(i=>!i.naturalWidth).map(i=>i.getAttribute('src'))}));
@@ -12,7 +12,7 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
   assert.equal(await page.locator('nav [aria-current="page"]').count(),1,route+' active menu');
   for(const href of ['/shop','/portfolio','/custom-order'])assert.equal(await page.locator('nav a[href="'+href+'"]').count(),1,route+' repeats '+href);
   if(route==='/'&&width===1440){
-   await page.locator('#go-sales-launcher').click();
+   await page.getByRole('button',{name:'ให้ GO ช่วยเลือก',exact:true}).click();
    assert.equal(await page.locator('#go-sales-panel').isVisible(),true,route+' GO panel opens');
    assert.equal(await page.locator('#go-sales-launcher').getAttribute('aria-expanded'),'true',route+' GO launcher expanded');
    await page.locator('#go-sales-close').click();
