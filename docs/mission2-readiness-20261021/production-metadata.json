@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-21T14:06:20Z",
+  "read_only": true,
+  "customer_records_read": false,
+  "worker": "yggmetro-web",
+  "deployment_id": "58af0a7a-10a4-4500-8884-b6db9951f2d9",
+  "version_id": "1b6458a8-c673-42e7-8896-a33d12d1cdec",
+  "traffic_percentage": 100,
+  "deployed_at": "2026-10-20T20:16:17.772748Z",
+  "build_id": "79ee7fb5-298d-461c-b7bf-6a74d69cdcd9",
+  "build_outcome": "success",
+  "source_branch": "main",
+  "source_sha": "2ca6f7df7f31257ebc113eccf932aa41ea6f6708",
+  "automatic_build_branch_includes": ["main"],
+  "automatic_build_branch_excludes": [],
+  "request_binding_names_present": ["REQUESTS_DB", "YGG_ADMIN_CREDENTIALS", "OPENAI_API_KEY"],
+  "capability_limits": "Binding metadata does not verify schema health, Admin availability, model response, external delivery authorization, payment or HERMES acceptance. No customer API was called."
+}

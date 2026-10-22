@@ -1,0 +1,141 @@
+✖ transport and malformed JSON errors never render internal details to customers (42.263976ms)
+✖ composer drafts stay with their request on switch and return (27.656164ms)
+✖ uncertain message retries use original id and text without losing newer edits (13.787973ms)
+✖ late message response cannot erase edits typed while sending or cross requests (22.386837ms)
+✖ same-tab refresh restores selected older request rather than newest request (18.905662ms)
+✖ unsaved brief or message warns before refresh/back navigation without storing contents (9.573765ms)
+✖ Admin delivery composer is isolated per request and failed login clears old privileged data (26.635162ms)
+✔ double-send while pending commits one message and reply only (23.202584ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 1
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 273.038566
+
+✖ failing tests:
+
+test at tests/request-journey.test.cjs:7:1
+✖ transport and malformed JSON errors never render internal details to customers (42.263976ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /เชื่อมต่อ|ลองใหม่/. Input:
+
+  'System — internal secret path /private/server.js:42'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:11:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'System — internal secret path /private/server.js:42',
+    expected: /เชื่อมต่อ|ลองใหม่/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:17:1
+✖ composer drafts stay with their request on switch and return (27.656164ms)
+  AssertionError [ERR_ASSERTION]: A content must not appear in B composer
+
+  'only for A' !== ''
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:19:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'only for A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:24:1
+✖ uncertain message retries use original id and text without losing newer edits (13.787973ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /บันทึกข้อความแล้ว/. Input:
+
+  'System — ข้อความนี้ถูกส่งแล้ว กรุณาโหลดประวัติล่าสุด'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:29:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'System — ข้อความนี้ถูกส่งแล้ว กรุณาโหลดประวัติล่าสุด',
+    expected: /บันทึกข้อความแล้ว/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:33:1
+✖ late message response cannot erase edits typed while sending or cross requests (22.386837ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'next A' !== ''
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:36:111)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'next A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:40:1
+✖ same-tab refresh restores selected older request rather than newest request (18.905662ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'BRIEF-a4b1652b-7076-4d23-9b57-a200f39786c2'
+  - 'BRIEF-59eed35f-7bd2-43ce-ac7b-ad56680571f6'
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:42:30)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-a4b1652b-7076-4d23-9b57-a200f39786c2',
+    expected: 'BRIEF-59eed35f-7bd2-43ce-ac7b-ad56680571f6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:45:1
+✖ unsaved brief or message warns before refresh/back navigation without storing contents (9.573765ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:47:108)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:53:1
+✖ Admin delivery composer is isolated per request and failed login clears old privileged data (26.635162ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'delivery only for A'
+  - ''
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/request-journey.test.cjs:56:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'delivery only for A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

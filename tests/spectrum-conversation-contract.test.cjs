@@ -93,3 +93,18 @@ test('customer and Admin pages compile, identify actual senders, and keep submis
  if(route==='/client'){assert.match(page,/ส่งคำขอ/);assert.match(page,/AI - GO/);assert.doesNotMatch(page,/askWhisper|askGo|handleTeamPrecheck/)}
  }
 });
+
+test('neutral-input model claims about payment, acceptance and delivery become honest System copy',async()=>{
+ const {default:web}=await load(),original=global.fetch;
+ const claims=['ได้รับชำระเงินแล้ว ทีมรับงานและเริ่มทำงานแล้วครับ','Your payment is confirmed and your request has been accepted.','ส่งมอบงานเสร็จเรียบร้อยแล้ว'];
+ try{for(const [i,reply] of claims.entries()){
+  global.fetch=async()=>Response.json({output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({...base(),reply})}]}]});
+  const response=await web.fetch(new Request('https://shop.yggmetro.com/api/v1/interpret',{method:'POST',headers:{'content-type':'application/json','cf-connecting-ip':'mission2-truth-'+i},body:JSON.stringify({text:'สถานะล่าสุดเป็นอย่างไร'})}),{OPENAI_API_KEY:'isolated-fixture-only'});
+  const result=await response.json();assert.equal(response.status,200);assert.notEqual(result.reply,reply);assert.match(result.reply,/ยังไม่ยืนยันสถานะ/);assert.equal(result.sender_type,'SYSTEM');
+ }}finally{global.fetch=original}
+});
+
+test('request page distinguishes recorded intake from accepted work and payment',async()=>{
+ const {requestPage}=await import('../src/request-pages.js');const html=requestPage();
+ assert.equal(html.includes('บันทึกคำขอเพื่อรอ Admin ตรวจสอบ'),true,'intake is waiting for Admin review');assert.equal(html.includes('ไม่ใช่การยืนยันรับงานหรือชำระเงิน'),true,'intake is not work/payment acceptance');
+});

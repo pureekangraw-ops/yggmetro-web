@@ -115,11 +115,14 @@ const PUBLIC_TEMPLATE_LEAK=/(?:^|[\r\n])\s*(?:#{1,6}\s|```|[-=]{8,}\s*$)|(?:ข�
 const HUMAN_REQUEST=/(?:คุยกับ(?:คน|พนักงาน|เจ้าหน้าที่|ทีม)|ขอ(?:คน|พนักงาน|เจ้าหน้าที่)|คนจริง|พนักงาน|เจ้าหน้าที่|สำนักงาน|human|manager)/i;
 const ESTIMATE_REQUEST=/(?:ประเมิน|ราคา|งบ|ใบเสนอราคา|quotation|quote|estimate|แพ็กเกจ)/i;
 const PAYMENT_CLAIM=/(?:จ่าย(?:เงิน)?(?:ไป)?แล้ว|ชำระ(?:เงิน)?(?:ไป)?แล้ว|โอน(?:เงิน)?(?:ไป)?แล้ว|ตัดเงินแล้ว|payment\s*(?:done|paid)|paid\b)/i;
+// Model text is not evidence of an operational/payment transition. Known affirmative claims fail closed.
+const UNVERIFIED_STATUS_CLAIM=/(?:ได้รับ(?:การ)?ชำระเงิน|(?:ชำระเงิน|การชำระเงิน)(?:สำเร็จ|ยืนยันแล้ว)|(?:ทีม)?รับงาน(?:แล้ว|เรียบร้อย)|เริ่ม(?:ทำ)?งานแล้ว|ส่งมอบงาน(?:แล้ว|เสร็จ|เรียบร้อย)|payment\s+(?:is\s+|has\s+been\s+)?(?:confirmed|received|completed|successful)|(?:request|order|work)\s+(?:is\s+|has\s+been\s+)?(?:accepted|started|completed|delivered))/i;
 const COMPLAINT_REQUEST=/(?:ไม่พอใจ|ร้องเรียน|แย่มาก|ช้ามาก|ล่าช้า|ผิดหวัง|complain|complaint|refund|คืนเงิน)/i;
 const IDENTITY_COLLISION=/(?:yggdrazil|ygg-cg\.com|ตลาดหลักทรัพย์|\bSET\b)/i;
 function publicFallback(kind){
   if(kind==="human")return "ได้ครับ ผมจะหยุดถามข้อมูลซ้ำไว้ตรงนี้ คุณกดส่งคำขอได้ ศูนย์รับงานจะเก็บรายละเอียดไว้ให้ Admin ตรวจสอบครับ";
   if(kind==="estimate")return "ได้ครับ ผมรับว่าอยากประเมินก่อน โดยจะไม่เดาราคาเอง เมื่อข้อมูลพอให้ส่งคำขอให้ศูนย์รับงานประเมินจากข้อมูลจริงครับ";
+  if(kind==="unverified-status")return "ตอนนี้ผมยังไม่ยืนยันสถานะรับงาน เริ่มงาน ส่งมอบ หรือชำระเงินจากบทสนทนาครับ กรุณาดูสถานะคำขอที่บันทึกไว้ และให้ Admin ตรวจรายการจริง";
   if(kind==="payment")return "รับทราบครับ เรื่องการชำระเงินต้องตรวจจากรายการจริงก่อน ตอนนี้ผมยังไม่ยืนยันสถานะการชำระเงินจากข้อความอย่างเดียวครับ";
   if(kind==="complaint")return "รับทราบครับ ผมจะไม่เถียงหรือเดาสาเหตุ ขอเก็บสิ่งที่กระทบคุณให้ชัด แล้วส่งต่อให้ทีมรับช่วงพร้อมบริบทที่มีอยู่ครับ";
   if(kind==="identity")return "ตอนนี้ YGG METRO ไม่มีข้อมูลยืนยันความเกี่ยวข้องกับองค์กรที่ชื่อนี้ครับ ผมจึงจะไม่เชื่อมโยงหรือเติมข้อมูลบริษัทจากแหล่งภายนอกเอง";
@@ -139,6 +142,7 @@ export function applyConversationGuards(text,result={}){
   else if(COMPLAINT_REQUEST.test(input)){kind="complaint";guarded.intent="HELP";guarded.wantsManager=true;}
   else if(HUMAN_REQUEST.test(input)){kind="human";guarded.intent="HELP";guarded.wantsManager=true;}
   else if(ESTIMATE_REQUEST.test(input)){kind="estimate";guarded.wantsEstimate=true;if(guarded.intent==="UNKNOWN")guarded.intent="PRE_ESTIMATE";}
+  if(!kind&&UNVERIFIED_STATUS_CLAIM.test(String(guarded.reply||""))){kind="unverified-status";guarded.intent="HELP";}
   const fallback=publicFallback(kind);
   guarded.reply=kind?fallback:safePublicReply(guarded.reply,fallback);
   guarded.reply=safePublicReply(guarded.reply,fallback);

@@ -1,0 +1,32 @@
+✔ actual Custom Order entry bootstraps owner, saves draft, confirms, and offers owned readback (27.511806ms)
+✔ lost Custom Order confirmation response retries original request without duplicate or losing newer edits (11.413913ms)
+✔ Custom Order network failure and repeated submit preserve form and one immutable pending request (6.439488ms)
+✔ Custom Order retries a lost draft-save response and retains owner isolation when session expires (7.054876ms)
+✖ Custom Order warns before leaving edited or uncertain form, then clears warning after success (3.352349ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 147.115778
+
+✖ failing tests:
+
+test at tests/custom-order-journey.test.cjs:34:1
+✖ Custom Order warns before leaving edited or uncertain form, then clears warning after success (3.352349ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (/workspace/shared/atlas-mission2-web/tests/custom-order-journey.test.cjs:37:76)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

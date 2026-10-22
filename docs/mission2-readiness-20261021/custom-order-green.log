@@ -1,0 +1,18 @@
+✔ actual Custom Order entry bootstraps owner, saves draft, confirms, and offers owned readback (26.182302ms)
+✔ lost Custom Order confirmation response retries original request without duplicate or losing newer edits (11.377641ms)
+✔ Custom Order network failure and repeated submit preserve form and one immutable pending request (5.348812ms)
+✔ Custom Order retries a lost draft-save response and retains owner isolation when session expires (6.576425ms)
+✔ Custom Order warns before leaving edited or uncertain form, then clears warning after success (7.557716ms)
+✔ Custom Order lost-confirm response then refresh resolves the existing submission without another write (10.5526ms)
+✔ Custom Order lost-save response then refresh restores only the server-owned draft before retry (8.990482ms)
+✔ editing a recovered unsubmitted Custom Order draft submits the visible updated fields (8.690454ms)
+✔ recovering an already progressed request shows its authoritative status instead of awaiting review (8.222884ms)
+✔ successful Custom Order reload recovery leaves no false dirty warning when controls are re-enabled (10.560237ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 204.97913

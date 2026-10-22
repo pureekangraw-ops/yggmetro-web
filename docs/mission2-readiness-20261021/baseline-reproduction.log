@@ -1,0 +1,221 @@
+✖ transport and malformed JSON errors never render internal details to customers (25.999839ms)
+✖ composer drafts stay with their request on switch and return (18.24103ms)
+✖ uncertain message retries use original id and text without losing newer edits (8.813687ms)
+✖ late message response cannot erase edits typed while sending or cross requests (15.888463ms)
+✖ same-tab refresh restores selected older request rather than newest request (16.116718ms)
+✖ unsaved brief or message warns before refresh/back navigation without storing contents (4.546023ms)
+✖ Admin delivery composer is isolated per request and failed login clears old privileged data (18.448343ms)
+✔ double-send while pending commits one message and reply only (24.714404ms)
+✖ failed Admin relogin removes the previously authenticated customer view (14.195938ms)
+✔ foreign remembered request id is not restored across customer cookies (7.977115ms)
+✖ logout while a reply is pending prevents late data from restoring Admin view (20.542304ms)
+✔ 30-fixture conversation contract keeps critical intents deterministic and public-safe (83.875009ms)
+✔ internal terms and system-like templates from model output are stripped before reaching customer (0.475598ms)
+✔ handoff packet carries context without inventing commercial truth (1.310328ms)
+✔ GO whisper and takeover fail closed until their budget service is mapped (6.360383ms)
+✔ GO budget refusal is explicit and does not silently turn into a PANTHEON task (0.819166ms)
+✔ customer and Admin pages compile, identify actual senders, and keep submission independent of AI (2.518622ms)
+✖ neutral-input model claims about payment, acceptance and delivery become honest System copy (3.003029ms)
+✖ request page distinguishes recorded intake from accepted work and payment (0.932658ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 8
+ℹ fail 11
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 271.022244
+
+✖ failing tests:
+
+test at tests/request-journey.test.cjs:7:1
+✖ transport and malformed JSON errors never render internal details to customers (25.999839ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /เชื่อมต่อ|ลองใหม่/. Input:
+
+  'System — internal secret path /private/server.js:42'
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:11:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'System — internal secret path /private/server.js:42',
+    expected: /เชื่อมต่อ|ลองใหม่/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:17:1
+✖ composer drafts stay with their request on switch and return (18.24103ms)
+  AssertionError [ERR_ASSERTION]: A content must not appear in B composer
+
+  'only for A' !== ''
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:19:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'only for A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:24:1
+✖ uncertain message retries use original id and text without losing newer edits (8.813687ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /บันทึกข้อความแล้ว/. Input:
+
+  'System — ข้อความนี้ถูกส่งแล้ว กรุณาโหลดประวัติล่าสุด'
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:29:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'System — ข้อความนี้ถูกส่งแล้ว กรุณาโหลดประวัติล่าสุด',
+    expected: /บันทึกข้อความแล้ว/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:33:1
+✖ late message response cannot erase edits typed while sending or cross requests (15.888463ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'next A' !== ''
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:36:111)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'next A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:40:1
+✖ same-tab refresh restores selected older request rather than newest request (16.116718ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'BRIEF-6182d137-5926-44f3-b9b4-d6ff0023292c'
+  - 'BRIEF-40382c61-07f6-4856-b09a-5bdc75804796'
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:42:30)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'BRIEF-6182d137-5926-44f3-b9b4-d6ff0023292c',
+    expected: 'BRIEF-40382c61-07f6-4856-b09a-5bdc75804796',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:45:1
+✖ unsaved brief or message warns before refresh/back navigation without storing contents (4.546023ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:47:108)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:53:1
+✖ Admin delivery composer is isolated per request and failed login clears old privileged data (18.448343ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'delivery only for A'
+  - ''
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:56:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'delivery only for A',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:66:1
+✖ failed Admin relogin removes the previously authenticated customer view (14.195938ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'private customer brief'
+  - ''
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:68:44)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'private customer brief',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/request-journey.test.cjs:76:1
+✖ logout while a reply is pending prevents late data from restoring Admin view (20.542304ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  1 !== 0
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/request-journey.test.cjs:80:50)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/spectrum-conversation-contract.test.cjs:97:1
+✖ neutral-input model claims about payment, acceptance and delivery become honest System copy (3.003029ms)
+  AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
+
+  'ได้รับชำระเงินแล้ว ทีมรับงานและเริ่มทำงานแล้วครับ'
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/spectrum-conversation-contract.test.cjs:103:79)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'ได้รับชำระเงินแล้ว ทีมรับงานและเริ่มทำงานแล้วครับ',
+    expected: 'ได้รับชำระเงินแล้ว ทีมรับงานและเริ่มทำงานแล้วครับ',
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/spectrum-conversation-contract.test.cjs:107:1
+✖ request page distinguishes recorded intake from accepted work and payment (0.932658ms)
+  AssertionError [ERR_ASSERTION]: intake is waiting for Admin review
+
+  false !== true
+
+      at TestContext.<anonymous> (/tmp/mission2-red-proof/tests/spectrum-conversation-contract.test.cjs:109:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
