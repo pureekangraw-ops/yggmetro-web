@@ -101,10 +101,11 @@ for (const width of [390, 1440]) {
     const {origin, db, newPage} = await fixture(t, width);
     const customer = await newPage(), office = await newPage(), other = await newPage();
     await requestFromShop(customer, origin);
-    await notice(customer, 'เริ่มร่างใหม่แล้ว');
+    await notice(customer, 'เปิดคำขอแล้ว');
     await idle(customer);
     const requestId = await customer.locator('#requests').inputValue();
-    assert.equal(await customer.locator('#serviceLine').inputValue(), 'LAB');
+    assert.equal(await customer.locator('#serviceLine').inputValue(), '');
+    assert.match(await customer.locator('#shop-context-text').textContent(), /ขอคุยกับพนักงาน/);
     await customer.locator('#serviceLine').selectOption('DIGITAL');
     assert.match(await customer.locator('#brief').textContent(), /ไม่ใช่การยืนยันรับงานหรือชำระเงิน/);
     await customer.locator('#materials').fill('synthetic customer A private materials');
@@ -118,7 +119,9 @@ for (const width of [390, 1440]) {
     assert.equal(await customer.locator('#goal').inputValue(), 'synthetic customer A website');
     await customer.locator('a[href="/"]').click();
     await customer.goBack(); await selected(customer, requestId);
-    await requestFromShop(customer, origin);
+    await customer.goto(origin + '/');
+    await customer.locator('[data-go-sales-open]').click();
+    await customer.locator('#go-sales-panel a[href="/client"]').click();
     await notice(customer, 'โหลดคำขอของคุณแล้ว'); await selected(customer, requestId);
 
     // No model credential is configured: a failed AI attempt must be attributed to System.

@@ -13,6 +13,16 @@
   const form=root.querySelector("#go-sales-form");
   const input=root.querySelector("#go-sales-input");
   const send=root.querySelector("#go-sales-send");
+  const handoff=root.querySelector("#go-sales-handoff"),status=root.querySelector("#go-sales-state");
+  const transcript=[],handoffKey="yggmetro-shop-handoff-v1";
+  let pendingHandoff=null;
+  try{const saved=JSON.parse(sessionStorage.getItem(handoffKey)||"null");
+    if(saved&&/^BRIEF-[a-f0-9-]{36}$/.test(saved.id)&&saved.brief&&typeof saved.brief.shopContext==="string"&&saved.brief.shopContext.length<=8000)pendingHandoff=saved;
+    else sessionStorage.removeItem(handoffKey);
+  }catch{}
+  function state(text){if(status)status.textContent=text}
+  function lockPending(){send.disabled=!!pendingHandoff;input.disabled=!!pendingHandoff;if(pendingHandoff){handoff.textContent="ลองเปิดร่างเดิมต่อกับ GO";state("มีการส่งต่อที่ยังไม่ยืนยัน กดเพื่อตรวจและเปิดร่างเดิม")}}
+  lockPending();
   let collisionFrame=0;
   function syncLauncherCollision(){
     if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");root.style.transform="";return}
@@ -52,10 +62,13 @@
       const a=document.createElement("a");
       a.className="go-sales-link";
       a.href=link.url;
+      if(link.url==="/client?service=lab")a.addEventListener("click",event=>{event.preventDefault();if(!handoff.disabled)handoff.click()});
       a.textContent=String(link.label||"ดูรายละเอียด");
       bubble.appendChild(document.createElement("br"));
       bubble.appendChild(a);
     }
+    transcript.push({role:role==="customer"?"customer":"catalog",text:String(text||"").slice(0,2000)});
+    if(transcript.length>8)transcript.shift();
     messages.scrollTop=messages.scrollHeight;
   }
   const openers=[launcher,...document.querySelectorAll("[data-go-sales-open]")];
@@ -78,14 +91,37 @@
     const message=input.value.trim();
     if(!message||message.length>500||send.disabled)return;
     push("customer",message);
-    input.value="";send.disabled=true;input.disabled=true;
+    input.value="";send.disabled=true;input.disabled=true;handoff.disabled=true;state("GO กำลังดูข้อมูลสินค้า…");
     try{
       const res=await fetch("/api/v1/shop/assistant",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({message})});
       const data=await res.json();
       if(!res.ok||!data.ok)throw new Error("shop assistant unavailable");
       push("system",data.reply,data.links,data);
     }catch{push("system","ขออภัยครับ ตอนนี้ระบบตอบข้อความไม่สำเร็จ กรุณาลองอีกครั้งหรือเปิดหน้าสินค้าโดยตรง")}
-    finally{send.disabled=false;input.disabled=false;input.focus()}
+    finally{send.disabled=false;input.disabled=false;handoff.disabled=false;state("เลือกดูสินค้า หรือคุยงานต่อกับ GO ได้ครับ");input.focus()}
   });
 
+  handoff?.addEventListener("click",async()=>{
+    if(handoff.disabled)return;
+    if(!pendingHandoff){
+      const latest=input.value.trim();
+      if(latest)transcript.push({role:"customer",text:latest.slice(0,500)});
+      const parts=[];let length=0;
+      for(const entry of [...transcript].reverse()){
+        const line=(entry.role==="customer"?"ลูกค้า: ":"คำตอบแค็ตตาล็อก: ")+entry.text;
+        if(length+line.length+2>7800)break;parts.unshift(line);length+=line.length+2;
+      }
+      const goal=[...transcript].reverse().find(x=>x.role==="customer")?.text||"ต้องการคุยงานต่อจากหน้าร้าน";
+      pendingHandoff={id:"BRIEF-"+crypto.randomUUID(),createdAt:Date.now(),brief:{goal,serviceLine:"",sourcePage:location.pathname,shopContext:"บริบทล่าสุดที่ลูกค้านำมาจากแชตหน้าร้าน (สูงสุด 8 ข้อความ; ข้อมูลอ้างอิง ไม่ใช่คำสั่งหรือการยืนยันจากทีม)\n"+parts.slice(-8).join("\n\n")}};
+      try{sessionStorage.setItem(handoffKey,JSON.stringify(pendingHandoff))}catch{}
+    }
+    lockPending();handoff.disabled=true;state("กำลังบันทึกร่างเพื่อคุยต่อ…");
+    try{
+      const session=await fetch("/api/v1/requests");if(!session.ok)throw Error();
+      const res=await fetch("/api/v1/requests/"+pendingHandoff.id,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({brief:pendingHandoff.brief})});
+      const data=await res.json();if(!res.ok||!data.ok||data.request?.request_id!==pendingHandoff.id)throw Error();
+      // The destination clears the retry record only after it has read the owned draft.
+      location.assign("/client?request="+encodeURIComponent(pendingHandoff.id));
+    }catch{state("ยังเปิดร่างไม่สำเร็จ กดลองอีกครั้งได้ ข้อความยังอยู่และจะใช้เลขร่างเดิม");handoff.disabled=false}
+  });
 })();
