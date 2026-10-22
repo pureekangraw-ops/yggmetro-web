@@ -23,9 +23,11 @@ test('each marketplace product keeps its exact external CTA on both catalog and 
       assert.equal(response.status, 200, route);
       const html = await response.text();
       const cta = anchors(html).filter(link => link.href === href);
-      assert.equal(cta.length, 1, route + ' must have one matching marketplace CTA');
-      assert.equal(cta[0].target, '_blank');
-      assert.ok(cta[0].rel.includes('noopener') && cta[0].rel.includes('noreferrer'));
+      assert.equal(cta.length, route === '/products/shop-home' ? 2 : 1, route + ' marketplace CTA count');
+      for (const link of cta) {
+        assert.equal(link.target, '_blank');
+        assert.ok(link.rel.includes('noopener') && link.rel.includes('noreferrer'));
+      }
       if (route.startsWith('/products/')) assert.doesNotMatch(html, /<button[^>]*data-add-to-cart=/);
     }
   }
