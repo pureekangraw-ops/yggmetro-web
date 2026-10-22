@@ -2,6 +2,11 @@
   const root=document.getElementById("go-sales-root");
   if(!root)return;
   const launcher=root.querySelector("#go-sales-launcher");
+  const dock=root.querySelector("#go-mascot-dock");
+  const minimize=root.querySelector("#go-mascot-minimize");
+  try{if(sessionStorage.getItem("go-mascot-minimized")==="1")root.setAttribute("data-minimized","")}catch{}
+  minimize?.addEventListener("click",()=>{root.setAttribute("data-minimized","");try{sessionStorage.setItem("go-mascot-minimized","1")}catch{}scheduleCollisionCheck();launcher.focus()});
+  root.querySelector("#go-mascot-image")?.addEventListener("error",()=>{root.setAttribute("data-minimized","");scheduleCollisionCheck()});
   const panel=root.querySelector("#go-sales-panel");
   const closer=root.querySelector("#go-sales-close");
   const messages=root.querySelector("#go-sales-messages");
@@ -10,18 +15,19 @@
   const send=root.querySelector("#go-sales-send");
   let collisionFrame=0;
   function syncLauncherCollision(){
-    if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");return}
-    const buttonRect=launcher.getBoundingClientRect();
-    const content=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button'],img,h1,h2,h3,p,li")].filter(node=>!root.contains(node)&&node.getClientRects().length);
-    const overlaps=content.some(node=>{
-      const style=getComputedStyle(node);
-      if(style.visibility==="hidden"||style.display==="none"||Number(style.opacity)===0)return false;
-      const rect=node.getBoundingClientRect();
-      return Math.min(buttonRect.right,rect.right)-Math.max(buttonRect.left,rect.left)>6&&
-        Math.min(buttonRect.bottom,rect.bottom)-Math.max(buttonRect.top,rect.top)>6;
-    });
-    if(overlaps)root.setAttribute("data-obscured","true");else root.removeAttribute("data-obscured");
+    if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");root.style.transform="";return}
+    root.style.transform="";
+    const buttonRect=(dock||launcher).getBoundingClientRect();
+    const rects=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button']")].filter(node=>!root.contains(node)&&node.getClientRects().length).filter(node=>{
+      const style=getComputedStyle(node);return style.visibility!=="hidden"&&style.display!=="none"&&Number(style.opacity)!==0;
+    }).map(node=>node.getBoundingClientRect());
+    const lift=[0,160,320].find(offset=>buttonRect.top-offset>=80&&!rects.some(rect=>
+      Math.min(buttonRect.right,rect.right)-Math.max(buttonRect.left,rect.left)>6&&
+      Math.min(buttonRect.bottom-offset,rect.bottom)-Math.max(buttonRect.top-offset,rect.top)>6));
+    if(lift===undefined)root.setAttribute("data-obscured","true");
+    else{root.removeAttribute("data-obscured");root.style.transform=lift?"translateY(-"+lift+"px)":""}
   }
+
   function scheduleCollisionCheck(){
     cancelAnimationFrame(collisionFrame);
     collisionFrame=requestAnimationFrame(syncLauncherCollision);
@@ -57,13 +63,13 @@
   function open(event){
     lastOpener=event.currentTarget;
     openers.forEach(button=>button.setAttribute("aria-expanded","true"));
-    launcher.hidden=true;launcher.setAttribute("aria-expanded","true");
+    if(dock)dock.hidden=true;launcher.hidden=true;launcher.setAttribute("aria-expanded","true");
     root.removeAttribute("data-obscured");
-    panel.hidden=false;input.focus();
+    panel.hidden=false;root.style.transform="";root.removeAttribute("data-obscured");input.focus();
     if(!messages.childNodes.length)push("system","สวัสดีครับ 💙 GO แนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
   }
   openers.forEach(button=>button.addEventListener("click",open));
-  function close(){panel.hidden=true;launcher.hidden=false;openers.forEach(button=>button.setAttribute("aria-expanded","false"));scheduleCollisionCheck();lastOpener.focus()}
+  function close(){panel.hidden=true;if(dock)dock.hidden=false;launcher.hidden=false;openers.forEach(button=>button.setAttribute("aria-expanded","false"));scheduleCollisionCheck();lastOpener.focus()}
   closer.addEventListener("click",close);
   panel.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
   input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
