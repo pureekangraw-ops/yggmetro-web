@@ -2,6 +2,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 (async()=>{const {startPreview}=await import('../helpers/storefront-preview.mjs');const {server,origin}=await startPreview();let browser;
 try{browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});await fs.mkdir('test-results',{recursive:true});
 for(const width of [1440,708,390]){const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.route('**/*',route=>route.request().url().startsWith(origin+'/')?route.continue():route.fulfill({contentType:'text/html; charset=utf-8',body:'<!doctype html><title>Offline external platform fixture</title>'}));
 for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-simulator','/products/shop-home','/how-to-buy','/cart','/checkout']){
  const response=await page.goto(origin+route);assert.equal(response.status(),200,route);
  await page.evaluate(async()=>{const images=[...document.images];images.forEach(image=>{image.loading='eager'});await Promise.all(images.map(i=>i.decode().catch(()=>{})))});
@@ -68,7 +69,7 @@ for(const route of ['/','/shop','/portfolio','/custom-order','/products/finance-
 }
 const {commercePage,commerceScript}=await import('../../src/commerce-pages.js');
 const fixture=[{slug:'offline-fixture',name:'Offline fixture',label:'Fixture',amount:900,currency:'usd',testMode:true}];
-for(const path of ['/cart','/checkout'])await page.route(origin+path,route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body>'+commercePage(path)+commerceScript(fixture,{})+'</body></html>'}));
+for(const path of ['/cart','/checkout'])await page.route(origin+path,route=>route.fulfill({contentType:'text/html; charset=utf-8',body:'<!doctype html><html><head><meta charset="utf-8"></head><body>'+commercePage(path)+commerceScript(fixture,{})+'</body></html>'}));
 await page.evaluate(()=>localStorage.setItem('yggmetro-cart-v1','offline-fixture'));
 await page.goto(origin+'/cart');await page.getByRole('link',{name:'ไปหน้าชำระเงิน'}).click();await page.waitForURL('**/checkout');
 const email=page.getByRole('textbox',{name:'อีเมลสำหรับรายการสั่งซื้อ'});await email.fill('buyer@example.test');
