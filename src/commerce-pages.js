@@ -18,8 +18,48 @@ main.append(el('h2',checkout?'1 · ข้อมูลติดต่อ':'สิ
 if(product.testMode){main.append(el('p','โหมดทดสอบ — ไม่มีการเรียกเก็บเงินจริง','test-mode'))}
 let form,email;if(checkout){form=el('form');form.id='secure-checkout-form';const label=el('label','อีเมลสำหรับรายการสั่งซื้อ');email=el('input');email.type='email';email.autocomplete='email';email.required=true;email.maxLength=254;email.name='email';email.placeholder='you@example.com';label.append(email);form.append(label,el('h2','2 · ชำระเงิน'));const info=el('div',undefined,'payment-info');info.append(el('strong','เปิดหน้าชำระเงินของ Stripe'),el('p','กรอกข้อมูลการชำระเงินบนหน้าที่ Stripe ดูแล'));form.append(info,el('p','เมื่อได้รับการยืนยันชำระเงิน ระบบจะแสดงปุ่มรับสินค้าในหน้ารายการสั่งซื้อ'));main.append(form)}else{const remove=el('button','นำสินค้าออก');remove.type='button';remove.addEventListener('click',()=>{try{localStorage.removeItem(key)}catch{}location.reload()});main.append(remove,el('p','สั่งซื้อสินค้าดิจิทัลครั้งละ 1 รายการ','hint'))}
 summary.append(el('h2','สรุปคำสั่งซื้อ'),el('p',product.name));const total=el('div',undefined,'order-total');total.append(el('span','รวม'),el('strong',money(product)));summary.append(total);const status=el('p','','commerce-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-if(checkout){const button=el('button','ดำเนินการชำระเงิน →','btn primary');button.type='submit';button.setAttribute('form',form.id);summary.append(button,status);const storageKey='yggmetro-checkout-'+product.slug+'-'+(product.testMode?'test':'live');let previousEmail=null;let requestId=null;try{requestId=sessionStorage.getItem(storageKey);previousEmail=sessionStorage.getItem(storageKey+'-email')}catch{}if(!/^[a-f0-9]{64}$/.test(requestId||''))requestId=Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');try{sessionStorage.setItem(storageKey,requestId)}catch{}
-form.addEventListener('submit',async e=>{e.preventDefault();if(button.disabled||!form.reportValidity())return;const contact=email.value.trim();if(previousEmail!==null&&previousEmail!==contact)requestId=Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');previousEmail=contact;try{sessionStorage.setItem(storageKey,requestId);sessionStorage.setItem(storageKey+'-email',contact)}catch{}button.disabled=true;status.textContent='กำลังเตรียมหน้าชำระเงิน…';try{const r=await fetch('/api/v1/shop/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({slug:product.slug,requestId,email:contact})});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.code||'CHECKOUT_UNAVAILABLE');if(typeof d.orderUrl==='string'&&d.orderUrl.startsWith('/order?session_id=cs_')){location.assign(d.orderUrl);return}const url=new URL(d.url);if(url.protocol!=='https:'||url.hostname!=='checkout.stripe.com')throw Error();location.assign(url.href)}catch(e){if(['CHECKOUT_CONFLICT','CHECKOUT_EXPIRED'].includes(e.message)){requestId=Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');try{sessionStorage.setItem(storageKey,requestId)}catch{}}status.textContent='ยังเปิดหน้าชำระเงินไม่ได้ ไม่มีการเรียกเก็บเงิน กรุณาลองอีกครั้งหรือติดต่อเรา';button.disabled=false}})}else summary.append(link('ไปหน้าชำระเงิน →','/checkout','btn primary'));
+if(checkout){const button=el('button','ดำเนินการชำระเงิน →','btn primary');button.type='submit';button.setAttribute('form',form.id);summary.append(button,status);const storageKey='yggmetro-checkout-'+product.slug+'-'+(product.testMode?'test':'live');
+let requestId=null,previousEmail=null,started=false,storageReady=true,legacy=false;
+try{requestId=sessionStorage.getItem(storageKey);previousEmail=sessionStorage.getItem(storageKey+'-email');started=sessionStorage.getItem(storageKey+'-started')==='true';legacy=previousEmail!==null&&!started}catch{storageReady=false}
+if(!/^[a-f0-9]{64}$/.test(requestId||'')){
+ if(started||legacy){storageReady=false;requestId=null}else requestId=Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');
+}
+try{if(requestId)sessionStorage.setItem(storageKey,requestId)}catch{storageReady=false}
+if(previousEmail!==null)email.value=previousEmail;
+if(started){email.readOnly=true;button.textContent='ตรวจและเปิดรายการเดิม →';status.textContent='มีรายการที่เริ่มไว้แล้ว ระบบจะตรวจรายการเดิมก่อนดำเนินการต่อ'}
+const help=link('ติดต่อเราเรื่องรายการนี้','/client');help.hidden=true;summary.append(help);
+if(legacy){button.disabled=true;email.readOnly=true;help.hidden=false;status.textContent='พบรายการจากระบบรุ่นก่อน กรุณาติดต่อเราเพื่อตรวจสถานะก่อนเริ่มใหม่'}
+if(!storageReady){button.disabled=true;help.hidden=false;status.textContent='ยังเก็บข้อมูลสำหรับกู้รายการไม่ได้ กรุณาอนุญาตพื้นที่จัดเก็บของเว็บไซต์ก่อนเริ่ม'}
+async function submitAttempt(payload){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{const r=await fetch('/api/v1/shop/checkout',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});return {response:r,data:await r.json()}}finally{clearTimeout(timer)}
+}
+form.addEventListener('submit',async e=>{
+ e.preventDefault();if(button.disabled||!form.reportValidity())return;
+ const contact=email.value.trim();
+ if(started&&previousEmail!==contact){status.textContent='รายการเดิมยังไม่จบ กรุณาตรวจรายการเดิมหรือติดต่อเราก่อนเปลี่ยนอีเมล';help.hidden=false;return}
+ // Persist the original identity before sending. Never replace an uncertain attempt automatically.
+ try{sessionStorage.setItem(storageKey,requestId);sessionStorage.setItem(storageKey+'-email',contact);sessionStorage.setItem(storageKey+'-started','true')}catch{status.textContent='ยังเก็บข้อมูลสำหรับกู้รายการไม่ได้ กรุณาตรวจพื้นที่จัดเก็บของเว็บไซต์';help.hidden=false;return}
+ started=true;previousEmail=contact;email.readOnly=true;button.disabled=true;status.textContent='กำลังตรวจและเตรียมรายการ…';
+ try{
+  const payload={slug:product.slug,requestId,email:contact};let result=await submitAttempt(payload);
+  // A first response sets the HttpOnly owner cookie without contacting Stripe; retry once to confirm it.
+  if(result.response.status===428&&result.data.code==='CHECKOUT_SESSION_REQUIRED')result=await submitAttempt(payload);
+  const {response:r,data:d}=result;
+  if(!r.ok||!d.ok)throw Error(d.code||'CHECKOUT_UNAVAILABLE');
+  if(typeof d.orderUrl==='string'){
+   const target=new URL(d.orderUrl,location.origin),id=target.searchParams.get('session_id');
+   if(target.origin===location.origin&&target.pathname==='/order'&&!target.hash&&[...target.searchParams].length===1&&/^cs_(test|live)_[A-Za-z0-9_]+$/.test(id||'')){location.assign(target.href);return}
+   throw Error('INVALID_PROVIDER_SESSION');
+  }
+  const url=new URL(d.url);if(url.origin!=='https://checkout.stripe.com'||url.username||url.password)throw Error('INVALID_PROVIDER_SESSION');location.assign(url.href);
+ }catch(e){
+  const needsHelp=['CHECKOUT_CONFLICT','CHECKOUT_EXPIRED','CHECKOUT_RECONCILIATION_REQUIRED'].includes(e.message);
+  status.textContent=needsHelp?'รายการเดิมต้องตรวจสอบก่อนเริ่มใหม่ กรุณาติดต่อเราเพื่อยืนยันสถานะ':'ยังเปิดหน้าชำระเงินไม่ได้ และยังยืนยันผลรายการไม่ได้ กดตรวจรายการเดิมอีกครั้งหรือติดต่อเรา';
+  if(e.message==='CHECKOUT_SESSION_REQUIRED')status.textContent='ยังยืนยันเบราว์เซอร์ไม่ได้ กรุณาอนุญาตคุกกี้ของเว็บไซต์แล้วตรวจรายการเดิมอีกครั้ง';
+  help.hidden=false;button.disabled=needsHelp;button.textContent='ตรวจและเปิดรายการเดิม →';
+ }
+})}else summary.append(link('ไปหน้าชำระเงิน →','/checkout','btn primary'));
 summary.append(el('p','ชำระเงินอย่างปลอดภัยผ่าน Stripe','hint'),link('กลับไปเลือกสินค้า','/shop'));layout.append(main,summary);root.append(layout)}
-document.querySelectorAll('[data-add-to-cart]').forEach(button=>button.addEventListener('click',()=>{const slug=button.dataset.addToCart;if(!catalog.some(p=>p.slug===slug))return;try{localStorage.setItem(key,slug);sessionStorage.removeItem('yggmetro-checkout-'+slug+'-test');sessionStorage.removeItem('yggmetro-checkout-'+slug+'-live');location.assign('/cart')}catch{const note=document.querySelector('.add-cart-note');if(note)note.textContent='กรุณาอนุญาตการจัดเก็บข้อมูลของเว็บไซต์เพื่อใช้ตะกร้า'}}));render();
+document.querySelectorAll('[data-add-to-cart]').forEach(button=>button.addEventListener('click',()=>{const slug=button.dataset.addToCart;if(!catalog.some(p=>p.slug===slug))return;try{localStorage.setItem(key,slug);location.assign('/cart')}catch{const note=document.querySelector('.add-cart-note');if(note)note.textContent='กรุณาอนุญาตการจัดเก็บข้อมูลของเว็บไซต์เพื่อใช้ตะกร้า'}}));render();
 })();</script>`}

@@ -1,0 +1,134 @@
+✔ sandbox checkout returns only sandbox redirects and fulfills an owned synthetic order (103.649747ms)
+✔ sandbox rejects wrong origin and live configuration before provider or store access (1.825063ms)
+✔ checkout fails closed for missing configuration, foreign origin and client prices (1.327189ms)
+✔ checkout uses server price, persists pending order and issues an HttpOnly owner cookie (2.410157ms)
+✔ unavailable delivery or mismatched Stripe price cannot create a checkout (1.221453ms)
+✔ download requires owner cookie AND signed paid webhook, webhook retry is idempotent (2.829086ms)
+✔ unpaid, live, wrong amount and wrong product events never unlock delivery (4.335319ms)
+✔ async success unlocks payment only after paid event; missing order asks Stripe to retry (1.867437ms)
+✔ real Stripe SDK accepts signed payload and rejects tampering before any order write (9.276462ms)
+✔ a retry after a provider timeout uses the exact same idempotent Checkout parameters (2.648208ms)
+✔ live checkout requires explicit activation and never accepts a test price (0.85331ms)
+✔ invalid email is rejected before creating an order (0.645112ms)
+✔ test-mode orders cannot be presented as live orders after a mode switch (1.288612ms)
+✔ a delayed successful payment still delivers after the first 24 hours (1.528596ms)
+✔ a stale test checkout request returns recoverable conflict in live mode (1.531451ms)
+✖ first checkout establishes ownership before any provider call (1.872524ms)
+✖ concurrent retries persist one order and return the same checkout (2.31659ms)
+✖ provider success followed by D1 failure recovers with the same intent after restart (1.763063ms)
+✖ an old unresolved checkout is not retried after the provider idempotency window (2.366573ms)
+✖ an unresolved request cannot change its email or price or be taken over (1.879634ms)
+✖ missing durable-attempt migration fails before calling the provider (1.515496ms)
+✔ lost success response is recoverable using the cookie already established before checkout (1.713609ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 16
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 262.315991
+
+✖ failing tests:
+
+test at tests/stripe-checkout.test.cjs:150:1
+✖ first checkout establishes ownership before any provider call (1.872524ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 428
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:154:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 428,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/stripe-checkout.test.cjs:160:1
+✖ concurrent retries persist one order and return the same checkout (2.31659ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:165:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/stripe-checkout.test.cjs:168:1
+✖ provider success followed by D1 failure recovers with the same intent after restart (1.763063ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:173:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/stripe-checkout.test.cjs:179:1
+✖ an old unresolved checkout is not retried after the provider idempotency window (2.366573ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 409
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:185:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/stripe-checkout.test.cjs:188:1
+✖ an unresolved request cannot change its email or price or be taken over (1.879634ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  503 !== 409
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:192:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/stripe-checkout.test.cjs:200:1
+✖ missing durable-attempt migration fails before calling the provider (1.515496ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 503
+  
+      at TestContext.<anonymous> (/workspace/scratch/481624336393/yggmetro-web/tests/stripe-checkout.test.cjs:202:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 503,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
