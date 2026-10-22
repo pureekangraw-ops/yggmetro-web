@@ -63,6 +63,8 @@ const CHAT_CSS = [
 "#go-sales-root[data-obscured='true']{visibility:hidden;pointer-events:none}",
 "#go-sales-launcher{display:flex;gap:8px;align-items:center;justify-content:center;min-height:48px;padding:0 14px;border-radius:999px;border:1px solid #b8f8e3;background:#b8f8e3;color:#102522;font-size:13px;font-weight:800;box-shadow:0 6px 24px #0007;cursor:pointer}",
 "#go-sales-launcher:hover{background:#d5fff0}",
+"#go-mascot-dock{position:relative;width:120px;margin-left:auto}#go-mascot-dock #go-sales-launcher{width:120px;min-height:150px;padding:0 0 5px;flex-direction:column;gap:0;background:transparent;border:0;box-shadow:none;color:#102522}#go-mascot-image{display:block;width:112px;height:124px;object-fit:contain;transform-origin:50% 90%;animation:go-mascot-greet 2.8s ease-in-out 3;filter:drop-shadow(0 5px 8px #102b5b30)}#go-mascot-label{background:#e4f7ff;border:1px solid #69c8ef;border-radius:16px;padding:5px 10px;font-size:12px;white-space:nowrap}#go-mascot-minimize{position:absolute;right:0;top:0;border:1px solid #69c8ef;border-radius:50%;width:32px;height:32px;background:#e4f7ff;color:#102522;cursor:pointer;font-size:20px}#go-sales-root[data-minimized] #go-mascot-image{display:none}#go-sales-root[data-minimized] #go-sales-launcher{min-height:48px}#go-sales-root[data-minimized] #go-mascot-minimize{display:none}@keyframes go-mascot-greet{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-3deg)}}@media(prefers-reduced-motion:reduce){#go-mascot-image{animation:none}}@media(max-width:540px){#go-mascot-dock,#go-mascot-dock #go-sales-launcher{width:100px}#go-mascot-dock #go-sales-launcher{min-height:126px}#go-mascot-image{width:90px;height:100px}}",
+
 "#go-sales-panel{display:flex;flex-direction:column;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100dvh - 104px));border:1px solid #4b6b67;border-radius:19px;background:#101c20;box-shadow:0 18px 60px #000b;overflow:hidden}",
 "#go-sales-header{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#193035;border-bottom:1px solid #3a5253;padding:14px 16px}",
 "#go-sales-header strong{display:block;font-size:15px}",
@@ -82,7 +84,7 @@ const CHAT_CSS = [
 ].join("");
 const CHAT_HTML = [
 '<aside id="go-sales-root" aria-label="ผู้ช่วยข้อมูลสินค้าของ YGG METRO">',
-'<button type="button" id="go-sales-launcher" aria-expanded="false" aria-controls="go-sales-panel">💬 GO · ช่วยเลือกสินค้า</button>',
+ '<div id="go-mascot-dock"><button type="button" id="go-sales-launcher" aria-label="คุยกับ GO แนะนำสินค้า" aria-expanded="false" aria-controls="go-sales-panel"><img id="go-mascot-image" src="/assets/shop/go-mascot.webp" alt="" width="112" height="124"><span id="go-mascot-label">คุยกับ GO 💬</span></button><button type="button" id="go-mascot-minimize" aria-label="ย่อมาสคอต GO">−</button></div>',
 '<section id="go-sales-panel" role="dialog" aria-label="GO ช่วยเลือกสินค้า" hidden>',
 '<div id="go-sales-header"><div><strong>GO · ช่วยเลือกสินค้า</strong><small>ช่วยค้นหาจากข้อมูลสินค้าในร้าน</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
 '<div id="go-sales-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>',
