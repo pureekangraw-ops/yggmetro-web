@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const {fixture}=require('./helpers/request-store.cjs');
+test('shop context survives draft, reaches AI adapter, and create retry does not mutate submission',async()=>{
+ const {requestWorkflow}=await import('../src/request-workflow.js');const f=fixture();let cookie='',seen=null;
+ const interpret=async(request,env)=>{seen=env.REQUEST_CHAT_CONTEXT;return Response.json({sender_type:'AI',reply:'รับบริบทแล้วครับ'})};
+ async function call(path='',body){const res=await requestWorkflow(new Request('https://shop.yggmetro.com/api/v1/requests'+path,{method:body?'POST':'GET',headers:{cookie,origin:'https://shop.yggmetro.com','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})}),f.env,interpret);if(res.headers.has('set-cookie'))cookie=res.headers.get('set-cookie').split(';')[0];return {status:res.status,data:await res.json()}}
+ try{await call();const context='ลูกค้า: วางแปลนที่ดิน\nคำตอบแค็ตตาล็อก: Land Planner';await call('/BRIEF-handoff',{brief:{goal:'ทำเว็บ',shopContext:context,sourcePage:'/shop?private=omit'}});assert.equal(seen,null);await call('/BRIEF-handoff/messages',{messageId:'first',text:'ช่วยทำต่อครับ'});assert.equal(seen.brief.shopContext,context);assert.equal(seen.brief.sourcePage,'/shop');assert.equal(seen.history.at(-1).sender_type,'CUSTOMER');await call('/BRIEF-handoff/confirm',{});const replay=await call('/BRIEF-handoff',{brief:{goal:'stale',shopContext:'old'}});assert.equal(replay.status,200);assert.equal(replay.data.request.status,'SUBMITTED');assert.equal(replay.data.request.brief.shopContext,context);assert.equal(replay.data.events.filter(e=>e.kind==='STATUS').length,1)}finally{f.db.close()}
+});

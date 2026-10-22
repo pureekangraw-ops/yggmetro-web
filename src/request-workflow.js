@@ -10,10 +10,10 @@ const keys=(v,allowed)=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v
 const sql=(db,q,...args)=>db.prepare(q).bind(...args);
 const all=async s=>(await s.all()).results;
 const now=()=>new Date().toISOString();
-const fields=['goal','serviceLine','entryService','sourcePage','jobType','audience','materials','pageCount','package','desiredDate','deadlineText'];
+const fields=['goal','serviceLine','entryService','sourcePage','jobType','audience','materials','pageCount','package','desiredDate','deadlineText','shopContext'];
 function brief(v){
  if(!keys(v,fields))fail('INVALID_BRIEF');
- const result={};for(const k of fields){const x=v[k];if(x!==undefined){if(k==='pageCount'){if(x!==null&&(!Number.isInteger(x)||x<1||x>500))fail('INVALID_BRIEF');result[k]=x}else{if(typeof x!=='string'&&x!==null)fail('INVALID_BRIEF');result[k]=String(x||'').slice(0,2000)}}}
+ const result={};for(const k of fields){const x=v[k];if(x!==undefined){if(k==='pageCount'){if(x!==null&&(!Number.isInteger(x)||x<1||x>500))fail('INVALID_BRIEF');result[k]=x}else{if(typeof x!=='string'&&x!==null)fail('INVALID_BRIEF');result[k]=String(x||'').slice(0,k==='shopContext'?8000:2000)}}}
  if(result.sourcePage)result.sourcePage=result.sourcePage.split(/[?#]/)[0];return result;
 }
 async function body(request){
@@ -90,10 +90,12 @@ export async function requestWorkflow(request,env,interpret){
    fail('REQUEST_ID_REQUIRED');
   }
   let row=await sql(db,'SELECT * FROM ygg_requests WHERE request_id=?',id(requestId)).first();
-  if(!isAdmin&&request.method==='POST'&&(action==='upsert'||(!action&&!row))){
+  if(!isAdmin&&request.method==='POST'&&(action==='upsert'||!action)){
    if(!legacy&&!keys(input,['brief']))fail('INVALID_REQUEST');
    if(row&&row.owner_hash!==actor.id)fail('REQUEST_NOT_FOUND',404);
    const data=brief(input?.brief||{}),time=now();
+   // Retrying creation returns the owned record, never overwrites a draft edited since creation.
+   if(row&&!action)return respond({...await read(db,row,actor),briefId:requestId,status:row.status});
    if(!row){await sql(db,`INSERT INTO ygg_requests(request_id,owner_hash,brief_json,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(request_id) DO NOTHING`,requestId,actor.id,JSON.stringify(data),time,time).run();row=await owned(db,requestId,actor)}
    else {if(row.status!=='DRAFT')fail('REQUEST_ALREADY_SUBMITTED',409);row=await mutate(db,row,{brief_json:JSON.stringify(data)},actor,'DRAFT_UPDATED','DRAFT','DRAFT',null)}
    return respond({...await read(db,row,actor),briefId:requestId,status:'DRAFT'});

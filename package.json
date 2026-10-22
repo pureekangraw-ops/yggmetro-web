@@ -6,7 +6,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "test": "node --test tests/*.test.cjs",
-    "test:e2e": "node tests/e2e/storefront.cjs && node --test tests/e2e/request-recovery.cjs && node --test tests/e2e/request-journey.cjs",
+    "test:e2e": "node tests/e2e/storefront.cjs && node --test tests/e2e/request-recovery.cjs && node --test tests/e2e/request-journey.cjs && node --test tests/e2e/shop-handoff.cjs",
     "test:request-recovery": "node --test tests/e2e/request-recovery.cjs",
     "test:requests:e2e": "node tests/e2e/request-workflow.mjs",
     "test:request-journey": "node --test tests/e2e/request-journey.cjs"

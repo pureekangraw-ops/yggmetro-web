@@ -78,6 +78,7 @@ const CHAT_CSS = [
 "#go-sales-input{flex:1;min-width:0;resize:none;max-height:96px;min-height:46px;border:1px solid #486565;border-radius:10px;padding:11px;background:#14272b;color:white;font:inherit}",
 "#go-sales-send{flex:0 0 auto;border:0;border-radius:10px;min-width:55px;padding:0 12px;background:#b8f8e3;color:#102522;font-weight:800;cursor:pointer}",
 "#go-sales-send:disabled{opacity:.5;cursor:wait}",
+"#go-sales-handoff{margin:0 12px 8px;padding:9px;border:1px solid #69c8ef;border-radius:10px;background:#193035;color:#e4f7ff;cursor:pointer;min-height:44px}#go-sales-handoff:disabled{opacity:.6;cursor:wait}#go-sales-state{display:block;min-height:18px;padding:0 14px 5px;color:#b4c9c5;font-size:12px}",
 "#go-sales-note{font-size:10px;line-height:1.4;color:#b4c9c5;padding:0 14px 10px}",
 "#go-sales-root button:focus-visible,#go-sales-root textarea:focus-visible,#go-sales-root a:focus-visible{outline:3px solid #fff;outline-offset:2px}",
 "@media(max-width:540px){#go-sales-root{right:12px;bottom:max(12px,env(safe-area-inset-bottom))}#go-sales-panel{width:calc(100vw - 24px);height:min(570px,calc(100dvh - 76px))}}"
@@ -89,6 +90,7 @@ const CHAT_HTML = [
 '<div id="go-sales-header"><div><strong>GO · ช่วยเลือกสินค้า</strong><small>ช่วยค้นหาจากข้อมูลสินค้าในร้าน</small></div><button type="button" id="go-sales-close" aria-label="ปิดแชต">×</button></div>',
 '<div id="go-sales-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>',
 '<form id="go-sales-form"><textarea id="go-sales-input" maxlength="500" rows="2" placeholder="อยากได้เครื่องมือแบบไหนครับ?" aria-label="คำถามเกี่ยวกับสินค้า"></textarea><button type="submit" id="go-sales-send">ส่ง</button></form>',
+'<button type="button" id="go-sales-handoff">คุยงานต่อกับ GO →</button><small style="padding:0 14px 8px;color:#bfd4d0">นำข้อความล่าสุดสูงสุด 8 ข้อความไปสร้างร่าง ยังไม่ส่งคำขอจ้าง · <a href="/client" style="color:#b8f8e3">เปิดคำขอเดิม</a></small><span id="go-sales-state" role="status" aria-live="polite"></span>',
 '<p id="go-sales-note">ตอบจากข้อมูลสินค้าในร้าน · ไม่ตรวจออเดอร์หรือรับข้อมูลบัตร · หากต้องการคุยงาน กดเมนูคุยงาน</p>',
 '</section></aside>'
 ].join("");
