@@ -1,0 +1,102 @@
+{
+  "checked_at": "2026-10-22T01:25:38.591Z",
+  "scope": "Real Stripe testmode provider acceptance; deployed app end-to-end remains blocked",
+  "source_commit": "5c13ae3148505255a818d75cb1774466f72a9f4c",
+  "stripe_context": "acct_1UPfntLUh1BviBSH",
+  "livemode": false,
+  "product_id": "prod_yggmetro_checkout_test_40thb",
+  "price": {
+    "id": "price_1UTAV6LUh1BviBSHAwjISA4N",
+    "currency": "thb",
+    "unit_amount": 4000,
+    "type": "one_time",
+    "active": true
+  },
+  "session": {
+    "id": "cs_test_a1cNwXwKa4uE6YKynEZjZ6zDgTvALtUrEHlxgnEbkk0IykOMopM0QPvrd0",
+    "status": "complete",
+    "payment_status": "paid",
+    "amount_total": 4000,
+    "currency": "thb"
+  },
+  "payment_intent": {
+    "id": "pi_3UTAgDLUh1BviBSH1KayFSPV",
+    "status": "succeeded",
+    "amount_received": 4000,
+    "currency": "thb",
+    "charge": "ch_3UTAgDLUh1BviBSH16LJGFFi"
+  },
+  "decline": {
+    "status": "requires_payment_method",
+    "code": "card_declined",
+    "decline_code": "generic_decline",
+    "amount_received": 0,
+    "event_id": "evt_3UTAgDLUh1BviBSH1os87fF9"
+  },
+  "events": [
+    {
+      "id": "evt_1UTAieLUh1BviBSHvdUgVMVE",
+      "type": "checkout.session.completed",
+      "created": 1792632180,
+      "object_id": "cs_test_a1cNwXwKa4uE6YKynEZjZ6zDgTvALtUrEHlxgnEbkk0IykOMopM0QPvrd0",
+      "livemode": false
+    },
+    {
+      "id": "evt_3UTAgDLUh1BviBSH1TOydw5l",
+      "type": "payment_intent.succeeded",
+      "created": 1792632180,
+      "object_id": "pi_3UTAgDLUh1BviBSH1KayFSPV",
+      "livemode": false
+    }
+  ],
+  "cloudflare": {
+    "worker": "yggmetro-shop-sandbox",
+    "origin": "https://yggmetro-shop-sandbox.pureekangraw.workers.dev",
+    "deployment_id": "b8fbcf997b3b4763b60603734f178e04",
+    "bundle_sha256": "68cd23492fd5687daa399f5f0d89859918e54d794a00aa4d9f25896667345f85",
+    "d1": {
+      "name": "yggmetro-shop-sandbox-orders",
+      "id": "cb4c8a75-779e-44cb-a994-63153eed9b09",
+      "migrations": [
+        "0001_shop_orders.sql",
+        "0003_shop_checkout_attempts.sql"
+      ],
+      "orders_count": 0,
+      "attempts_count": 0
+    },
+    "r2": {
+      "name": "yggmetro-shop-sandbox-downloads",
+      "public": false,
+      "custom_domains": [],
+      "key": "private/checkout-test.zip",
+      "bytes": 188,
+      "md5": "e194afbe8feb1dad7b2422996665efdc",
+      "sha256": "7837cfa0c68819d5d6a7044850cbdf83ede4b43f0171947a42b09ec72a226b02"
+    },
+    "secret_names": [],
+    "static_assets_uploaded": false
+  },
+  "webhook": {
+    "id": "we_1UTAbMLUh1BviBSH9AyP1Eea",
+    "url": "https://yggmetro-shop-sandbox.pureekangraw.workers.dev/api/v1/stripe/webhook",
+    "status": "disabled",
+    "livemode": false,
+    "enabled_events": [
+      "checkout.session.completed",
+      "checkout.session.async_payment_succeeded"
+    ]
+  },
+  "blocker": {
+    "secret_transfer": "Auto-review rejected transfer of Stripe webhook signing secret to Cloudflare STRIPE_TEST_WEBHOOK_SECRET; explicit user approval required. No retry or workaround attempted.",
+    "api_key": "STRIPE_TEST_KEY not configured; Stripe Dashboard is at login; test key not retrievable through discovered connector operations."
+  },
+  "claims": {
+    "provider_decline_pass": true,
+    "provider_payment_pass": true,
+    "product_page_visible_40baht": true,
+    "webhook_delivered": false,
+    "app_d1_paid": false,
+    "owned_download": false,
+    "production_deployed": false
+  }
+}

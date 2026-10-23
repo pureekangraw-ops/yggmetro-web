@@ -1,0 +1,54 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yggmetro-web@0.1.0 test:e2e
+> node tests/e2e/storefront.cjs && node --test tests/e2e/request-recovery.cjs && node --test tests/e2e/request-journey.cjs && node --test tests/e2e/checkout.cjs
+
+Desktop/mobile storefront flow passed at 1440px
+Desktop/mobile storefront flow passed at 708px
+Desktop/mobile storefront flow passed at 390px
+✔ canceling a new request keeps the unsaved brief and does not create a record (504.020218ms)
+✔ canceling legacy import preserves unsaved fields without creating a record (223.158416ms)
+✔ failed new request preserves the selected request and its unsaved brief for retry (341.707224ms)
+✔ failed selection restores the current draft and cannot overwrite the other request (653.299344ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2122.685564
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 390px (9969.94014ms)
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 1440px (9510.263263ms)
+✔ lost committed message response retries the exact payload once and keeps newer composition (397.853504ms)
+✔ late response and repeated submit cannot erase edits or cross request composers (568.81648ms)
+✔ safe network errors preserve edits and canceled browser navigation keeps unsaved brief (433.688866ms)
+✔ home Custom Order form creates one owned submitted request and opens its customer readback (551.720777ms)
+✔ custom form lost confirmation response retries one request and retains newer edits (837.23348ms)
+✔ lost custom confirmation survives real reload through owned readback without duplicate submission (528.21907ms)
+✔ lost custom draft-save response restores server fields after reload and submits the same request once (685.654234ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23919.915172
+✔ 40 THB mobile storefront → checkout → verified fixture webhook → owner download (978.892787ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (505.922838ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (540.322ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (501.913074ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (635.195215ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (770.553744ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (632.291719ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (371.338028ms)
+✔ unavailable recovery storage prevents an untrackable purchase (404.671147ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5745.590132

@@ -1,0 +1,33 @@
+{
+  "name": "yggmetro-shop-sandbox",
+  "main": "../../src/sandbox/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "../../public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "vars": {
+    "SHOP_ENVIRONMENT": "sandbox",
+    "SHOP_SANDBOX_ORIGIN": "https://yggmetro-shop-sandbox.pureekangraw.workers.dev",
+    "STRIPE_CHECKOUT_MODE": "test",
+    "STRIPE_TEST_CHECKOUT_ENABLED": "true",
+    "STRIPE_TEST_CATALOG": "{\"checkout-test\":{\"enabled\":true,\"priceId\":\"price_1UTAV6LUh1BviBSHAwjISA4N\",\"amount\":4000,\"currency\":\"thb\",\"deliveryKey\":\"private/checkout-test.zip\"}}"
+  },
+  "d1_databases": [
+    {
+      "binding": "SHOP_ORDERS",
+      "database_name": "yggmetro-shop-sandbox-orders",
+      "database_id": "cb4c8a75-779e-44cb-a994-63153eed9b09",
+      "migrations_dir": "../../migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "SHOP_DOWNLOADS",
+      "bucket_name": "yggmetro-shop-sandbox-downloads"
+    }
+  ]
+}

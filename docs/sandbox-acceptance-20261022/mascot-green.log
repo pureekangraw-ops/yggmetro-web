@@ -1,0 +1,35 @@
+
+> yggmetro-web@0.1.0 test:checkout
+> node --test tests/e2e/checkout.cjs
+
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 390px (1442.137934ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 1440px (1259.780675ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (909.876554ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (862.358173ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (783.896397ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (981.463331ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (922.219953ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (891.136287ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (644.121342ms)
+✔ unavailable recovery storage prevents an untrackable purchase (605.083165ms)
+✔ a damaged started request is not replaced with a new purchase after reload (612.377455ms)
+✔ sandbox resource links and images remain local and resolve at 390px (791.114043ms)
+✔ sandbox resource links and images remain local and resolve at 1440px (807.45233ms)
+✔ mascot protects checkout notices and retains controls at 320px (1131.94889ms)
+✔ mascot protects checkout notices and retains controls at 390px (1201.565824ms)
+✔ mascot protects checkout notices and retains controls at 540px (1145.829385ms)
+✔ mascot protects checkout notices and retains controls at 708px (1136.234896ms)
+✔ mascot protects checkout notices and retains controls at 1440px (1265.63115ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17796.712751
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

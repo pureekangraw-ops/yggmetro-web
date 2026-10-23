@@ -22,7 +22,7 @@ async function body(request){
  if(reader){const decoder=new TextDecoder();try{for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>32768){await reader.cancel();fail('PAYLOAD_TOO_LARGE',413)}raw+=decoder.decode(value,{stream:true})}raw+=decoder.decode()}finally{reader.releaseLock()}}
  try{return JSON.parse(raw)}catch{fail('INVALID_JSON')}
 }
-async function admin(request,env){
+export async function authenticateAdmin(request,env){
  const authorization=request.headers.get('authorization')||'';if(!/^Bearer [A-Za-z0-9_-]{32,200}$/.test(authorization))fail('ADMIN_AUTH_REQUIRED',401);
  let credentials;try{credentials=JSON.parse(env.YGG_ADMIN_CREDENTIALS||'{}')}catch{fail('ADMIN_AUTH_NOT_CONFIGURED',503)}
  const digest=await hash(authorization.slice(7));
@@ -76,7 +76,7 @@ export async function requestWorkflow(request,env,interpret){
   if(!['GET','POST'].includes(request.method))return respond({ok:false,code:'METHOD_NOT_ALLOWED'},405,{allow:'GET, POST'});
   if(request.method==='POST'&&(request.headers.get('origin')!==u.origin||request.headers.get('sec-fetch-site')==='cross-site'))fail('ORIGIN_DENIED',403);
   if(request.method==='GET'&&request.headers.get('sec-fetch-site')==='cross-site')fail('ORIGIN_DENIED',403);
-  const db=env.REQUESTS_DB,actor=isAdmin?await admin(request,env):await session(request,db,request.method==='GET');
+  const db=env.REQUESTS_DB,actor=isAdmin?await authenticateAdmin(request,env):await session(request,db,request.method==='GET');
   const base=isAdmin?'/api/v1/admin/requests':'/api/v1/requests';const rest=path.slice(base.length).split('/').filter(Boolean);
   let input=request.method==='POST'?await body(request):null;
   if(input&&['sender_type','sender_id','sender','role','actor_id','timestamp'].some(k=>Object.hasOwn(input,k)))fail('SENDER_FORBIDDEN',400);

@@ -1,0 +1,81 @@
+
+> yggmetro-web@0.1.0 test:e2e
+> node tests/e2e/storefront.cjs && node --test tests/e2e/request-recovery.cjs && node --test tests/e2e/request-journey.cjs && node --test tests/e2e/shop-handoff.cjs && node --test tests/e2e/checkout.cjs
+
+Desktop/mobile storefront flow passed at 1440px
+Desktop/mobile storefront flow passed at 708px
+Desktop/mobile storefront flow passed at 390px
+✔ canceling a new request keeps the unsaved brief and does not create a record (868.512392ms)
+✔ canceling legacy import preserves unsaved fields without creating a record (375.685544ms)
+✔ failed new request preserves the selected request and its unsaved brief for retry (454.574448ms)
+✔ failed selection restores the current draft and cannot overwrite the other request (886.696521ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3007.614285
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 390px (9482.878667ms)
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 1440px (9291.510691ms)
+✔ lost committed message response retries the exact payload once and keeps newer composition (606.74636ms)
+✔ late response and repeated submit cannot erase edits or cross request composers (780.964063ms)
+✔ safe network errors preserve edits and canceled browser navigation keeps unsaved brief (705.076402ms)
+✔ home Custom Order form creates one owned submitted request and opens its customer readback (861.329165ms)
+✔ custom form lost confirmation response retries one request and retains newer edits (1217.418905ms)
+✔ lost custom confirmation survives real reload through owned readback without duplicate submission (2204.967595ms)
+✔ lost custom draft-save response restores server fields after reload and submits the same request once (1331.956609ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26875.611982
+✔ shop to owned GO draft and chat at 390 (1306.294357ms)
+✔ shop to owned GO draft and chat at 1440 (1117.981131ms)
+✔ lost create response and reload retry keeps a single draft (923.620105ms)
+✔ create retry cannot overwrite edited draft and another browser cannot read it (1017.29848ms)
+✔ typed unsent text is transferred as data and catalog client link uses the handoff (705.12847ms)
+✔ Admin sees context and reloading preserves a later selection (1018.503889ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6485.925653
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 390px (2046.94647ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 1440px (1663.122678ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (886.851168ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (833.531126ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (812.246196ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (960.621883ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (1026.590567ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (1085.359228ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (731.929191ms)
+✔ unavailable recovery storage prevents an untrackable purchase (658.903953ms)
+✔ a damaged started request is not replaced with a new purchase after reload (721.125238ms)
+✔ sandbox resource links and images remain local and resolve at 390px (845.980875ms)
+✔ sandbox resource links and images remain local and resolve at 1440px (928.586681ms)
+✔ mascot protects checkout notices and retains controls at 320px (1199.193166ms)
+✔ mascot protects checkout notices and retains controls at 390px (1201.482665ms)
+✔ mascot protects checkout notices and retains controls at 540px (1250.147392ms)
+✔ mascot protects checkout notices and retains controls at 708px (1251.055566ms)
+✔ mascot protects checkout notices and retains controls at 1440px (1531.172703ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20065.546452
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

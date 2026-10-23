@@ -28,7 +28,7 @@
     if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");root.style.transform="";return}
     root.style.transform="";
     const buttonRect=(dock||launcher).getBoundingClientRect();
-    const rects=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button']")].filter(node=>!root.contains(node)&&node.getClientRects().length).filter(node=>{
+    const rects=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button'],.test-mode,.payment-info,.commerce-status,.order-total,.cart-item")].filter(node=>!root.contains(node)&&node.getClientRects().length).filter(node=>{
       const style=getComputedStyle(node);return style.visibility!=="hidden"&&style.display!=="none"&&Number(style.opacity)!==0;
     }).map(node=>node.getBoundingClientRect());
     const lift=[0,160,320].find(offset=>buttonRect.top-offset>=80&&!rects.some(rect=>

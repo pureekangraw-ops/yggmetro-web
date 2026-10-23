@@ -1,0 +1,9 @@
+{
+  "checkout-test": {
+    "enabled": true,
+    "priceId": "REPLACE_WITH_VERIFIED_SANDBOX_PRICE_ID",
+    "amount": 4000,
+    "currency": "thb",
+    "deliveryKey": "private/checkout-test.zip"
+  }
+}

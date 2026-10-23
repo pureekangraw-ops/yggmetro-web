@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {DatabaseSync}=require('node:sqlite');
 const fs=require('node:fs');
 const load=()=>import('../src/stripe-checkout.js');
-function fixture(){const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync('migrations/0001_shop_orders.sql','utf8'));
+function fixture(){const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync('migrations/0001_shop_orders.sql','utf8'));db.exec(fs.readFileSync('migrations/0003_shop_checkout_attempts.sql','utf8'));
  const store={prepare:sql=>({bind:(...args)=>({first:async()=>db.prepare(sql).get(...args),run:async()=>db.prepare(sql).run(...args)})})};
  const item={enabled:true,priceId:'price_TEST',amount:900,currency:'usd',deliveryKey:'shop-home.zip'};
  const env={STRIPE_TEST_CHECKOUT_ENABLED:'true',STRIPE_TEST_KEY:'rk_test_fixture',STRIPE_TEST_WEBHOOK_SECRET:'whsec_fixture',STRIPE_TEST_CATALOG:JSON.stringify({'shop-home':item}),SHOP_ORDERS:store,SHOP_DOWNLOADS:{head:async()=>({}),get:async()=>({body:'paid-zip-content'})}};
@@ -10,9 +10,42 @@ function fixture(){const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync
  let event={id:'evt_1',livemode:false,type:'checkout.session.completed',data:{object:session}},created=0;
  const sdk={prices:{retrieve:async()=>({livemode:false,active:true,type:'one_time',unit_amount:900,currency:'usd'})},checkout:{sessions:{create:async body=>{created++;assert.equal(body.line_items[0].price,'price_TEST');assert.equal(body.payment_method_types,undefined);return session},retrieve:async()=>session,listLineItems:async()=>({data:[{price:{id:'price_TEST'},quantity:1}],has_more:false})}},webhooks:{constructEventAsync:async(raw,sig)=>{if(sig!=='valid')throw Error('bad signature');return event}}};
  return {db,env,session,sdk,get created(){return created},set event(e){event=e}}}
-function checkout(extra={},origin='https://shop.yggmetro.com'){return new Request('https://shop.yggmetro.com/api/v1/shop/checkout',{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({slug:'shop-home',requestId:'a'.repeat(64),...extra})})}
+function checkout(extra={},origin='https://shop.yggmetro.com'){return new Request('https://shop.yggmetro.com/api/v1/shop/checkout',{method:'POST',headers:{origin,'content-type':'application/json',cookie:'__Host-ygg-order='+'c'.repeat(64)},body:JSON.stringify({slug:'shop-home',requestId:'a'.repeat(64),...extra})})}
 const webhook=sig=>new Request('https://shop.yggmetro.com/api/v1/stripe/webhook',{method:'POST',headers:{'stripe-signature':sig},body:'{}'});
 const catalog=[{slug:'shop-home'}];
+test('sandbox checkout returns only sandbox redirects and fulfills an owned synthetic order',async t=>{
+ const {handleShopCheckout,handleStripeWebhook,handleShopOrder}=await load();const f=fixture();t.after(()=>f.db.close());
+ const origin='https://shop-sandbox.example';Object.assign(f.env,{SHOP_ENVIRONMENT:'sandbox',SHOP_SANDBOX_ORIGIN:origin});
+ const create=f.sdk.checkout.sessions.create;
+ f.sdk.checkout.sessions.create=async(body,options)=>{
+  assert.equal(body.success_url,origin+'/order?session_id={CHECKOUT_SESSION_ID}');
+  assert.equal(body.cancel_url,origin+'/checkout');
+  return create(body,options);
+ };
+ const request=new Request(origin+'/api/v1/shop/checkout',{method:'POST',headers:{origin,'content-type':'application/json',cookie:'__Host-ygg-order='+'c'.repeat(64)},body:JSON.stringify({slug:'shop-home',requestId:'b'.repeat(64)})});
+ const response=await handleShopCheckout(request,f.env,catalog,()=>f.sdk);assert.equal(response.status,200);
+ const cookie=response.headers.get('set-cookie').split(';')[0];
+ const order=host=>new Request(host+'/api/v1/shop/order/download?session_id=cs_test_example',{headers:{cookie}});
+ assert.equal((await handleShopOrder(order(origin),f.env)).status,409);
+ const event=new Request(origin+'/api/v1/stripe/webhook',{method:'POST',headers:{'stripe-signature':'valid'},body:'{}'});
+ assert.equal((await handleStripeWebhook(event,f.env,()=>f.sdk)).status,200);
+ assert.equal(await(await handleShopOrder(order(origin),f.env)).text(),'paid-zip-content');
+ assert.equal((await handleShopOrder(order('https://shop.yggmetro.com'),f.env)).status,404);
+});
+
+test('sandbox rejects wrong origin and live configuration before provider or store access',async t=>{
+ const {handleShopCheckout,handleStripeWebhook,getShopProduct}=await load();const f=fixture();t.after(()=>f.db.close());
+ Object.assign(f.env,{SHOP_ENVIRONMENT:'sandbox',SHOP_SANDBOX_ORIGIN:'https://shop-sandbox.example'});
+ const forbidden=()=>{throw Error('provider must not be called')};
+ assert.equal((await handleShopCheckout(checkout(),f.env,catalog,forbidden)).status,403);
+ assert.equal((await handleStripeWebhook(webhook('valid'),f.env,forbidden)).status,403);
+ const sameUrlWrongOrigin=new Request('https://shop-sandbox.example/api/v1/shop/checkout',{method:'POST',headers:{origin:'https://shop.yggmetro.com','content-type':'application/json'},body:'{}'});
+ assert.equal((await handleShopCheckout(sameUrlWrongOrigin,f.env,catalog,forbidden)).status,403);
+ assert.equal(getShopProduct({...f.env,STRIPE_CHECKOUT_MODE:'live'},'shop-home'),null);
+ assert.equal(f.created,0);
+ assert.equal(f.db.prepare('SELECT count(*) AS n FROM shop_orders').get().n,0);
+});
+
 test('checkout fails closed for missing configuration, foreign origin and client prices',async()=>{
  const {handleShopCheckout,getTestProduct}=await load();const f=fixture();
  assert.equal((await handleShopCheckout(checkout(),{},catalog)).status,503);
@@ -26,7 +59,7 @@ test('checkout uses server price, persists pending order and issues an HttpOnly 
  const response=await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk);assert.equal(response.status,200);
  assert.match(response.headers.get('set-cookie'),/HttpOnly; Secure; SameSite=Lax/);
  assert.equal(f.db.prepare('SELECT status FROM shop_orders').get().status,'pending');
- const retry=await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk);assert.equal(retry.status,409);assert.equal(f.created,1);f.db.close();
+ const other=checkout();other.headers.set('cookie','__Host-ygg-order='+'d'.repeat(64));const retry=await handleShopCheckout(other,f.env,catalog,()=>f.sdk);assert.equal(retry.status,409);assert.equal(f.created,1);f.db.close();
 });
 test('unavailable delivery or mismatched Stripe price cannot create a checkout',async()=>{
  const {handleShopCheckout}=await load();let f=fixture();f.env.SHOP_DOWNLOADS.head=async()=>null;
@@ -113,3 +146,66 @@ test('a stale test checkout request returns recoverable conflict in live mode',a
  assert.equal((await handleShopCheckout(request,env,catalog,()=>f.sdk)).status,409);assert.equal(retrieved,false);f.db.close();
 });
 
+
+test('first checkout establishes ownership before any provider call',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());
+ const first=checkout();first.headers.delete('cookie');
+ const r=await handleShopCheckout(first,f.env,catalog,()=>f.sdk);
+ assert.equal(r.status,428);assert.equal((await r.json()).code,'CHECKOUT_SESSION_REQUIRED');
+ assert.equal(f.created,0);assert.equal(f.db.prepare('SELECT count(*) n FROM shop_orders').get().n,0);
+ const retry=checkout();retry.headers.set('cookie',r.headers.get('set-cookie').split(';')[0]);
+ assert.equal((await handleShopCheckout(retry,f.env,catalog,()=>f.sdk)).status,200);
+});
+
+test('concurrent retries persist one order and return the same checkout',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());
+ const responses=await Promise.all([1,2].map(()=>handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk)));
+ assert.deepEqual(responses.map(r=>r.status),[200,200]);
+ assert.equal(f.db.prepare('SELECT count(*) n FROM shop_orders').get().n,1);
+ assert.equal(f.db.prepare('SELECT count(*) n FROM shop_checkout_attempts').get().n,1);
+});
+
+test('provider success followed by D1 failure recovers with the same intent after restart',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());let parameters,options,calls=0;
+ f.sdk.checkout.sessions.create=async(p,o)=>{calls++;if(!parameters){parameters=structuredClone(p);options=structuredClone(o)}else{assert.deepEqual(p,parameters);assert.deepEqual(o,options)}return f.session};
+ f.db.exec("CREATE TRIGGER fail_order BEFORE INSERT ON shop_orders BEGIN SELECT RAISE(FAIL,'store unavailable'); END");
+ assert.equal((await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk)).status,503);
+ assert.equal(f.db.prepare('SELECT count(*) n FROM shop_checkout_attempts').get().n,1);
+ f.db.exec('DROP TRIGGER fail_order');
+ assert.equal((await handleShopCheckout(checkout(),{...f.env},catalog,()=>f.sdk)).status,200);
+ assert.equal(calls,2);assert.equal(f.db.prepare('SELECT count(*) n FROM shop_orders').get().n,1);
+});
+
+test('an old unresolved checkout is not retried after the provider idempotency window',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());let calls=0;
+ f.sdk.checkout.sessions.create=async()=>{calls++;throw Error('unknown provider outcome')};
+ assert.equal((await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk)).status,503);
+ f.db.prepare('UPDATE shop_checkout_attempts SET created_at=?').run(Date.now()-25*3600000);
+ const r=await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk);
+ assert.equal(r.status,409);assert.equal((await r.json()).code,'CHECKOUT_RECONCILIATION_REQUIRED');assert.equal(calls,1);
+});
+
+test('an unresolved request cannot change its email or price or be taken over',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());let calls=0;
+ f.sdk.checkout.sessions.create=async()=>{calls++;throw Error('timeout')};
+ await handleShopCheckout(checkout({email:'first@example.com'}),f.env,catalog,()=>f.sdk);
+ assert.equal((await handleShopCheckout(checkout({email:'other@example.com'}),f.env,catalog,()=>f.sdk)).status,409);
+ const stolen=checkout({email:'first@example.com'});stolen.headers.set('cookie','__Host-ygg-order='+'d'.repeat(64));
+ assert.equal((await handleShopCheckout(stolen,f.env,catalog,()=>f.sdk)).status,409);
+ const config=JSON.parse(f.env.STRIPE_TEST_CATALOG);config['shop-home'].priceId='price_CHANGED';
+ assert.equal((await handleShopCheckout(checkout({email:'first@example.com'}),{...f.env,STRIPE_TEST_CATALOG:JSON.stringify(config)},catalog,()=>f.sdk)).status,409);
+ assert.equal(calls,1);
+});
+
+test('missing durable-attempt migration fails before calling the provider',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());f.db.exec('DROP TABLE shop_checkout_attempts');
+ assert.equal((await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk)).status,503);assert.equal(f.created,0);
+});
+
+test('lost success response is recoverable using the cookie already established before checkout',async t=>{
+ const {handleShopCheckout}=await load(),f=fixture();t.after(()=>f.db.close());
+ await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk); // client never receives this response
+ const recovered=await handleShopCheckout(checkout(),f.env,catalog,()=>f.sdk);
+ assert.equal(recovered.status,200);assert.equal(f.created,1);
+ assert.equal((await recovered.json()).url,f.session.url);
+});

@@ -1,6 +1,8 @@
+import {officeCommerce} from './office-commerce.js';
 import {requestWorkflow} from './request-workflow.js';
 import {requestPage} from './request-pages.js';
 import {handleShopCheckout,handleStripeWebhook,handleShopOrder,orderPage} from './stripe-checkout.js';
+import {isShopRequest,isShopSandbox} from './shop-origin.js';
 import { renderShop, getShopPublicCatalog } from "./shop.js";
 import { handleShopAssistant } from "./shop-assistant.js";
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
@@ -411,19 +413,22 @@ export function renderHomePage(hostname="") {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const shopRequest=isShopRequest(request,env),sandbox=isShopSandbox(env);
+    if(sandbox&&!shopRequest)return json({ok:false,code:'SHOP_ONLY'},404);
+    const commerce=await officeCommerce(request,env);if(commerce)return commerce;
     const workflow=await requestWorkflow(request,env,handleGoClientInterpret);if(workflow)return workflow;
     if(url.pathname==='/requests'||url.pathname==='/admin/requests'){
       if(!['GET','HEAD'].includes(request.method))return new Response('Method Not Allowed',{status:405});
-      return new Response(request.method==='HEAD'?null:requestPage(url.pathname==='/admin/requests'),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
+      return new Response(request.method==='HEAD'?null:requestPage(url.pathname==='/admin/requests',false,sandbox),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
     }
-    if (url.hostname === "shop.yggmetro.com" && url.pathname.startsWith("/assets/shop/")) {
+    if (shopRequest && url.pathname.startsWith("/assets/shop/")) {
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed", {status:405,headers:{allow:"GET, HEAD"}});
       return env.ASSETS ? env.ASSETS.fetch(request) : new Response("Not Found", {status:404});
     }
-    if(url.hostname==='shop.yggmetro.com'){
+    if(shopRequest){
       if(url.pathname==='/api/v1/shop/checkout'){
         if(rateLimited(request,'shop-checkout'))return json({ok:false,code:'RATE_LIMITED'},429);
-        return handleShopCheckout(request,env,getShopPublicCatalog());
+        return handleShopCheckout(request,env,getShopPublicCatalog(env));
       }
       if(url.pathname==='/api/v1/stripe/webhook')return handleStripeWebhook(request,env);
       if(url.pathname==='/api/v1/shop/order'||url.pathname==='/api/v1/shop/order/download')return handleShopOrder(request,env);
@@ -434,7 +439,7 @@ export default {
       return Response.json({ok:true,service:"yggmetro-web",status:"READY",spectrumSaleConfigured:Boolean(env?.OPENAI_API_KEY)}, {headers:{"cache-control":"no-store"}});
     }
     if (url.pathname === "/api/v1/shop/assistant") {
-      if (url.hostname !== "shop.yggmetro.com") return json({ok:false,code:"SHOP_ONLY"},404);
+      if (!shopRequest) return json({ok:false,code:"SHOP_ONLY"},404);
       if (rateLimited(request,"shop-assistant")) return json({ok:false,code:"RATE_LIMITED"},429);
       return handleShopAssistant(request,getShopPublicCatalog());
     }
@@ -450,9 +455,9 @@ export default {
       return new Response(request.method==="HEAD"?null:requestPage(false,url.hostname === "shop.yggmetro.com"),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
-    if(url.hostname==="shop.yggmetro.com"){
+    if(shopRequest){
       const page=renderShop(url.pathname,env);
-      return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin","cache-control":"no-store"}});
+      return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin","cache-control":"no-store",...(sandbox?{'x-robots-tag':'noindex, nofollow'}:{})}});
     }
     const home=renderHomePage(url.hostname);
     return new Response(request.method==="HEAD"?null:home.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
