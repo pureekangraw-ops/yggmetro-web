@@ -9,37 +9,63 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  safety:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run regression tests before deployment
+        run: npm test
+      - name: Check application syntax
+        run: |
+          node --check src/index.js
+          node --check ygg-vault-android/www/app.js
 
-      - name: Preflight deployment credentials
+  deploy:
+    needs: safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # Build without deployment credentials; deploy precisely these bytes below.
+      - name: Prebuild Worker without credentials
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          ./node_modules/.bin/wrangler deploy --dry-run --outdir .deploy-build
+          find .deploy-build public -type f -print0 | sort -z | xargs -0 sha256sum > .deploy-build.sha256
+          sha256sum wrangler.jsonc >> .deploy-build.sha256
+
+      - name: Deploy yggmetro-web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
         shell: bash
         run: |
           test -n "${CLOUDFLARE_API_TOKEN}" || { echo "::error::CLOUDFLARE_API_TOKEN is not available to yggmetro-web"; exit 1; }
           test -n "${CLOUDFLARE_ACCOUNT_ID}" || { echo "::error::CLOUDFLARE_ACCOUNT_ID is not available to yggmetro-web"; exit 1; }
+          sha256sum --check .deploy-build.sha256
+          ./node_modules/.bin/wrangler deploy .deploy-build/index.js --no-bundle
 
-      - name: Install dependencies
-        run: npm ci --no-audit --no-fund
-
-      - name: Run regression tests before deployment
-        run: npm test
-
-      - name: Deploy yggmetro-web
-        run: npx wrangler deploy
-
-      - name: Verify production health and GO Client
+      - name: Resolve public smoke origin
+        id: smoke_origin
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
           const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
           const token = process.env.CLOUDFLARE_API_TOKEN;
 
@@ -49,13 +75,23 @@ jobs:
           );
           const subdomainPayload = await subdomainRes.json().catch(() => null);
           const subdomain = String(subdomainPayload?.result?.subdomain || "").trim();
-          if (!subdomainRes.ok || !subdomain) {
+          if (!subdomainRes.ok || subdomainPayload?.success !== true || !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(subdomain)) {
             console.error("::error::Unable to resolve workers.dev subdomain.");
             process.exit(1);
           }
 
           const origin = "https://yggmetro-web." + subdomain + ".workers.dev";
 
+          appendFileSync(process.env.GITHUB_OUTPUT, `origin=${origin}\n`);
+          NODE
+
+      - name: Verify production health and GO Client
+        env:
+          SMOKE_ORIGIN: ${{ steps.smoke_origin.outputs.origin }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin = process.env.SMOKE_ORIGIN;
           const healthRes = await fetch(origin + "/health", { headers:{ "cache-control":"no-cache" } });
           const health = await healthRes.json().catch(() => null);
           if (!healthRes.ok || health?.ok !== true || health?.service !== "yggmetro-web" || health?.spectrumSaleConfigured !== true) {
