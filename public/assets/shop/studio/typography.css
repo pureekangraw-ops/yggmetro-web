@@ -1,0 +1,23 @@
+/* System-font refinement: no downloaded families or synthetic text distortion. */
+h1,h2,h3,.product-opening h1,.product-opening h2,.showroom-hero h1,.hero-product-info h2{letter-spacing:normal}
+h1,h2,h3{font-weight:700;line-height:1.5}
+.showroom-hero h1{font-weight:700;font-size:clamp(48px,5.1vw,74px);line-height:1.5;margin:20px 0 24px}
+.showroom-hero h1 .hero-title-accent{font-weight:400;font-size:.84em;display:inline-block;line-height:1.65}
+.showroom-hero-copy>p{font-size:18px;line-height:1.9;color:#d0dbe6}
+.hero-product-info h2{font-size:30px;font-weight:700;line-height:1.4}
+.hero-product-info p{font-size:16px;line-height:1.8}
+.hero-work-small h2{font-size:24px}
+.hero-work-small p,.home-destinations .destination-card p{font-size:15px;line-height:1.85}
+.home-destinations .destination-card h2{font-size:30px;font-weight:700;line-height:1.5}
+.product-stage-controls button{font-size:13px;font-weight:400}
+.hero-product-heading{flex-wrap:wrap;gap:10px 16px}
+.stage-image-note{font-size:12px;line-height:1.85}
+.header #navigation .nav-item{font-size:15px}
+.go-intro h1{font-weight:700;line-height:1.5}
+.go-intro h1>span{font-weight:400}
+.go-panel h2{font-weight:700;line-height:1.6}
+.go-panel p,.go-field,.go-side dd,.go-review dd,.go-consent{font-size:16px;line-height:1.85}
+.go-side dt,.go-review dt{font-size:13px;line-height:1.8}
+.go-panel .go-terms,.go-privacy{font-size:13px}
+@media(max-width:1000px){.showroom-hero h1{font-size:48px}.hero-product-info h2{font-size:27px}}
+@media(max-width:700px){.showroom-hero h1{font-size:clamp(36px,9.3vw,56px);line-height:1.5}.showroom-hero-copy>p{font-size:17px}.hero-product-info h2{font-size:27px}.hero-work-small h2{font-size:23px}.home-destinations .destination-card h2{font-size:28px}.stage-actions{gap:10px;flex-wrap:wrap}}

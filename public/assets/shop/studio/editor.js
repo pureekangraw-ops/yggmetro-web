@@ -1,0 +1,25 @@
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id), repo='https://github.com/pureekangraw-ops/yggmetro-web';let content,dirty=false,imageURL;
+const notice=text=>{$('notice').textContent=text;};
+const field=(label,value,change,multi=false)=>{const wrap=document.createElement('label');wrap.textContent=label;const input=document.createElement(multi?'textarea':'input');input.value=value??'';if(multi)input.rows=3;input.addEventListener('input',()=>{change(input.value);dirty=true;notice('แก้ในหน้านี้แล้ว ยังไม่ได้เผยแพร่');});wrap.append(input);return wrap;};
+function render(){
+ $('home').replaceChildren(...Object.entries({title:'หัวเรื่อง',accent:'หัวเรื่องบรรทัดที่สอง',description:'คำอธิบาย'}).map(([k,label])=>field(label,content.home[k],v=>content.home[k]=v,k==='description')));
+ $('products').replaceChildren();
+ for(const product of content.products){const section=document.createElement('details'),title=document.createElement('summary');title.textContent=product.name;section.append(title);
+ for(const [k,label] of Object.entries({name:'ชื่อสินค้า',label:'คำอธิบายสั้น',desc:'รายละเอียด',price:'ราคาที่แสดง (ไม่เปลี่ยนราคาเรียกเก็บ)',url:'ลิงก์หน้าสินค้า',image:'ชื่อไฟล์ภาพ',note:'ข้อควรรู้'}))section.append(field(label,product[k],v=>product[k]=v|| (k==='image'?null:''),['desc','note'].includes(k)));
+ section.append(field('ประโยชน์สินค้า — บรรทัดละข้อ',product.features.join('\n'),v=>product.features=v.split('\n').filter(Boolean),true));$('products').append(section);}
+ $('raw').value=JSON.stringify(content,null,2);preview();
+}
+function preview(){const box=$('preview');box.replaceChildren();const h=document.createElement('h2');h.textContent=content.home.title+' '+content.home.accent;const p=document.createElement('p');p.textContent=content.home.description;box.append(h,p);for(const item of content.products){const article=document.createElement('article'),title=document.createElement('h3'),detail=document.createElement('p');title.textContent=item.name;detail.textContent=item.label+' · '+item.price;article.append(title,detail);box.append(article);}}
+function validate(data){if(data.schemaVersion!==1||!data.home||!Array.isArray(data.products)||data.products.length!==6)throw Error('รูปแบบไม่ตรงกับหน้าร้านรุ่นนี้');for(const p of data.products){if(!p.id||!p.name||!Array.isArray(p.features)||!/^https:\/\//.test(p.url))throw Error('ตรวจชื่อสินค้า ประโยชน์ และลิงก์ https ของ '+p.id);if(p.image&&!/^[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/.test(p.image))throw Error('ชื่อภาพต้องเป็นตัวอักษรอังกฤษ ตัวเลข ขีด และชนิด png/jpg/webp');}return data;}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+$('preview-button').onclick=()=>{preview();$('raw').value=JSON.stringify(content,null,2);notice('อัปเดตตัวอย่างข้อความในหน้านี้แล้ว เว็บจริงยังไม่เปลี่ยน');};
+$('download').onclick=()=>{try{validate(content);download(new Blob([JSON.stringify(content,null,2)+'\n'],{type:'application/json'}),'content.json');dirty=false;notice('เตรียม content.json แล้ว อัปโหลดเข้า GitHub จากปุ่มขั้นที่ 2 และ Commit เพื่อเผยแพร่');}catch(e){notice(e.message);}};
+$('apply-raw').onclick=()=>{try{content=validate(JSON.parse($('raw').value));dirty=true;render();notice('อ่านข้อมูลขั้นสูงแล้ว ยังไม่เผยแพร่');}catch(e){notice('ใช้ข้อมูลไม่ได้: '+e.message);}};
+$('import').onchange=async e=>{try{content=validate(JSON.parse(await e.target.files[0].text()));dirty=true;render();notice('นำเข้าฉบับร่างแล้ว ยังไม่เผยแพร่');}catch(e){notice('อ่านไฟล์ไม่ได้: '+e.message);}};
+$('image').onchange=e=>{const file=e.target.files[0];if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)){notice('เลือกรูป PNG, JPEG หรือ WebP');return;}if(imageURL)URL.revokeObjectURL(imageURL);imageURL=URL.createObjectURL(file);$('image-preview').src=imageURL;$('image-preview').hidden=false;$('image-name').value=file.name.replace(/[^a-zA-Z0-9_.-]/g,'-');$('image-download').hidden=false;};
+$('image-download').onclick=()=>{const name=$('image-name').value;if(!/^[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/.test(name)){notice('ตั้งชื่อไฟล์เป็นภาษาอังกฤษ ไม่มีช่องว่าง และใช้นามสกุลภาพเดิม');return;}const file=$('image').files[0];if(!file)return;const expected={'image/png':['png'],'image/jpeg':['jpg','jpeg'],'image/webp':['webp']}[file.type];if(!expected?.includes(name.split('.').pop())){notice('นามสกุลต้องตรงชนิดภาพ ไม่ได้แปลงไฟล์ด้วยการเปลี่ยนชื่อ');return;}download(file,name);notice('นำรูปชื่อนี้ไปอัปโหลด แล้วใส่ชื่อเดียวกันในช่องชื่อไฟล์ภาพของสินค้า');};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+fetch('/admin/storefront/content',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{content=validate(data);render();notice('อ่านข้อมูลหน้าร้านรุ่นปัจจุบันแล้ว');}).catch(()=>notice('โหลดข้อมูลไม่ได้ กรุณารีเฟรชก่อนแก้ไข'));
+})();

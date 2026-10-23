@@ -120,7 +120,7 @@ for (const width of [390, 1440]) {
     await customer.locator('a[href="/"]').click();
     await customer.goBack(); await selected(customer, requestId);
     await customer.goto(origin + '/');
-    await customer.locator('[data-go-sales-open]').click();
+    await customer.locator('.assistant-launcher[data-go-sales-open]').click();
     await customer.locator('#go-sales-panel a[href="/client"]').click();
     await notice(customer, 'โหลดคำขอของคุณแล้ว'); await selected(customer, requestId);
 
@@ -306,7 +306,7 @@ test('home Custom Order form creates one owned submitted request and opens its c
   const {origin, db, newPage} = await fixture(t);
   const page = await newPage();
   await page.goto(origin + '/');
-  await page.locator('nav a[href="/custom-order"]').click();
+  await page.goto(origin+'/custom-order/quick');
   const form = page.locator('#custom-order-form');
   await form.locator('[name=service]').selectOption('digital');
   await form.locator('[name=contact]').fill('synthetic@example.invalid');
@@ -333,7 +333,7 @@ test('home Custom Order form creates one owned submitted request and opens its c
 test('custom form lost confirmation response retries one request and retains newer edits', {timeout: 60000}, async t => {
   const {origin, db, newPage} = await fixture(t, 1440);
   const page = await newPage();
-  await page.goto(origin + '/'); await page.locator('nav a[href="/custom-order"]').click();
+  await page.goto(origin + '/'); await page.goto(origin+'/custom-order/quick');
   const form = page.locator('#custom-order-form');
   await form.locator('[name=service]').selectOption('digital');
   await form.locator('[name=contact]').fill('synthetic-retry@example.invalid');
@@ -387,7 +387,7 @@ async function acceptReloadWarning(page) {
 
 test('lost custom confirmation survives real reload through owned readback without duplicate submission', {timeout: 60000}, async t => {
   const {origin, db, newPage} = await fixture(t);
-  const page = await newPage(); await page.goto(origin + '/custom-order');
+  const page = await newPage(); await page.goto(origin + '/custom-order/quick');
   const form = page.locator('#custom-order-form');
   const goal = 'private reload-confirm synthetic brief', contact = 'reload-confirm@example.invalid';
   await fillReloadFixture(form, goal, contact);
@@ -419,7 +419,7 @@ test('lost custom confirmation survives real reload through owned readback witho
 
 test('lost custom draft-save response restores server fields after reload and submits the same request once', {timeout: 60000}, async t => {
   const {origin, db, newPage} = await fixture(t, 1440);
-  const page = await newPage(); await page.goto(origin + '/custom-order');
+  const page = await newPage(); await page.goto(origin + '/custom-order/quick');
   const form = page.locator('#custom-order-form');
   const goal = 'private reload-draft synthetic brief', contact = 'reload-draft@example.invalid';
   await fillReloadFixture(form, goal, contact);

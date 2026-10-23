@@ -71,7 +71,7 @@
     if(transcript.length>8)transcript.shift();
     messages.scrollTop=messages.scrollHeight;
   }
-  const openers=[launcher,...document.querySelectorAll("[data-go-sales-open]")];
+  const openers=[launcher];
   let lastOpener=launcher;
   function open(event){
     lastOpener=event.currentTarget;
@@ -82,6 +82,7 @@
     if(!messages.childNodes.length)push("system","สวัสดีครับ 💙 GO แนะนำจากข้อมูลสินค้าของร้านได้ครับ สนใจสินค้าไหน หรืออยากได้เครื่องมือสำหรับงานอะไรครับ?");
   }
   openers.forEach(button=>button.addEventListener("click",open));
+  document.addEventListener("click",event=>{const button=event.target.closest?.("[data-go-sales-open]");if(!button)return;event.preventDefault();if(!openers.includes(button))openers.push(button);open({currentTarget:button});});
   function close(){panel.hidden=true;if(dock)dock.hidden=false;launcher.hidden=false;openers.forEach(button=>button.setAttribute("aria-expanded","false"));scheduleCollisionCheck();lastOpener.focus()}
   closer.addEventListener("click",close);
   panel.addEventListener("keydown",e=>{if(e.key==="Escape")close()});

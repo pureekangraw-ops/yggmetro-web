@@ -1,3 +1,5 @@
+import {sitesStorefront} from './sites-storefront.js';
+import {storefrontEditor} from './storefront-editor.js';
 import {officeCommerce} from './office-commerce.js';
 import {requestWorkflow} from './request-workflow.js';
 import {requestPage} from './request-pages.js';
@@ -415,6 +417,7 @@ export default {
     const url = new URL(request.url);
     const shopRequest=isShopRequest(request,env),sandbox=isShopSandbox(env);
     if(sandbox&&!shopRequest)return json({ok:false,code:'SHOP_ONLY'},404);
+    const editor=await storefrontEditor(request,env);if(editor)return editor;
     const commerce=await officeCommerce(request,env);if(commerce)return commerce;
     const workflow=await requestWorkflow(request,env,handleGoClientInterpret);if(workflow)return workflow;
     if(url.pathname==='/requests'||url.pathname==='/admin/requests'){
@@ -423,6 +426,7 @@ export default {
     }
     if (shopRequest && url.pathname.startsWith("/assets/shop/")) {
       if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed", {status:405,headers:{allow:"GET, HEAD"}});
+      if(['/assets/shop/studio/content.js','/assets/shop/studio/widget.css'].includes(url.pathname))return sitesStorefront(request,env);
       return env.ASSETS ? env.ASSETS.fetch(request) : new Response("Not Found", {status:404});
     }
     if(shopRequest){
@@ -456,10 +460,11 @@ export default {
     }
     if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method Not Allowed",{status:405,headers:{allow:"GET, HEAD"}});
     if(shopRequest){
-      const page=renderShop(url.pathname,env);
+      const designed=sandbox?null:await sitesStorefront(request,env);if(designed)return designed;
+      const page=renderShop(url.pathname==='/custom-order/quick'?'/custom-order':url.pathname,env);
       return new Response(request.method==="HEAD"?null:page.html.replace('</body>',salesObserverScript+'</body>'),{status:page.status,headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin","cache-control":"no-store",...(sandbox?{'x-robots-tag':'noindex, nofollow'}:{})}});
     }
-    const home=renderHomePage(url.hostname);
+    let home=renderHomePage(url.hostname);if(url.hostname==='office.yggmetro.com')home=home.replace('</body>','<nav aria-label="จัดการหน้าร้าน" style="padding:24px;text-align:center"><a href="/admin/storefront">แก้ข้อความ สินค้า และรูปหน้าร้าน</a></nav></body>');
     return new Response(request.method==="HEAD"?null:home.replace('</body>',salesObserverScript+'</body>'),{headers:{"content-type":"text/html; charset=utf-8","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"}});
   }
 };

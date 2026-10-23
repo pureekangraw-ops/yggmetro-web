@@ -49,11 +49,11 @@ test('external marketplace products stay excluded from native cart even with fix
   }
 });
 
-test('unconfigured native checkout stays closed and the unavailable product points to inquiry', async () => {
+test('unconfigured native checkout stays closed and the marketplace product points to its listing', async () => {
   const {default: web} = await import('../src/index.js');
   const response = await web.fetch(new Request('https://shop.yggmetro.com/products/finance-simulator'), {});
   const html = await response.text();
-  assert.ok(anchors(html).some(link => link.href === '/custom-order?service=lab'));
+  assert.ok(anchors(html).some(link => link.href === 'https://www.notion.com/th/templates/ygg-metro-personal-finance-simulator'));
   assert.doesNotMatch(html, /<button[^>]*data-add-to-cart=/);
   const checkout = await web.fetch(new Request('https://shop.yggmetro.com/api/v1/shop/checkout', {method: 'POST', headers: {'content-type': 'application/json', origin: 'https://shop.yggmetro.com'}, body: JSON.stringify({slug: 'finance-simulator', requestId: 'a'.repeat(64), email: 'offline@example.test'})}), {});
   assert.equal(checkout.status, 503);
