@@ -7,7 +7,7 @@ const content=require('../../public/assets/shop/studio/content.json');
 for(const width of [390,768,1440]) test(`responsive purchase guidance and assistant at ${width}px`,async t=>{
   const {startPreview}=await import('../helpers/storefront-preview.mjs');
   const {server,origin}=await startPreview();
-  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true});
+  const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});
   const context=await browser.newContext({viewport:{width,height:width===390?844:1024},isMobile:width<1000,hasTouch:width<1000,deviceScaleFactor:1,serviceWorkers:'block'});
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',route=>route.request().method()==='GET'&&new URL(route.request().url()).origin===origin?route.continue():route.abort());
