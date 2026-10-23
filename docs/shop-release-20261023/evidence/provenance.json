@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-10-23T06:44:55.654Z",
+  "kind": "compiled-runtime-evidence-not-authored-source",
+  "worker": "yggmetro-web",
+  "cloudflare": {
+    "deploymentId": "a2a34c6d-67da-49aa-9541-a0993aec53ff",
+    "versionId": "ccd6faa9-dbee-406f-b0e1-c12a2c666268",
+    "percentage": 100,
+    "createdOn": "2026-10-23T06:28:18.65528Z",
+    "etag": "01acc5762da3d842ad8ea4e2c02e75096baa3ab38aff3201bbc84e3982663684",
+    "tag": "sites19-drive-fix-20261023"
+  },
+  "workerArtifact": {
+    "path": "runtime-worker.mjs.gz",
+    "uncompressedSha256": "1d2f1f8bd15e0f4b3ebec9e0850736bd32ffc1345f38d08d8a42eccf481f9436",
+    "uncompressedBytes": 564730,
+    "method": "Cloudflare GET /workers/scripts/yggmetro-web; multipart worker.mjs extracted without edits; repeated reads had identical SHA256"
+  },
+  "sitesSourceCandidate": {
+    "id": "appgprj_6ad80383a3f081919cf04e2e175e3ca7~appgver_5d2c6b0a63bc8191a9818bd3683a57d8",
+    "project_id": "appgprj_6ad80383a3f081919cf04e2e175e3ca7",
+    "version_number": 19,
+    "source": {
+      "commit_sha": "30e6813106aed2bb8e7a17b73cb9dfd7c5db21dc"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000060e881f79f2690f1c6ac491b",
+      "content_hash": "sha256:169a2ed93503cd0c58c4597ee4d036ab35fdb121f1155dd58a57a37387a516d9",
+      "size_bytes": 9308160,
+      "file_count": 32
+    },
+    "deployment_id": "appgdep_6ad9c9111440819188baa23e0741e074"
+  },
+  "reconciliation": "unverified: Sites19 source commit is identified but not retrieved; GO applied later Worker opener fix; full asset manifest missing",
+  "publicFetch": {
+    "status": 403,
+    "layer": "execution network proxy (envoy CONNECT)",
+    "bodyArchived": false
+  }
+}

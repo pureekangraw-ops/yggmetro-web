@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "state": "blocked-source-unreconciled",
+  "worker": "yggmetro-web",
+  "origin": "https://shop.yggmetro.com",
+  "repositoryBase": "6e24fb3fe8453fe269b853848c002fba394affd9",
+  "expectedDeploymentId": "a2a34c6d-67da-49aa-9541-a0993aec53ff",
+  "expectedVersions": [{"version_id":"ccd6faa9-dbee-406f-b0e1-c12a2c666268","percentage":100}],
+  "reason": "GO owns the direct production deployment. Canonical authored source, deployed Worker opener fix and complete asset manifest have not been reconciled with this repository. A reviewed follow-up must implement a verified release path; editing this state or an environment variable cannot unlock deployment."
+}

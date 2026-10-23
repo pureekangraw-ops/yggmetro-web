@@ -1,0 +1,26 @@
+{
+  "browser-blocker.json": {
+    "sha256": "ec1c62bcbbce9b85efc33b88bd23a9d6ff8fd41f37a68207c6dcbf7f4f65024e",
+    "bytes": 4468
+  },
+  "deployment-readback.json": {
+    "sha256": "18e89b65122f47dddcc804a0958538d2570c92afc79d265c6045512285b03c74",
+    "bytes": 428
+  },
+  "provenance.json": {
+    "sha256": "1a05d7ed92c30356836af06956c6477a6b23d7162dd6d50cebd89e5870efc049",
+    "bytes": 1723
+  },
+  "public-fetch.headers.txt": {
+    "sha256": "970ae84f6d2c8acf9ce4684966f857d972e92ba9e1354fbf0e1c938ab0280b1a",
+    "bytes": 143
+  },
+  "regression.log": {
+    "sha256": "738a8addd13e2934753c71022e31033fb6fd1d4c079f1fd20d05ebbaf577a9b5",
+    "bytes": 11874
+  },
+  "runtime-worker.mjs.gz": {
+    "sha256": "939ac00fbf746ab26e9748fdc4fcf8aa38ac30d8c910e8b2bdfb1e03c9292c6d",
+    "bytes": 109572
+  }
+}

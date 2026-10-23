@@ -9,7 +9,18 @@ permissions:
   contents: read
 
 jobs:
+  release-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Block unreconciled production source
+        run: node scripts/shop-release-guard.mjs
+
   deploy:
+    needs: release-integrity
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -34,7 +45,9 @@ jobs:
         run: npm test
 
       - name: Deploy yggmetro-web
-        run: npx wrangler deploy
+        run: |
+          node scripts/shop-release-guard.mjs
+          npx wrangler deploy
 
       - name: Verify production health and GO Client
         shell: bash
