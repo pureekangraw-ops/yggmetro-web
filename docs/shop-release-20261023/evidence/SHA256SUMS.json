@@ -15,6 +15,18 @@
     "sha256": "18e89b65122f47dddcc804a0958538d2570c92afc79d265c6045512285b03c74",
     "bytes": 428
   },
+  "go-DEPLOYMENT.json": {
+    "sha256": "daf8fc0782ffe74b09abe57f7ae58e0f8d4a439c6f08253c40adc57665382201",
+    "bytes": 448
+  },
+  "go-TRANSFER-MANIFEST.json": {
+    "sha256": "3c2f16fc0c46e35dd0c81b4ebc07c016e2846da6b683687bdf29aafe86e1d257",
+    "bytes": 21675
+  },
+  "go-TRANSFER-README.txt": {
+    "sha256": "dedfd5f0491d42ea1af6fac332028189d6a602fb4faec002e502aa9440ff2e6c",
+    "bytes": 640
+  },
   "provenance.json": {
     "sha256": "1a05d7ed92c30356836af06956c6477a6b23d7162dd6d50cebd89e5870efc049",
     "bytes": 1723
@@ -27,8 +39,24 @@
     "sha256": "738a8addd13e2934753c71022e31033fb6fd1d4c079f1fd20d05ebbaf577a9b5",
     "bytes": 11874
   },
+  "responsive-assets-blocker.log": {
+    "sha256": "1c188b72d0bf66f05d9d0831b2a23bace8896981a0c234c80fc21c22a25ee035",
+    "bytes": 3843
+  },
+  "responsive-geometry-green.log": {
+    "sha256": "8348dab1bc1e5d7a394f11ea5c3d986d83b3b33225995ab35c47a451eb21eda8",
+    "bytes": 334
+  },
+  "responsive-red.log": {
+    "sha256": "d7facb29384188b3d49fa23dd6015ea231529570721b7ef0d4b26197a9d2a871",
+    "bytes": 2281
+  },
   "runtime-worker.mjs.gz": {
     "sha256": "939ac00fbf746ab26e9748fdc4fcf8aa38ac30d8c910e8b2bdfb1e03c9292c6d",
     "bytes": 109572
+  },
+  "source-transfer-receipt.json": {
+    "sha256": "70616308393b841276c561136f9d8ffeb4ed2dd309e9aacac7e85874f6c2e3a3",
+    "bytes": 24361
   }
 }

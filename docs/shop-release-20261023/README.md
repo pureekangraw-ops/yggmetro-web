@@ -1,5 +1,17 @@
 # Shop release integrity — source reconciliation pending
 
+## Source receipt and local implementation update
+
+GO's final archive is identified by SHA256 `42fa4c8b9292ecf1a5b68732f1a7fb1ab08585fb9ee5798168378b6f5800279a`. Parent verified its 24,806,084 bytes and all 135 transfer-manifest entries. The executor received 93 text files through four lossless Library JSON packs and independently verified every original UTF-8 byte count/hash before integration. It recovered 41 binary entries from existing local assets by exact byte/hash matches. The archive itself has not been downloaded into this executor. See `evidence/source-transfer-receipt.json` and the preserved GO deployment/transfer records.
+
+Local baseline commit `e2ab67a` integrates the actual Sites19 authored text, production adapter and delegated dynamic assistant opener. Existing workflow and freeze changes are retained; checkout/payment code, configuration and original catalog price/URL bytes remain unchanged from the verified source. The 41 matching binaries include all product artwork. Four original binaries remain missing: `brand-wordmark.png`, `nav-shop.png`, `nav-gallery.png`, `nav-custom-order.png` under `public/assets/shop/studio/assets/`. Their expected hashes/sizes are in the receipt. Visual acceptance and original-image optimization remain blocked until receipt.
+
+The local responsive follow-up makes the closed mascot flow after the footer, retains the shared dialog and header/product openers, removes the duplicate launcher, reduces mobile/tablet hero spacing and wordmark size, adds early product-specific external CTAs, and serves buying guidance from the same catalog/guides. Native cart/checkout logic is retained; empty-cart copy explains external purchase channels. Desktop hero geometry is unchanged at 1440px. Unit regressions pass 124/124. New viewport checks reproduced the floating mascot issue at all three sizes before changes; layout/navigation/CTA/assistant checks subsequently passed at 390/768/1440. A required image-completeness assertion now correctly fails on the four missing assets. Screenshots generated while these assets are missing are incomplete diagnostics, not accepted before/after evidence.
+
+A credential-free, minified Wrangler 4.151.1 dry-run of the preserved source baseline succeeds with existing bindings only. Its Worker SHA256 is `9f50ca43a034df4d105cf20b752a3fff888a1f65bc55eb5d6b903f19bf1d1b3c` (564,825 bytes), which does **not** equal the captured runtime module (564,730 bytes). Different minified symbols/statement formatting and a sourceMappingURL are observed; exact reproduction still needs GO's original build command/toolchain and comparison. No byte-for-byte runtime parity is claimed. The release freeze stays unconditional.
+
+The sections below retain the initial investigation and release requirements; initial source-access blockers have been narrowed as described above. No new production authority follows from source receipt.
+
 This branch prevents its deployment workflow and `npm run deploy` from replacing the approved direct release with stale repository source. **It is not deployed or merged, so it does not yet protect main.** No application, price, payment, secret or permission change is included. The existing checkout was clean; no worktree was created and no existing branch was merged.
 
 ## Verified provenance

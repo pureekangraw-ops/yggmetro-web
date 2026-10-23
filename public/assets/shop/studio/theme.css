@@ -1,4 +1,40 @@
-/* Future visual adjustments belong here, after the imported Sites 19 styles.
-   Keep the original files intact so design changes remain small and reversible.
-   Example: :root { --radius: 16px; }
-*/
+/* Reviewed adjustments over the preserved Sites19 design. */
+.opening-actions{flex-wrap:wrap;gap:12px}
+.opening-actions .btn{min-height:48px;white-space:normal;line-height:1.65}
+.product-format h2,.buying-guide h2{line-height:1.5;letter-spacing:normal}
+.buying-guide{padding-block:32px 56px}
+.buying-intro{max-width:800px;line-height:1.9}
+.buying-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-block:28px}
+.buying-grid article{background:white;border:1px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.buying-grid p{line-height:1.85}
+.buying-grid .btn{margin-top:auto;min-height:48px;white-space:normal}
+.buying-guide>.text-link{display:inline-flex;margin-top:24px;min-height:44px;align-items:center}
+/* A single in-flow mascot leaves content and purchase controls unobscured.
+   Header/product buttons open the same fixed dialog without a second launcher. */
+body[data-page] #go-sales-root{position:static;display:flex;justify-content:flex-end;padding:8px max(20px,calc((100% - 1160px)/2)) 20px;background:#0c203b;width:100%}
+body[data-page] #go-mascot-dock{width:auto;margin:0}
+body[data-page] #go-mascot-dock #go-sales-launcher{width:auto;min-height:64px;flex-direction:row;gap:8px;padding:0 8px}
+body[data-page] #go-mascot-image{width:48px;height:56px;animation:none}
+body[data-page] #go-mascot-minimize{display:none}
+body[data-page] #go-sales-panel{position:fixed;z-index:100;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));height:min(570px,calc(100dvh - 24px));max-height:calc(100dvh - 24px)}
+body[data-page=home] footer{padding-bottom:0}
+body[data-page=home] .footer-compact{padding-right:0}
+@media(max-width:850px){
+  .showroom-hero.home-hero{padding-block:24px 32px}
+  .showroom-hero-grid{gap:24px}
+  .showroom-hero-copy .hero-brand{width:210px;margin-bottom:8px}
+  .showroom-hero-copy h1{font-size:40px;line-height:1.45;margin-block:8px 12px}
+  .showroom-hero-copy>p{font-size:17px;line-height:1.85}
+  .showroom-hero .hero-buttons{margin-top:18px}
+}
+@media(max-width:540px){
+  .showroom-hero-copy .hero-brand{width:180px}
+  .showroom-hero-copy h1{font-size:32px}
+  .showroom-hero-copy>p{font-size:16px}
+  .showroom-hero .hero-buttons{flex-wrap:wrap;gap:12px}
+  .hero-product-info{padding:16px}
+  .buying-grid{grid-template-columns:1fr;gap:16px}
+  .buying-grid article{padding:20px}
+  .opening-actions{align-items:stretch}
+  .opening-actions .product-buy{flex-basis:100%;justify-content:center}
+}

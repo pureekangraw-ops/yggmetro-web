@@ -16,8 +16,9 @@ Open `https://office.yggmetro.com/admin/storefront`.
 1. Edit homepage/product fields or import an earlier content.json.
 2. Preview the text and export content.json. This is a local draft, not publication.
 3. Follow the GitHub upload link and upload to `public/assets/shop/studio/` under
-   the same filename, then commit with your authorized GitHub account. Existing
-   main deployment tests and publishes; check the linked Actions result.
+   the same filename in an isolated review branch with your authorized GitHub account.
+   The release-integrity freeze blocks publication pending reconciliation and approval;
+   do not upload directly to main to bypass review.
 4. For images, choose PNG/JPEG/WebP, preview and download under the desired filename.
    Upload via the image link to `public/assets/shop/studio/assets/`. Use the matching
    filename in content.json. Upload new image names before referencing them.
@@ -60,7 +61,10 @@ Browser payment fixtures are not provider/payment acceptance.
 
 ## Rollback
 
-Revert the release commit through GitHub and let the existing deployment run.
+GO owns release and rollback. Preserve and verify the exact known-good Worker version,
+assets and configuration before any separately authorized rollback. Do not revert a
+GitHub commit and assume that it restores the direct deployment. The unconditional
+release guard remains in force; see `docs/shop-release-20261023/README.md`.
 No migrations, new bindings, DNS changes, secret changes or customer-data rewrite.
 Do not overwrite pending PR69/70; reconcile their overlap with the shared catalog
 and deployment workflow against the new main before merging them.

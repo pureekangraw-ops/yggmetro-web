@@ -25,7 +25,7 @@
   lockPending();
   let collisionFrame=0;
   function syncLauncherCollision(){
-    if(launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");root.style.transform="";return}
+    if(getComputedStyle(root).position!=="fixed"||launcher.hidden||!panel.hidden){root.removeAttribute("data-obscured");root.style.transform="";return}
     root.style.transform="";
     const buttonRect=(dock||launcher).getBoundingClientRect();
     const rects=[...document.querySelectorAll("a[href],button,input,select,textarea,[role='button'],.test-mode,.payment-info,.commerce-status,.order-total,.cart-item")].filter(node=>!root.contains(node)&&node.getClientRects().length).filter(node=>{

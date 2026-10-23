@@ -1,0 +1,704 @@
+{
+  "sourceArchiveSha256": "42fa4c8b9292ecf1a5b68732f1a7fb1ab08585fb9ee5798168378b6f5800279a",
+  "archiveVerification": "Parent verified full archive and all 135 manifest entries; executor received and verified 93 UTF-8 files through four lossless Library packs",
+  "textFiles": [
+    {
+      "path": ".gitignore",
+      "bytes": 49,
+      "sha256": "35fdf8f2233c0b23af71c5cba308bcbca113910b574699f2c749082e47a03747"
+    },
+    {
+      "path": "docs/sites19/asset-manifest.json",
+      "bytes": 3057,
+      "sha256": "03d478df980c6f2a3b2786272b4d2d8d6d125011443a62b431c357e04bd6baca"
+    },
+    {
+      "path": "migrations/0003_shop_checkout_attempts.sql",
+      "bytes": 270,
+      "sha256": "7b91db91e5de2753b1a9dea4fc88787efb2adee1c4a7c5ce05e2785eeb71ae92"
+    },
+    {
+      "path": "public/assets/shop/icons/cart.svg",
+      "bytes": 642,
+      "sha256": "d76883fd29649d2a5494d8ca716b248f17f326313bcfdd175c4be9d0a6d3abf2"
+    },
+    {
+      "path": "public/assets/shop/portfolio/cloudport-metropolis.svg",
+      "bytes": 1147,
+      "sha256": "c82eebcf630c56ef4c17bfe093d12aad3b2a791616950fb224ddaba0ca61d36d"
+    },
+    {
+      "path": "public/assets/shop/portfolio/product-design.svg",
+      "bytes": 1135,
+      "sha256": "f490734dcf62c8928de6588bd86eaa8533a3efb2b5f68b45ba7b6404e4c98453"
+    },
+    {
+      "path": "public/assets/shop/studio/core.js",
+      "bytes": 3942,
+      "sha256": "f83ab0119a092eed1b107edb812aeb7e8ade87b517b456ec388342c638d786ae"
+    },
+    {
+      "path": "public/assets/shop/studio/effects.js",
+      "bytes": 1064,
+      "sha256": "6f010900cfcfbc8787a4b131e352cd5a83d2b5853a57380888b2353dde3081f3"
+    },
+    {
+      "path": "public/assets/shop/studio/showcase.css",
+      "bytes": 20351,
+      "sha256": "d9ccd7bfeff984848fe0ae474f6d2a6259fede8b3c5087e78f978d6c4d388701"
+    },
+    {
+      "path": "public/assets/shop/studio/typography.css",
+      "bytes": 1785,
+      "sha256": "4a0ed834045cc9eab15fe1c23cbc0ecc52619eee6331e2d2ade095a3b2bb91db"
+    },
+    {
+      "path": "src/office-commerce.js",
+      "bytes": 8606,
+      "sha256": "17b0f59dfc8f9ca984ddba7bb04a59db403be7c28478ec0e6576765bac3b6e62"
+    },
+    {
+      "path": "src/sandbox-product.js",
+      "bytes": 1748,
+      "sha256": "ea1e84003fce58373857038c0008cb6524ea067d9690a26a5c5e1cd28008424f"
+    },
+    {
+      "path": "src/shop-origin.js",
+      "bytes": 1196,
+      "sha256": "330d27027fb1ed5f5d70d5fe641e63994202faa2485a1ab148792efae5749df1"
+    },
+    {
+      "path": "src/storefront-layout.js",
+      "bytes": 33743,
+      "sha256": "c85b917c34dc2b9c1fafd0001747e76a64963ccc26cda0a6b97e556f8df90dd4"
+    },
+    {
+      "path": "tests/e2e/checkout.cjs",
+      "bytes": 14077,
+      "sha256": "cdc84b30660ffb0428822a859b1ec6ac5a1e02e3bbd200c225673239c8e1e03c"
+    },
+    {
+      "path": "tests/e2e/request-workflow.mjs",
+      "bytes": 14826,
+      "sha256": "448c546b193647113424ff80d40b7bb3c2f6b7ce3d18e0525625d523ff1f0233"
+    },
+    {
+      "path": "tests/helpers/checkout-preview.mjs",
+      "bytes": 5108,
+      "sha256": "a449e4857c1d85ea94d249a5422ccd5db1e59d31548589c1eec1bc4f89eeeaf8"
+    },
+    {
+      "path": "tests/helpers/request-store.cjs",
+      "bytes": 722,
+      "sha256": "40a6712cea49f5ed2dd35f8c86b7335e5a02e2e9c0fe958a5f927e1c2e232df2"
+    },
+    {
+      "path": "tests/office-commerce.test.cjs",
+      "bytes": 7714,
+      "sha256": "a419af6cbb8f567a9d09f90e452b85a83d507ea02167390afe7fd70deb7eb973"
+    },
+    {
+      "path": "tests/request-recovery.test.cjs",
+      "bytes": 8305,
+      "sha256": "0664ad038c915ad84aed1ecca226a8932a5d1cfa529f92fbfd04b7d517454bea"
+    },
+    {
+      "path": "tests/shop-assistant.test.cjs",
+      "bytes": 4003,
+      "sha256": "d256341919ad759c6b2b3b2992c2b734b68edce2501e52520daed25642d93bd8"
+    },
+    {
+      "path": "tests/sites-storefront.test.cjs",
+      "bytes": 3508,
+      "sha256": "d3cdba3cdea83d0d49d1b34ae1b4c9ce1040afeb2b82e432edd42563b00ec90c"
+    },
+    {
+      "path": "tests/stripe-checkout.test.cjs",
+      "bytes": 18421,
+      "sha256": "1f68c8e7ec68e02dae1d0280c3a4797f9a8e03d8c6aa518509eed5182153a256"
+    },
+    {
+      "path": "DEPLOYMENT.json",
+      "bytes": 448,
+      "sha256": "daf8fc0782ffe74b09abe57f7ae58e0f8d4a439c6f08253c40adc57665382201"
+    },
+    {
+      "path": "README.md",
+      "bytes": 259,
+      "sha256": "c99c2ff6833805fceb70387bee050f4251cc877d1a1d3a45adcb388ab2f48628"
+    },
+    {
+      "path": "docs/sites19/verification.md",
+      "bytes": 1103,
+      "sha256": "63964f1915f742f58b1ed680cb021f31bed7adf7d3babe054365ed6a5c126987"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 51585,
+      "sha256": "7bc3391ca18617d5f2cdc7123874f85e3d9d04d44eeb948cced410e55a31c23e"
+    },
+    {
+      "path": "public/assets/shop/icons/chat.svg",
+      "bytes": 547,
+      "sha256": "d96ed66d29640af537b816287ef88f32a26368e6134182caeeefb78a3b3b7831"
+    },
+    {
+      "path": "public/assets/shop/portfolio/creative-illustration.svg",
+      "bytes": 1149,
+      "sha256": "2a6f23ec1472f4c8653ff97256885ad14cb370c5d787e9c6e508b23c56780327"
+    },
+    {
+      "path": "public/assets/shop/studio/app.js",
+      "bytes": 48825,
+      "sha256": "80a28a20bd911fbc390543d8dd71e3e8cb56bc27ed298c0e84f6b37c0784e870"
+    },
+    {
+      "path": "public/assets/shop/studio/custom-order.css",
+      "bytes": 5009,
+      "sha256": "7dd6a06e48fe88f58ec4bafd0c81b31235b5227bba2792d1bc2fcf78c4001498"
+    },
+    {
+      "path": "public/assets/shop/studio/favicon.svg",
+      "bytes": 252,
+      "sha256": "26ddde992ffc3de2483a2fb3bf200df0c06ce51be6e62f993c82b1f9d84f9550"
+    },
+    {
+      "path": "public/assets/shop/studio/showcase.js",
+      "bytes": 8848,
+      "sha256": "981edc01e5ec9d9ecfa6cc39e36ab56fbb3fb42ba0702769d793fac843e99005"
+    },
+    {
+      "path": "scripts/build-sandbox-bundle.mjs",
+      "bytes": 2512,
+      "sha256": "e80f2071b6907a87da82d5d9d3efd59b8587ae72076a74608520753d5289e58b"
+    },
+    {
+      "path": "src/product-story.js",
+      "bytes": 5803,
+      "sha256": "6d9de4f04c717ba08ea5871a85dff3ebe24766aa27c96a6272cfb188b1935cde"
+    },
+    {
+      "path": "src/sandbox/commerce-read.js",
+      "bytes": 1261,
+      "sha256": "a2ba254ccb9e6f5d042c7aa97b12594b2a9a04aff3c6767ba85f0a148d64b23b"
+    },
+    {
+      "path": "src/shop.js",
+      "bytes": 50483,
+      "sha256": "624046dbc1e1b69a48989c4294396bb5465f5bc15046eba69a018f0ab2b0cc53"
+    },
+    {
+      "path": "src/stripe-checkout.js",
+      "bytes": 15389,
+      "sha256": "4f821ac40888c6307bcb35bd5940102d9f3692727f7fabc8b3d9ff480f6cb20c"
+    },
+    {
+      "path": "tests/e2e/mascot.cjs",
+      "bytes": 1567,
+      "sha256": "8beda4d3dc653485b11677b9f4a16bf9c9fa6842cfa6bf322dd4ad0e77b06572"
+    },
+    {
+      "path": "tests/e2e/shop-handoff.cjs",
+      "bytes": 7241,
+      "sha256": "53487c8097ce12c771ac133e588e87ded11469ef5729b066a6af528c7c59967f"
+    },
+    {
+      "path": "tests/helpers/isolation-matrix.mjs",
+      "bytes": 6668,
+      "sha256": "9ffb7cb394c7090cb45fad5f6f39ac25dbec31174f9044a17d301e36f0b11c86"
+    },
+    {
+      "path": "tests/helpers/storefront-preview.mjs",
+      "bytes": 1902,
+      "sha256": "475c285223381131719c365b180bdcdc5074ad220babc5ff262dde27fff91afc"
+    },
+    {
+      "path": "tests/product-catalog.test.cjs",
+      "bytes": 1481,
+      "sha256": "cc150379e842bb51f5e7e6e4666056f31c7278befbbd0f9346f0c4af4a16676f"
+    },
+    {
+      "path": "tests/request-workflow.test.cjs",
+      "bytes": 11359,
+      "sha256": "bf525ced61f2d1ab659c7e198d22e2a50bc9c44ab38ebf19c87705d9e13a23de"
+    },
+    {
+      "path": "tests/shop-domain.test.cjs",
+      "bytes": 891,
+      "sha256": "7bd032463d0c2ae09081df6f80c32aadd1844c1d29834b31fa1dedf4b58af21f"
+    },
+    {
+      "path": "tests/spectrum-conversation-contract.test.cjs",
+      "bytes": 10128,
+      "sha256": "c68a1520dcb11bf24a4f0ccd9c2873acac171df7413edbbb9efba18cc3de3067"
+    },
+    {
+      "path": "wrangler.jsonc",
+      "bytes": 460,
+      "sha256": "59c591ded05f22b6a1670674ec226b71720b1036ad44cacb1ab730f670f0b5f0"
+    },
+    {
+      "path": "config/shop-sandbox.catalog.example.json",
+      "bytes": 197,
+      "sha256": "8cbf5d1d7ae277468231453138529556288f3da4a5d5966c00a1400812b97298"
+    },
+    {
+      "path": "migrations/0001_shop_orders.sql",
+      "bytes": 393,
+      "sha256": "2d2903f0045aa1f92da7182c9fa00721e1e046cf2ee9b1cbe0599aca5bb4ffd0"
+    },
+    {
+      "path": "package.json",
+      "bytes": 919,
+      "sha256": "c8cadebae42d03b40c8a98c506a3f9caa7938effc7baddbc8e95f0f85550bfbd"
+    },
+    {
+      "path": "public/assets/shop/icons/search.svg",
+      "bytes": 426,
+      "sha256": "336dd2a484a1a39e0ccd81026e563a98e63419cf93fa64e70e1bdfcab2da739e"
+    },
+    {
+      "path": "public/assets/shop/portfolio/digital-planner-series.svg",
+      "bytes": 1151,
+      "sha256": "9cc22e6b591d45d1ac55ef94267e81ceb2bc989f0a4e9dd15245bf0110e100eb"
+    },
+    {
+      "path": "public/assets/shop/studio/balance.css",
+      "bytes": 3905,
+      "sha256": "c38e0f47a2dd6a398bb6656b9541a91b3d964e8aad4e57989c441da46bdcc7d5"
+    },
+    {
+      "path": "public/assets/shop/studio/custom-order.js",
+      "bytes": 20238,
+      "sha256": "a35ff7dfe03ae4d608cfebec8986a7184efddf6a1d96a240f8f00f14ac249efa"
+    },
+    {
+      "path": "public/assets/shop/studio/home.css",
+      "bytes": 7715,
+      "sha256": "0f48d4afe5fce0e425a1d10c0f01aea6e8e932ff44c3f4fede33cec4b1c89e7d"
+    },
+    {
+      "path": "public/assets/shop/studio/styles.css",
+      "bytes": 66467,
+      "sha256": "3e40047cc43e8f5375f47f620ebfb25f2f177a6b04937fd770d1a73555d639a9"
+    },
+    {
+      "path": "src/commerce-pages.js",
+      "bytes": 13181,
+      "sha256": "9e17260618758b664d77ada4326a4e3a2e7d480d4041b45c33e01d17f9806b19"
+    },
+    {
+      "path": "src/request-pages.js",
+      "bytes": 21505,
+      "sha256": "fe02794f1cf582023240170043934d9db197d6aabd7936d33daaa73469fa2ba5"
+    },
+    {
+      "path": "src/sandbox/index.js",
+      "bytes": 535,
+      "sha256": "9be640f0e18ef8474ceefc7915a83f6b8a004887326218e54129192ae1aef10c"
+    },
+    {
+      "path": "src/sites-storefront.js",
+      "bytes": 1826,
+      "sha256": "b8eba589d4ae603406b03b2649a8797dc8e21e531202cf5504d193691d3205b7"
+    },
+    {
+      "path": "tests/commerce-pages.test.cjs",
+      "bytes": 3221,
+      "sha256": "c2bcbfc4f31320e9e3878398a071f10f2454defece797492fd33e5755c513dd9"
+    },
+    {
+      "path": "tests/e2e/request-journey.cjs",
+      "bytes": 32061,
+      "sha256": "55d477da2abbedcd56c4d83cf572c1b2fc1e1ff5c33aa5acf80b3d5305b98536"
+    },
+    {
+      "path": "tests/e2e/sites-production.cjs",
+      "bytes": 5281,
+      "sha256": "12657f3e28697e442130acfe5a6b0b655f21d96bcf5209dbb96f4ddb6f5748da"
+    },
+    {
+      "path": "tests/helpers/journey-client.cjs",
+      "bytes": 3725,
+      "sha256": "befacdedeab2e73247ff079107c74cba0aad12d1b8e42f6e719c9494bdc9cec8"
+    },
+    {
+      "path": "tests/marketplace-routing.test.cjs",
+      "bytes": 3933,
+      "sha256": "5acbe64b22ab918464624dc292abab1f7b9b539eb96bc13335b8f283ec135c82"
+    },
+    {
+      "path": "tests/request-isolation.test.cjs",
+      "bytes": 2173,
+      "sha256": "c38e75c22d96fccd92da806d83fbfbed6370da8f8c38cf48b0891401e61ec130"
+    },
+    {
+      "path": "tests/sales-bridge.test.cjs",
+      "bytes": 4491,
+      "sha256": "031ec186d27baaaa114e23d28d006ea9ac5b6096200abbc0d0ae333cc5f95fcd"
+    },
+    {
+      "path": "tests/shop-handoff.test.cjs",
+      "bytes": 1862,
+      "sha256": "f5fb9fc930cd9efb81c377ca0a78449c7b23282bde7be1d31ee516b318171ecd"
+    },
+    {
+      "path": "tests/storefront-assets.test.cjs",
+      "bytes": 1303,
+      "sha256": "3c9bfd59c8841cde656a1142e8d816aaa76189eb4fc88b5ac80b506c7e2607f5"
+    },
+    {
+      "path": "TRANSFER-MANIFEST.json",
+      "bytes": 21675,
+      "sha256": "3c2f16fc0c46e35dd0c81b4ebc07c016e2846da6b683687bdf29aafe86e1d257"
+    },
+    {
+      "path": "docs/sites19/README.md",
+      "bytes": 3687,
+      "sha256": "749fbdfcb34746791d3218548ae71935019ea657969e42026bd909ab0e12878d"
+    },
+    {
+      "path": "migrations/0002_request_workflow.sql",
+      "bytes": 1483,
+      "sha256": "20327350840780ea4fba77b9a30f5efa0301b6f3a4a590521aa93c60e4d560e1"
+    },
+    {
+      "path": "public/assets/shop/go-chat.js",
+      "bytes": 9920,
+      "sha256": "70e71f5d977c8e250cf5d1d24a0a46837901d469cac9db557f5dc55ec859c86b"
+    },
+    {
+      "path": "public/assets/shop/portfolio/aurora-cityscape.svg",
+      "bytes": 1139,
+      "sha256": "8a92549329d42b4a67509de8baefc9c292b86c3dd5266f4c747a69d84235b6e0"
+    },
+    {
+      "path": "public/assets/shop/portfolio/notion-workspace.svg",
+      "bytes": 1139,
+      "sha256": "d570127f5ffa6adb5c22c76fe86ef420c420b138622e3de8482a10cf3a49f584"
+    },
+    {
+      "path": "public/assets/shop/studio/content.json",
+      "bytes": 28703,
+      "sha256": "d4fbdaf677d122093518d0d444383e31609e1a8f210c4c14f5efeccdc11ec8e6"
+    },
+    {
+      "path": "public/assets/shop/studio/editor.js",
+      "bytes": 6479,
+      "sha256": "d66e09caa90f7f45fef96c2cf3f1dfbbde1fc4ea181b73ca8b44951ad3c95c7b"
+    },
+    {
+      "path": "public/assets/shop/studio/index.html",
+      "bytes": 1804,
+      "sha256": "11123301d830b5f519ff7d86fb64bfe04fe13836056cb01a8d6203d85fecf887"
+    },
+    {
+      "path": "public/assets/shop/studio/theme.css",
+      "bytes": 200,
+      "sha256": "f288a45669ec9c0bb4684a91715d344b5065d9d179cf1d1186bda39e28e718d1"
+    },
+    {
+      "path": "src/index.js",
+      "bytes": 56832,
+      "sha256": "ee4fe0fdc435cc855190859cf30fae511c04e87dc48a6155dc75f09f260c966a"
+    },
+    {
+      "path": "src/request-workflow.js",
+      "bytes": 15761,
+      "sha256": "8aada4143751a114aac882d828835f4fdb2617b99367b5e910ac4ebff1cc7f28"
+    },
+    {
+      "path": "src/shop-assistant.js",
+      "bytes": 14078,
+      "sha256": "11772e28009556ce1c6838a178d042a31ef6336cc83a17a184a72897fda40c0d"
+    },
+    {
+      "path": "src/storefront-editor.js",
+      "bytes": 7751,
+      "sha256": "0577c6472f1049f04c832eee1d2dc5c626f288e2af0346d5737eb102963a05c9"
+    },
+    {
+      "path": "tests/custom-order-journey.test.cjs",
+      "bytes": 9864,
+      "sha256": "5cbb79783e071f9c0aa2b377f7ed3bbfe2da8a7ca8e6455e925fead6c5ec0f28"
+    },
+    {
+      "path": "tests/e2e/request-recovery.cjs",
+      "bytes": 7046,
+      "sha256": "d6fbd46f03f2e47e9f38d224c5c1240d1d7dd1faa7493d124800c975fc06dea5"
+    },
+    {
+      "path": "tests/e2e/storefront.cjs",
+      "bytes": 3275,
+      "sha256": "eb86ffa7dc92577df3fadcc26de8f926cb29cb58fdac3756dc59663496c83889"
+    },
+    {
+      "path": "tests/helpers/request-preview.mjs",
+      "bytes": 2319,
+      "sha256": "e5b39219a2ff878e2e59345cf93d5f55384f57d6b33e4de7dc96d859d963ce98"
+    },
+    {
+      "path": "tests/metro-android.test.cjs",
+      "bytes": 2547,
+      "sha256": "32fe041954b237270431e80a0535e6bebb89f6ef106aca2b66467571f059f8d4"
+    },
+    {
+      "path": "tests/request-journey.test.cjs",
+      "bytes": 7478,
+      "sha256": "976e8ea9141e781848d142a52a9a2ac98f17a564f6f6c3f56ce304345dbd2b51"
+    },
+    {
+      "path": "tests/sandbox-rpc.test.cjs",
+      "bytes": 2030,
+      "sha256": "d66e64288c30be043427570cae4d0ed5dfa36957b84bfa09e719a80ff55c6301"
+    },
+    {
+      "path": "tests/shop-sandbox.test.cjs",
+      "bytes": 3159,
+      "sha256": "266d9ac24b64432979aaeffe223d0e904445b73160eac15ca16c0409034c680e"
+    },
+    {
+      "path": "tests/storefront-routing.test.cjs",
+      "bytes": 6087,
+      "sha256": "56c2ba41984970aa43e0770f18817c5c49360a8d0e23502496d029ca00c7356a"
+    },
+    {
+      "path": "TRANSFER-README.txt",
+      "bytes": 640,
+      "sha256": "dedfd5f0491d42ea1af6fac332028189d6a602fb4faec002e502aa9440ff2e6c"
+    }
+  ],
+  "binaries": {
+    "reusedVerified": [
+      {
+        "path": "public/assets/shop/aurora.png",
+        "bytes": 2155212,
+        "sha256": "09210906302d3cea481ed245334be0265171a286c167bb5051fa0872f3388d77"
+      },
+      {
+        "path": "public/assets/shop/backgrounds/blue-smoke.jpg",
+        "bytes": 201037,
+        "sha256": "23f9dd7e73d0a98e54c6ec96d9cc6a7ffb2b3e2907f18afb7d4cb69e36752989"
+      },
+      {
+        "path": "public/assets/shop/brand-hero.jpg",
+        "bytes": 319266,
+        "sha256": "56fc5f3d3d0843bcd96580fce002e647cf4c775e4b28c50a5c2975111b0fa30c"
+      },
+      {
+        "path": "public/assets/shop/cloud-hero.jpg",
+        "bytes": 345330,
+        "sha256": "af27ae8fe3382e3dce13dfc850704d3e7b2f2f092004080b84531e012b1e142f"
+      },
+      {
+        "path": "public/assets/shop/cloud-stories/01_COSMIC_PASTEL.jpg",
+        "bytes": 345330,
+        "sha256": "af27ae8fe3382e3dce13dfc850704d3e7b2f2f092004080b84531e012b1e142f"
+      },
+      {
+        "path": "public/assets/shop/cloud-stories/02_SPECTRUM.jpg",
+        "bytes": 284582,
+        "sha256": "114571e85ca771e984f96e8eb6f83c506d5549c727ad95d86a8bd5b80514b765"
+      },
+      {
+        "path": "public/assets/shop/cloud-stories/03_CELESTIAL_VEIL.jpg",
+        "bytes": 343651,
+        "sha256": "be42266e0f5d21ff760f19e32e67c630f5c1b0dd23df66d71389a9804442fe35"
+      },
+      {
+        "path": "public/assets/shop/cloud-stories/04_SUNSHINE.jpg",
+        "bytes": 250834,
+        "sha256": "9046654e1a832977274eac00e2d6d736a7130ee49d8e1747f7be78b834e47c6a"
+      },
+      {
+        "path": "public/assets/shop/cloud-stories/05_EMERALD_CANVAS.jpg",
+        "bytes": 338608,
+        "sha256": "121bf1a7971f778fc0bf7db5d386c7403ac7c168840a0f8649cab6e32d10def4"
+      },
+      {
+        "path": "public/assets/shop/go-mascot.webp",
+        "bytes": 23284,
+        "sha256": "0ab058af0c245d6bf394e9e605dc3edce1c412bb7737884a4e38100540aed6f4"
+      },
+      {
+        "path": "public/assets/shop/headings/custom-order.png",
+        "bytes": 1012791,
+        "sha256": "14d7d63c674f1c53967195ee461eb76a9dee75d94f8a7b07bedf7796abc62bec"
+      },
+      {
+        "path": "public/assets/shop/headings/hermes.png",
+        "bytes": 1028236,
+        "sha256": "fbe4e52be2f0ac2099e49df4505a4055fd48ada8f30e100ea2e7c9b92f84bca2"
+      },
+      {
+        "path": "public/assets/shop/headings/home.png",
+        "bytes": 1487855,
+        "sha256": "582a2a9d4cc96d87bc766fb57c7499669fa1f5a149417f05db5701b56f9230ed"
+      },
+      {
+        "path": "public/assets/shop/headings/portfolio.png",
+        "bytes": 1131160,
+        "sha256": "b2163bae5b2dddfb65b9ad49e1be0e071d106d41632f1cfa525b35f20b902e49"
+      },
+      {
+        "path": "public/assets/shop/headings/shop.png",
+        "bytes": 1301859,
+        "sha256": "f84199564ef9c1a55865ef723f5853ef7e20d120892547521e440646c0a6c6d1"
+      },
+      {
+        "path": "public/assets/shop/products/adaptive-lens.jpg",
+        "bytes": 416181,
+        "sha256": "a38f919fc0a9067e7c536181142075968d957edbdd9c3bd8b54844b1503c6b2d"
+      },
+      {
+        "path": "public/assets/shop/products/city.jpg",
+        "bytes": 554722,
+        "sha256": "27f080db7789c8e9e6f607547146e2ec2d45d63938e63466ec0ddc62cf3afabc"
+      },
+      {
+        "path": "public/assets/shop/products/finance.jpg",
+        "bytes": 306801,
+        "sha256": "590f7004df1e30f822642589850b77667d2f01e4e06009d79333afbee7be979b"
+      },
+      {
+        "path": "public/assets/shop/products/icons.jpg",
+        "bytes": 372878,
+        "sha256": "e788bdb7958e851d78f757f260bbdfe0e660ff7e8943bc747b0d3d1d4c2f525b"
+      },
+      {
+        "path": "public/assets/shop/products/icons.png",
+        "bytes": 786445,
+        "sha256": "897e7020ed8802b47bfbb2761d7c45253866c601f64806364833aa7e29d073bf"
+      },
+      {
+        "path": "public/assets/shop/products/land-planner.jpg",
+        "bytes": 276459,
+        "sha256": "8728fe4b726494d77d3ab411539d3a295ee15645afc1e185862bd7bb63b34d64"
+      },
+      {
+        "path": "public/assets/shop/products/landscape.jpg",
+        "bytes": 195541,
+        "sha256": "2bbe76d12c29b89d0b05ad2bd9b85ac4e9c62c6a2d45ee002ce3b123428fe3c7"
+      },
+      {
+        "path": "public/assets/shop/products/lost-era.jpg",
+        "bytes": 540758,
+        "sha256": "19db9fe9dd4a1a77deb24ef5786047ad8518e485c2eab178f70a89c7cf32c381"
+      },
+      {
+        "path": "public/assets/shop/products/root-cause.jpg",
+        "bytes": 337355,
+        "sha256": "740ca82a51e57a834abbca228a80aa0821ed9f011068234b872ad37ed8e13299"
+      },
+      {
+        "path": "public/assets/shop/products/studio-banner.jpg",
+        "bytes": 214209,
+        "sha256": "165637cc96edcfbfeffee675582632a493cf21c75764377e0a8299ac3544dcfd"
+      },
+      {
+        "path": "public/assets/shop/sky-studies/emerald-aurora.jpg",
+        "bytes": 330977,
+        "sha256": "46f62ad95bf045422c36efd4a0b22ffdc2ea109d9243c095eb1d5829ce30b0fa"
+      },
+      {
+        "path": "public/assets/shop/sky-studies/golden-clouds.jpg",
+        "bytes": 177545,
+        "sha256": "fef37f5ec24eab42e5a034db27f7c9e428f551da6b643897d563ea0ff9b08c38"
+      },
+      {
+        "path": "public/assets/shop/sky-studies/purple-aurora.jpg",
+        "bytes": 336163,
+        "sha256": "dcd98c062a1da93dfd360ad8014c48a12870388ce958f7a30b55718ca38b58ea"
+      },
+      {
+        "path": "public/assets/shop/sky-studies/sunrise.jpg",
+        "bytes": 282869,
+        "sha256": "03af6319f47adaa1580d7792b1a31e93fe4a003ed3423b40805843d1835f4a05"
+      },
+      {
+        "path": "public/assets/shop/studio.webp",
+        "bytes": 356372,
+        "sha256": "0a2506532504ba791be412860f985821a135ed62643552ccceaf0d727450f938"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/adaptive-lens.jpg",
+        "bytes": 416181,
+        "sha256": "a38f919fc0a9067e7c536181142075968d957edbdd9c3bd8b54844b1503c6b2d"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/aurora.jpg",
+        "bytes": 345330,
+        "sha256": "af27ae8fe3382e3dce13dfc850704d3e7b2f2f092004080b84531e012b1e142f"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/blue-smoke.jpg",
+        "bytes": 201037,
+        "sha256": "23f9dd7e73d0a98e54c6ec96d9cc6a7ffb2b3e2907f18afb7d4cb69e36752989"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/emerald-aurora.jpg",
+        "bytes": 330977,
+        "sha256": "46f62ad95bf045422c36efd4a0b22ffdc2ea109d9243c095eb1d5829ce30b0fa"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/finance.jpg",
+        "bytes": 306801,
+        "sha256": "590f7004df1e30f822642589850b77667d2f01e4e06009d79333afbee7be979b"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/golden-clouds.jpg",
+        "bytes": 177545,
+        "sha256": "fef37f5ec24eab42e5a034db27f7c9e428f551da6b643897d563ea0ff9b08c38"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/hero.jpg",
+        "bytes": 319266,
+        "sha256": "56fc5f3d3d0843bcd96580fce002e647cf4c775e4b28c50a5c2975111b0fa30c"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/land-planner.jpg",
+        "bytes": 276459,
+        "sha256": "8728fe4b726494d77d3ab411539d3a295ee15645afc1e185862bd7bb63b34d64"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/lost-era.jpg",
+        "bytes": 540758,
+        "sha256": "19db9fe9dd4a1a77deb24ef5786047ad8518e485c2eab178f70a89c7cf32c381"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/purple-aurora.jpg",
+        "bytes": 336163,
+        "sha256": "dcd98c062a1da93dfd360ad8014c48a12870388ce958f7a30b55718ca38b58ea"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/root-cause.jpg",
+        "bytes": 337355,
+        "sha256": "740ca82a51e57a834abbca228a80aa0821ed9f011068234b872ad37ed8e13299"
+      }
+    ],
+    "pending": [
+      {
+        "path": "public/assets/shop/studio/assets/brand-wordmark.png",
+        "bytes": 968216,
+        "sha256": "daf4c6b9067d03bf2baa3b633477a716594d33a4313c513d8694bb5f779298cd"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/nav-custom-order.png",
+        "bytes": 1418491,
+        "sha256": "6fb7c909708492450f4607a44c73c0873355172f75999019b539f012e0e07ee2"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/nav-gallery.png",
+        "bytes": 1428449,
+        "sha256": "d2bc50f21f9ceb5093ea8093583f4facb68ed0739fd65020b25cda6dd2c11d1f"
+      },
+      {
+        "path": "public/assets/shop/studio/assets/nav-shop.png",
+        "bytes": 1614016,
+        "sha256": "8e867e30817d01341a424a3418a2764ade677c520f48b6478aafa470991885a0"
+      }
+    ]
+  },
+  "baselineCommit": "e2ab67a",
+  "localArchiveBytesReceived": false
+}
