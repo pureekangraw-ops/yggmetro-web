@@ -3,6 +3,14 @@
     "sha256": "ec1c62bcbbce9b85efc33b88bd23a9d6ff8fd41f37a68207c6dcbf7f4f65024e",
     "bytes": 4468
   },
+  "comparator-green.log": {
+    "sha256": "5b2d01a7f37d086d48327657e290c1afee1859c9c43f0b055091ff5011bca02c",
+    "bytes": 12143
+  },
+  "comparator-red.log": {
+    "sha256": "0b43b4bac9bd0c82c22ffdaadfa6db14b6baff0b0e523f6e080d326097f4c7fd",
+    "bytes": 2487
+  },
   "deployment-readback.json": {
     "sha256": "18e89b65122f47dddcc804a0958538d2570c92afc79d265c6045512285b03c74",
     "bytes": 428

@@ -22,10 +22,55 @@ test('unreconciled source cannot release, even with status or environment overri
 test('active comparison accepts only the pinned current deployment and traffic split',async()=>{
   const {assertActiveDeployment}=await import('../scripts/shop-release-guard.mjs');
   assert.equal(assertActiveDeployment(lock,active()).id,lock.expectedDeploymentId);
-  const changedId=active();changedId.result.deployments.unshift({id:'direct-api-new',versions:lock.expectedVersions});
-  const changedVersion=active();changedVersion.result.deployments[0].versions=[{version_id:'new',percentage:100}];
-  const split=active();split.result.deployments[0].versions=[{...lock.expectedVersions[0],percentage:50},{version_id:'new',percentage:50}];
+  const otherId='05b18642-03c7-4ffe-86b2-080775ef0baa';
+  const changedId=active();changedId.result.deployments.unshift({id:otherId,versions:lock.expectedVersions});
+  const changedVersion=active();changedVersion.result.deployments[0].versions=[{version_id:otherId,percentage:100}];
+  const split=active();split.result.deployments[0].versions=[{...lock.expectedVersions[0],percentage:50},{version_id:otherId,percentage:50}];
   for(const payload of [null,{}, {success:false}, {success:true,result:{deployments:[]}},changedId,changedVersion,split]) {
+    assert.throws(()=>assertActiveDeployment(lock,payload));
+  }
+});
+
+test('active comparison rejects malformed baseline and provider schemas',async()=>{
+  const {assertActiveDeployment}=await import('../scripts/shop-release-guard.mjs');
+  assert.throws(()=>assertActiveDeployment({}, {success:true,result:{deployments:[{}]}}));
+  for(const invalid of [null,{},[],{...lock,schemaVersion:'1'},{...lock,schemaVersion:2},
+    {...lock,worker:'other'},{...lock,expectedDeploymentId:undefined},
+    {...lock,expectedDeploymentId:''},{...lock,expectedDeploymentId:'not-a-uuid'},
+    {...lock,expectedVersions:undefined}]) assert.throws(()=>assertActiveDeployment(invalid,active()));
+  for(const success of [undefined,null,false,1,'true',{},[]]) {
+    assert.throws(()=>assertActiveDeployment(lock,{...active(),success}));
+  }
+  for(const result of [null,{},[],{deployments:null},{deployments:{}},{deployments:[{}]},
+    {deployments:[{id:'invalid',versions:lock.expectedVersions}]}]) {
+    assert.throws(()=>assertActiveDeployment(lock,{success:true,result}));
+  }
+});
+
+test('traffic comparison ignores object key order and version ordering',async()=>{
+  const {assertActiveDeployment}=await import('../scripts/shop-release-guard.mjs');
+  const second='05b18642-03c7-4ffe-86b2-080775ef0baa';
+  const baseline={...lock,expectedVersions:[{version_id:lock.expectedVersions[0].version_id,percentage:33.33},{version_id:second,percentage:66.67}]};
+  const payload=active();
+  payload.result.deployments[0].versions=[{percentage:66.67,version_id:second},{percentage:33.33,version_id:lock.expectedVersions[0].version_id}];
+  assert.equal(assertActiveDeployment(baseline,payload),payload.result.deployments[0]);
+  payload.result.deployments[0].versions[0].percentage=66.66;
+  payload.result.deployments[0].versions[1].percentage=33.34;
+  assert.throws(()=>assertActiveDeployment(baseline,payload),/Production changed/);
+});
+
+test('invalid traffic distributions fail on either side even when identical',async()=>{
+  const {assertActiveDeployment}=await import('../scripts/shop-release-guard.mjs');
+  const id=lock.expectedVersions[0].version_id;
+  const invalid=[undefined,null,{},[],[null],[{}],
+    [{percentage:100}],[{version_id:'invalid',percentage:100}],
+    ...[undefined,null,'100',0,-1,100.01,NaN,Infinity].map(percentage=>[{version_id:id,percentage}]),
+    [{version_id:id,percentage:99}],[{version_id:id,percentage:50},{version_id:id,percentage:50}]];
+  for(const versions of invalid) {
+    const baseline={...lock,expectedVersions:versions};
+    const payload=active();payload.result.deployments[0].versions=versions;
+    assert.throws(()=>assertActiveDeployment(baseline,payload));
+    assert.throws(()=>assertActiveDeployment(baseline,active()));
     assert.throws(()=>assertActiveDeployment(lock,payload));
   }
 });

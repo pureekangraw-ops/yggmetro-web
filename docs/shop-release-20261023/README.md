@@ -19,6 +19,8 @@ The credential-free `release-integrity` job must succeed before the existing dep
 
 The active-deployment comparator is prepared and regression tested; it compares the **first/current** Cloudflare deployment ID and its complete traffic split, not a matching old deployment in history. It is not an enabled release path. There is deliberately no pretend approval flag or fake source hash to bypass the freeze.
 
+Independent review found two latent comparator defects: malformed matching baseline/provider data could pass, and object/array ordering could reject equivalent traffic distributions. Three new tests reproduced those defects and invalid identical traffic acceptance before the fix. The comparator now validates baseline schema/worker/UUIDs, provider success/result/current-deployment structure, distinct version UUIDs, finite positive percentages bounded by 100 and total traffic of 100 (with floating-point addition tolerance). It compares distributions by version ID independent of key and version ordering. The unconditional release freeze never called this comparator, so the defects did not create a reachable deployment bypass. The comparator remains inactive in the release path.
+
 This gate is scoped to these repository entrypoints. Direct `wrangler`, Cloudflare API, other checkouts and GO's outside deployments are not fenced by GitHub code or concurrency. No new credentials or permissions are requested. Existing main remains unsafe until an authorized workflow change is accepted. Do not merge this branch as part of this task.
 
 ### Compatibility with PR70
@@ -27,7 +29,7 @@ PR70 head `b7f02dc6e881023d7991f173a00d09569e936246` was fetched and its exact p
 
 ## Evidence and responsive verification
 
-`npm test`: **118/118 passed**, including four new release tests. Those verify blocked release even with overrides, invalid lock rejection, detection of direct deployment/version/traffic changes, local npm deployment stopping before Wrangler, and workflow dependency placement. This is infrastructure regression evidence, not proof of current-live layout parity.
+Initial `npm test`: **118/118 passed**, including four release tests; comparator follow-up: **121/121 passed**, including seven release tests. Those verify blocked release even with overrides, invalid lock/schema/distribution rejection, semantic traffic comparison, detection of direct deployment/version/traffic changes, local npm deployment stopping before Wrangler, and workflow dependency placement. This is infrastructure regression evidence, not proof of current-live layout parity.
 
 `tests/e2e/shop-responsive-audit.mjs` prepares read-only capture at 390×844, 768×1024 and 1440×900 CSS pixels (DPR1, mobile/touch enabled at the first two). It blocks non-GET requests, APIs, unknown origins and service workers; it never clicks CTAs, chat or forms. It records response asset bytes under SHA256, viewport dimensions, horizontal overflow, loaded fonts, Thai text presence, images, navigation/CTA bounds and fixed elements; screenshots and HTML are written to a new output directory. These measurements still need visual Thai typography, navigation and mascot/CTA overlap review. Product detail coverage must be extended with exact canonical routes and selectors after source retrieval.
 
