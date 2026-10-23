@@ -12,6 +12,12 @@ Four display-sized WebP derivatives reduce their combined bytes from **5,429,172
 
 Validation: **125/125 unit tests**, storefront navigation at **390/768/1440**, request recovery **4/4**, customer/Admin journey **9/9**, handoff **6/6**, checkout/Office **18/18**, Sites workflows **5/5**, new responsive checks **3/3**. All pass on local synthetic fixtures; no production submissions or provider transactions. Old tests targeting the intentionally removed duplicate launcher now use the retained GO launcher, without removing journey assertions. New checks enforce image completeness, semantic product CTA destinations, product-specific guidance, menus/Escape, dialog bounds, and no horizontal overflow. Wrangler dry-run and whitespace/syntax checks pass. Initial red tests and intermediate incomplete-asset failures remain historical evidence.
 
+### Review corrections
+
+The restored Office editor no longer links to upload/edit `main` or promises that Commit deploys. It exports drafts locally and explains choosing a reconciled source branch, creating a separate branch, opening a Pull Request, and obtaining separate release approval while the freeze remains active. The served-HTML regression first failed on the old `upload/main` link; browser checks verify export contents, no server writes, and the post-download branch/review/freeze notice.
+
+At 390px the inherited product help band squeezed its copy to 81.14px and its heading into four lines. A geometry regression reproduced this; a phone-only single-column layout now gives the copy full width and places the action below it. Tests require at least 240px of copy width, at most two heading lines, and the button below the copy for all six products. Tablet/desktop rules remain unchanged. The updated mobile Adaptive screenshot is included below.
+
 ### Before / after screenshots
 
 Captures are a local replay of the fully verified GO baseline and the candidate, not fresh production screenshots. DPR1; mobile/touch emulation at 390/768; desktop at 1440. Heights: 844/1024/1024 respectively. The parent separately owns native production audit screenshots. Home, Adaptive and buying-guide screenshots at all sizes are under `evidence/browser/{before,after}/`; hashes are in `evidence/SHA256SUMS.json`.

@@ -32,5 +32,5 @@ test('Office editor publishes nothing and exposes only public configuration',asy
  assert.equal((await storefrontEditor(new Request('https://shop.yggmetro.com/admin/storefront'))).status,404);
  assert.equal((await storefrontEditor(new Request('https://office.yggmetro.com/admin/storefront',{method:'POST'}))).status,405);
  const res=await storefrontEditor(new Request('https://office.yggmetro.com/admin/storefront/content'));assert.deepEqual(await res.json(),data);
- const html=await(await storefrontEditor(new Request('https://office.yggmetro.com/admin/storefront'))).text();assert.match(html,/github.com\/pureekangraw-ops\/yggmetro-web\/upload\/main/);assert.match(html,/ยังไม่เปลี่ยนเว็บจริง/);
+ const html=await(await storefrontEditor(new Request('https://office.yggmetro.com/admin/storefront'))).text();assert.doesNotMatch(html,/\/(?:upload|edit)\/main(?:\/|["?])/);assert.doesNotMatch(html,/ระบบจะทดสอบและ Deploy ให้/);assert.match(html,/branch แยก/);assert.match(html,/Pull Request/);assert.match(html,/ระงับการเผยแพร่/);assert.match(html,/ยังไม่เปลี่ยนเว็บจริง/);
 });

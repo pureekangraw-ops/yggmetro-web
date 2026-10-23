@@ -31,6 +31,15 @@ for(const width of [390,768,1440]) test(`responsive purchase guidance and assist
     assert.match(await page.locator('.product-format').innerText(),new RegExp(content.guides[product.id].format));
     if(product.id==='adaptive-lens')assert.doesNotMatch(await page.locator('.product-format').innerText(),/เทมเพลต Notion|เว็บแอป/);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+    if(width===390){
+      const help=await page.locator('.help-band').evaluate(band=>{
+        const copy=band.children[1],heading=copy.querySelector('h2'),button=band.querySelector('.btn');
+        return {copyWidth:copy.getBoundingClientRect().width,headingLines:heading.getBoundingClientRect().height/parseFloat(getComputedStyle(heading).lineHeight),copyBottom:copy.getBoundingClientRect().bottom,buttonTop:button.getBoundingClientRect().top};
+      });
+      assert.ok(help.copyWidth>=240,JSON.stringify(help));
+      assert.ok(help.headingLines<=2.1,JSON.stringify(help));
+      assert.ok(help.buttonTop>=help.copyBottom,JSON.stringify(help));
+    }
     await page.locator('[data-go-sales-open][data-id]').first().click();
     await page.locator('#go-sales-panel').waitFor({state:'visible'});
     const bounds=await page.locator('#go-sales-panel').boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=width+1);

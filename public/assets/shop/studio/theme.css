@@ -38,3 +38,10 @@ body[data-page=home] .footer-compact{padding-right:0}
   .opening-actions{align-items:stretch}
   .opening-actions .product-buy{flex-basis:100%;justify-content:center}
 }
+/* Phone help copy needs its full line width; the action follows the text. */
+@media(max-width:700px){
+  .help-band{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+  .help-band>div:nth-child(2){max-width:none;min-width:0;width:100%}
+  .help-band>.btn{margin-left:0;justify-self:start}
+  .help-band p{font-size:14px}
+}
