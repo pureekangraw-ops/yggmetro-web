@@ -1,4 +1,4 @@
-# Shop release integrity — source reconciliation pending
+# Shop release integrity — verified baseline, release frozen
 
 ## Final implementation and acceptance
 
@@ -30,11 +30,20 @@ Captures are a local replay of the fully verified GO baseline and the candidate,
 
 [Mobile before](evidence/browser/before/home-390.png) · [Mobile after](evidence/browser/after/home-390.png) · [Tablet after](evidence/browser/after/home-768.png) · [Desktop after](evidence/browser/after/home-1440.png) · [Product after](evidence/browser/after/adaptive-390.png) · [Buying guidance](evidence/browser/after/buying-390.png).
 
-### Remaining release limitation
+### Canonical baseline build parity verified
 
-A minified Wrangler 4.151.1 build of the unmodified source baseline succeeds with existing bindings, but its Worker SHA256 `9f50ca43a034df4d105cf20b752a3fff888a1f65bc55eb5d6b903f19bf1d1b3c` (564,825 bytes) differs from the captured runtime module (564,730 bytes). Different minified symbols/statement formatting and a sourceMappingURL are observed. Exact reproduction still needs GO's original build command/toolchain and comparison; byte-for-byte compiled parity is not claimed. Source/archive/asset provenance is verified independently. The release freeze remains unconditional, and nothing is merged or deployed.
+GO's build provenance (Brain record `47ff5cca-6c24-455e-aff9-832e7ee8723c`, revision 1) identified two stages: an unminified Wrangler dry-run, then separate esbuild minification with ESM output. Repeating that sequence with Wrangler 4.151.1 and esbuild 0.28.2 on the unmodified, reverified 135-entry baseline produces **564,730 bytes, SHA256 `1d2f1f8bd15e0f4b3ebec9e0850736bd32ffc1345f38d08d8a42eccf481f9436`**, byte-for-byte equal to the decompressed captured production Worker. No source-map trailer remains. See `evidence/two-stage-build-receipt.json`.
 
-The sections below retain the initial investigation and release requirements. Historical source/image access blockers have been resolved as described above; the exact compiled-output reproduction limitation remains.
+```sh
+wrangler deploy --config <verified-baseline>/wrangler.jsonc --dry-run --outdir <build-dir>
+esbuild <build-dir>/index.js --minify --format=esm --outfile=<build-dir>/worker.mjs
+```
+
+These are verified reproduction commands, not a claim that the exact historical minifier invocation has been recovered. GO's saved intermediate is 1,076,021 bytes, SHA256 `84df89aa9c4b73357dfb6f0af46a3256545c3eba58975c0b29f08e07ee4fcf68`; this executor's intermediate is 1,080,333 bytes, SHA256 `4f0ec1d11e36ba87b39b78b965c8ee30f1834e592060c2c8448458509c549852`. The reason for that intermediate difference is unverified without the historical file. It does not prevent exact final-byte reproduction with the recorded command. The earlier single-stage Wrangler `--minify` mismatch remains historical evidence of a different build pipeline.
+
+Parity applies to the canonical baseline, not the deliberately modified responsive candidate. The unconditional release freeze remains; future release still requires fresh active-deployment comparison, GO coordination and separate authorization. Nothing is merged or deployed.
+
+The sections below retain the initial investigation and release requirements. Historical source/image access blockers and final compiled-byte reproduction are resolved as described above.
 
 This branch prevents its deployment workflow and `npm run deploy` from replacing the approved direct release with stale repository source. **It is not deployed or merged, so it does not yet protect main.** The initial guard-only commit changed no application code; subsequent source reconciliation and presentation changes are documented above. No new price, payment, secret or permission change is included. The existing checkout was clean; no worktree was created and no existing branch was merged.
 

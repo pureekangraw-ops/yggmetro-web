@@ -166,5 +166,9 @@
   "source-transfer-receipt.json": {
     "sha256": "e4bf9feae85b77b34c139d684997bbdb10101b8ec0cd2548d897b02fb95d0d5c",
     "bytes": 24522
+  },
+  "two-stage-build-receipt.json": {
+    "sha256": "5d176313005a838eb01139abdfb87d7c350ca010ca248ec214f5698ef9c01eff",
+    "bytes": 1212
   }
 }
