@@ -1,20 +1,38 @@
 # Shop release integrity — source reconciliation pending
 
-## Source receipt and local implementation update
+## Final implementation and acceptance
 
-GO's final archive is identified by SHA256 `42fa4c8b9292ecf1a5b68732f1a7fb1ab08585fb9ee5798168378b6f5800279a`. Parent verified its 24,806,084 bytes and all 135 transfer-manifest entries. The executor received 93 text files through four lossless Library JSON packs and independently verified every original UTF-8 byte count/hash before integration. It recovered 41 binary entries from existing local assets by exact byte/hash matches. The archive itself has not been downloaded into this executor. See `evidence/source-transfer-receipt.json` and the preserved GO deployment/transfer records.
+GO's final source archive is identified by SHA256 `42fa4c8b9292ecf1a5b68732f1a7fb1ab08585fb9ee5798168378b6f5800279a`. Parent verified the complete 24,806,084-byte archive. This executor independently verified **all 135 original manifest entries** after lossless Library transfer: 93 UTF-8 files, 41 hash-matched local binaries, and the four remaining original PNGs received in 34 base64 chunks. No original archive bytes were downloaded into this executor. Three extra transfer records are separately retained. See `evidence/source-transfer-receipt.json` and `go-TRANSFER-MANIFEST.json`.
 
-Local baseline commit `e2ab67a` integrates the actual Sites19 authored text, production adapter and delegated dynamic assistant opener. Existing workflow and freeze changes are retained; checkout/payment code, configuration and original catalog price/URL bytes remain unchanged from the verified source. The 41 matching binaries include all product artwork. Four original binaries remain missing: `brand-wordmark.png`, `nav-shop.png`, `nav-gallery.png`, `nav-custom-order.png` under `public/assets/shop/studio/assets/`. Their expected hashes/sizes are in the receipt. Visual acceptance and original-image optimization remain blocked until receipt.
+Baseline commit `e2ab67a` integrates the authored Sites19 text, production adapter and delegated opener fix; the four original PNGs were added later unchanged. Original source is preserved in the staged receipt and Git history. Workflows and the unconditional release freeze are retained. The shared `content.json` (including every price and external URL), checkout implementation, bindings and configuration remain byte-identical to GO's baseline. Only native cart explanatory prose changes.
 
-The local responsive follow-up makes the closed mascot flow after the footer, retains the shared dialog and header/product openers, removes the duplicate launcher, reduces mobile/tablet hero spacing and wordmark size, adds early product-specific external CTAs, and serves buying guidance from the same catalog/guides. Native cart/checkout logic is retained; empty-cart copy explains external purchase channels. Desktop hero geometry is unchanged at 1440px. Unit regressions pass 124/124. New viewport checks reproduced the floating mascot issue at all three sizes before changes; layout/navigation/CTA/assistant checks subsequently passed at 390/768/1440. A required image-completeness assertion now correctly fails on the four missing assets. Screenshots generated while these assets are missing are incomplete diagnostics, not accepted before/after evidence.
+The responsive changes retain the desktop hero layout, reduce mobile/tablet hero spacing and wordmark size, place the closed mascot in normal page flow after the footer, and keep header/product buttons connected to the same dialog. The duplicate floating launcher is removed. Product openings now expose the correct external CTA; platform/delivery guidance uses each product's existing shared guide rather than generic Notion/Web App copy. Header buying guidance and `/how-to-buy` lead to actual catalog destinations; native cart copy explains that external products are purchased at their platform.
 
-A credential-free, minified Wrangler 4.151.1 dry-run of the preserved source baseline succeeds with existing bindings only. Its Worker SHA256 is `9f50ca43a034df4d105cf20b752a3fff888a1f65bc55eb5d6b903f19bf1d1b3c` (564,825 bytes), which does **not** equal the captured runtime module (564,730 bytes). Different minified symbols/statement formatting and a sourceMappingURL are observed; exact reproduction still needs GO's original build command/toolchain and comparison. No byte-for-byte runtime parity is claimed. The release freeze stays unconditional.
+Four display-sized WebP derivatives reduce their combined bytes from **5,429,172 to 214,060 (96.1%)**. Originals are retained, and `docs/sites19/optimized-assets.json` records input/output hashes, dimensions, bytes and generator version. Reproduce with `python scripts/optimize-shop-images.py` using Pillow. This is byte reduction, not a measured LCP claim.
 
-The sections below retain the initial investigation and release requirements; initial source-access blockers have been narrowed as described above. No new production authority follows from source receipt.
+Validation: **125/125 unit tests**, storefront navigation at **390/768/1440**, request recovery **4/4**, customer/Admin journey **9/9**, handoff **6/6**, checkout/Office **18/18**, Sites workflows **5/5**, new responsive checks **3/3**. All pass on local synthetic fixtures; no production submissions or provider transactions. Old tests targeting the intentionally removed duplicate launcher now use the retained GO launcher, without removing journey assertions. New checks enforce image completeness, semantic product CTA destinations, product-specific guidance, menus/Escape, dialog bounds, and no horizontal overflow. Wrangler dry-run and whitespace/syntax checks pass. Initial red tests and intermediate incomplete-asset failures remain historical evidence.
 
-This branch prevents its deployment workflow and `npm run deploy` from replacing the approved direct release with stale repository source. **It is not deployed or merged, so it does not yet protect main.** No application, price, payment, secret or permission change is included. The existing checkout was clean; no worktree was created and no existing branch was merged.
+### Before / after screenshots
 
-## Verified provenance
+Captures are a local replay of the fully verified GO baseline and the candidate, not fresh production screenshots. DPR1; mobile/touch emulation at 390/768; desktop at 1440. Heights: 844/1024/1024 respectively. The parent separately owns native production audit screenshots. Home, Adaptive and buying-guide screenshots at all sizes are under `evidence/browser/{before,after}/`; hashes are in `evidence/SHA256SUMS.json`.
+
+| Viewport | Home showcase top before | After | Broken images / horizontal overflow |
+| --- | --- | --- | --- |
+| 390×844 | 650.41px | 531.06px | None / none |
+| 768×1024 | 681.95px | 493.92px | None / none |
+| 1440×1024 | 202px | 202px | None / none |
+
+[Mobile before](evidence/browser/before/home-390.png) · [Mobile after](evidence/browser/after/home-390.png) · [Tablet after](evidence/browser/after/home-768.png) · [Desktop after](evidence/browser/after/home-1440.png) · [Product after](evidence/browser/after/adaptive-390.png) · [Buying guidance](evidence/browser/after/buying-390.png).
+
+### Remaining release limitation
+
+A minified Wrangler 4.151.1 build of the unmodified source baseline succeeds with existing bindings, but its Worker SHA256 `9f50ca43a034df4d105cf20b752a3fff888a1f65bc55eb5d6b903f19bf1d1b3c` (564,825 bytes) differs from the captured runtime module (564,730 bytes). Different minified symbols/statement formatting and a sourceMappingURL are observed. Exact reproduction still needs GO's original build command/toolchain and comparison; byte-for-byte compiled parity is not claimed. Source/archive/asset provenance is verified independently. The release freeze remains unconditional, and nothing is merged or deployed.
+
+The sections below retain the initial investigation and release requirements. Historical source/image access blockers have been resolved as described above; the exact compiled-output reproduction limitation remains.
+
+This branch prevents its deployment workflow and `npm run deploy` from replacing the approved direct release with stale repository source. **It is not deployed or merged, so it does not yet protect main.** The initial guard-only commit changed no application code; subsequent source reconciliation and presentation changes are documented above. No new price, payment, secret or permission change is included. The existing checkout was clean; no worktree was created and no existing branch was merged.
+
+## Initial verified provenance
 
 - Repository main/initial checkout: `6e24fb3fe8453fe269b853848c002fba394affd9` (PR68), independently checked with `git ls-remote`.
 - Cloudflare GET deployment readback: `a2a34c6d-67da-49aa-9541-a0993aec53ff`, created `2026-10-23T06:28:18.65528Z`, source `api`, 100% version `ccd6faa9-dbee-406f-b0e1-c12a2c666268` (version 68).
@@ -39,7 +57,7 @@ This gate is scoped to these repository entrypoints. Direct `wrangler`, Cloudfla
 
 PR70 head `b7f02dc6e881023d7991f173a00d09569e936246` was fetched and its exact patch inspected. It isolates tokens to upload/account lookup, runs credential-free safety/build jobs, and deploys checksummed prebuilt bytes with `--no-bundle`. Those properties must be retained. This branch does not copy or overwrite PR70. Both touch deploy.yml and need deliberate reconciliation: retain `release-integrity`, make deployment depend on both safety and integrity, keep builds credential-free, and retain the lock check before any upload. PR70's exact workflow-shape test currently accepts only two jobs and an exact upload command; update that test explicitly when combining the patches. Do not silently relax its credential or artifact checks. PR42 also overlaps deploy.yml.
 
-## Evidence and responsive verification
+## Initial evidence and responsive preparation
 
 Initial `npm test`: **118/118 passed**, including four release tests; comparator follow-up: **121/121 passed**, including seven release tests. Those verify blocked release even with overrides, invalid lock/schema/distribution rejection, semantic traffic comparison, detection of direct deployment/version/traffic changes, local npm deployment stopping before Wrangler, and workflow dependency placement. This is infrastructure regression evidence, not proof of current-live layout parity.
 

@@ -1,5 +1,18 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const base=path.resolve('public/assets/shop/studio'),data=JSON.parse(fs.readFileSync(base+'/content.json'));
+test('display-sized image derivatives retain verified original assets and reduce bytes',()=>{
+ const {createHash}=require('node:crypto');
+ const original=JSON.parse(fs.readFileSync('docs/sites19/asset-manifest.json'));
+ const optimized=JSON.parse(fs.readFileSync('docs/sites19/optimized-assets.json'));
+ for(const item of optimized.outputs){
+  const source=fs.readFileSync(item.source),output=fs.readFileSync(item.output);
+  assert.equal(createHash('sha256').update(source).digest('hex'),original.find(x=>x.file===item.source).sha256);
+  assert.equal(createHash('sha256').update(source).digest('hex'),item.sourceSha256);
+  assert.equal(createHash('sha256').update(output).digest('hex'),item.outputSha256);
+  assert.ok(output.length<source.length*.2,'derivative must reduce transferred bytes');
+  assert.equal(item.outputDimensions[0],item.source.includes('wordmark')?1040:384);
+ }
+});
 test('editable storefront content is complete, safe and references real assets',()=>{
  assert.equal(data.schemaVersion,1);assert.equal(new Set(data.products.map(p=>p.id)).size,6);assert.deepEqual(Object.keys(data.guides).sort(),data.products.map(p=>p.id).sort());
  for(const p of data.products){assert.match(p.id,/^[a-z0-9-]+$/);assert.ok(data.categories[p.category]);assert.ok(p.features.length);for(const k of ['name','label','desc','price','note'])assert.equal(typeof p[k],'string');const u=new URL(p.url);assert.equal(u.protocol,'https:');assert.equal(u.username,'');assert.equal(u.password,'');if(p.image){assert.match(p.image,/^[a-zA-Z0-9_-]+\.(png|jpe?g|webp)$/);assert.ok(fs.statSync(base+'/assets/'+p.image).size>0);}const guide=data.guides[p.id];assert.match(guide.tone,/^[a-z]+$/);assert.equal(guide.steps.length,3);for(const step of guide.steps)assert.equal(step.length,5);}

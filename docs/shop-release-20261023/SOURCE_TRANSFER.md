@@ -1,5 +1,7 @@
 # Source transfer checklist for parent / GO
 
+Receipt complete: all 135 baseline manifest entries are independently verified in this executor. See `evidence/source-transfer-receipt.json`. The checklist below records the transfer contract; exact compiled-output/toolchain reproduction remains unresolved.
+
 Transfer into a new evidence directory outside `src/` and `public/`; do not overlay the checkout. No tokens, `.env` files, secret bindings, customer records or browser cookies are needed. Preserve raw bytes before inspection. The parent can bridge files through Library if direct source access is unavailable.
 
 ## Known immutable identifiers

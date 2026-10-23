@@ -1,0 +1,26 @@
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 390px (2580.400695ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 1440px (1861.658487ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (1490.707429ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (1974.181189ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (1018.727546ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (1220.427851ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (1255.470216ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (1080.217463ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (756.806203ms)
+✔ unavailable recovery storage prevents an untrackable purchase (741.32896ms)
+✔ a damaged started request is not replaced with a new purchase after reload (785.722658ms)
+✔ sandbox resource links and images remain local and resolve at 390px (957.22779ms)
+✔ sandbox resource links and images remain local and resolve at 1440px (1180.805408ms)
+✔ mascot protects checkout notices and retains controls at 320px (2070.461098ms)
+✔ mascot protects checkout notices and retains controls at 390px (1524.683898ms)
+✔ mascot protects checkout notices and retains controls at 540px (1472.776204ms)
+✔ mascot protects checkout notices and retains controls at 708px (1779.039504ms)
+✔ mascot protects checkout notices and retains controls at 1440px (2269.705448ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26681.94486

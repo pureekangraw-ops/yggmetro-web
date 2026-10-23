@@ -120,7 +120,7 @@ for (const width of [390, 1440]) {
     await customer.locator('a[href="/"]').click();
     await customer.goBack(); await selected(customer, requestId);
     await customer.goto(origin + '/');
-    await customer.locator('.assistant-launcher[data-go-sales-open]').click();
+    await customer.locator('#go-sales-launcher').click();
     await customer.locator('#go-sales-panel a[href="/client"]').click();
     await notice(customer, 'โหลดคำขอของคุณแล้ว'); await selected(customer, requestId);
 

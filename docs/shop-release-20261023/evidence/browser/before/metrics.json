@@ -1,0 +1,68 @@
+[
+  {
+    "width": 390,
+    "route": "/",
+    "overflow": false,
+    "broken": [],
+    "heroTop": 650.40625,
+    "launcher": "fixed"
+  },
+  {
+    "width": 390,
+    "route": "/products/adaptive-lens",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  },
+  {
+    "width": 390,
+    "route": "/how-to-buy",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  },
+  {
+    "width": 768,
+    "route": "/",
+    "overflow": false,
+    "broken": [],
+    "heroTop": 681.953125,
+    "launcher": "fixed"
+  },
+  {
+    "width": 768,
+    "route": "/products/adaptive-lens",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  },
+  {
+    "width": 768,
+    "route": "/how-to-buy",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  },
+  {
+    "width": 1440,
+    "route": "/",
+    "overflow": false,
+    "broken": [],
+    "heroTop": 202,
+    "launcher": "fixed"
+  },
+  {
+    "width": 1440,
+    "route": "/products/adaptive-lens",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  },
+  {
+    "width": 1440,
+    "route": "/how-to-buy",
+    "overflow": false,
+    "broken": [],
+    "launcher": "fixed"
+  }
+]

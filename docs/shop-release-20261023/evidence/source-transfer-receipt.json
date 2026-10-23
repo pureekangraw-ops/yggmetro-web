@@ -676,7 +676,7 @@
         "sha256": "740ca82a51e57a834abbca228a80aa0821ed9f011068234b872ad37ed8e13299"
       }
     ],
-    "pending": [
+    "receivedThroughLosslessPacks": [
       {
         "path": "public/assets/shop/studio/assets/brand-wordmark.png",
         "bytes": 968216,
@@ -697,8 +697,11 @@
         "bytes": 1614016,
         "sha256": "8e867e30817d01341a424a3418a2764ade677c520f48b6478aafa470991885a0"
       }
-    ]
+    ],
+    "pending": []
   },
   "baselineCommit": "e2ab67a",
-  "localArchiveBytesReceived": false
+  "localArchiveBytesReceived": false,
+  "baselineManifestVerifiedEntries": 135,
+  "binaryTransferLibraryManifest": "libfile_19b903cfa5a081919f2a3d49f4c869eb"
 }
