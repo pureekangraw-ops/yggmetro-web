@@ -1,4 +1,22 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),{chromium}=require('playwright');
+test('Office delayed imports cannot overwrite newer imports, edits or cancelled selections',async t=>{
+ const {page,origin}=await setup(t,'office.yggmetro.com');await page.goto(origin+'/admin/storefront');await page.locator('#home input').first().waitFor();
+ const baseline=await(await page.request.get(origin+'/admin/storefront/content')).json();
+ await page.evaluate(()=>{window.pendingImports={};File.prototype.text=function(){return new Promise(resolve=>{window.pendingImports[this.name]=resolve;});};});
+ const select=async name=>{await page.locator('#import').setInputFiles({name,mimeType:'application/json',buffer:Buffer.from('{}')});await page.waitForFunction(name=>Boolean(window.pendingImports[name]),name);};
+ const finish=async(name,title)=>{const data=structuredClone(baseline);data.home.title=title;await page.evaluate(async({name,data})=>{window.pendingImports[name](JSON.stringify(data));await new Promise(resolve=>setTimeout(resolve,0));},{name,data});};
+ await select('older.json');await select('newer.json');await finish('newer.json','Newer import');await finish('older.json','Stale import');
+ assert.equal(await page.locator('#home input').first().inputValue(),'Newer import');
+ await select('editing.json');await page.locator('#home input').first().fill('Newer edit');await finish('editing.json','Stale read');
+ assert.equal(await page.locator('#home input').first().inputValue(),'Newer edit');
+ await page.locator('details').filter({has:page.locator('#raw')}).locator('summary').click();
+ await select('raw.json');await page.locator('#raw').fill('{unfinished newer JSON');await finish('raw.json','Stale raw read');
+ assert.equal(await page.locator('#raw').inputValue(),'{unfinished newer JSON');
+ await select('cancelled.json');await page.locator('#import').setInputFiles([]);await finish('cancelled.json','Cancelled read');
+ assert.equal(await page.locator('#home input').first().inputValue(),'Newer edit');
+ await select('cancel-event.json');await page.locator('#import').dispatchEvent('cancel');await finish('cancel-event.json','Cancelled chooser');
+ assert.equal(await page.locator('#home input').first().inputValue(),'Newer edit');
+});
 for(const width of [390,768,1440])test('Office rejects broken mappings and preserves draft at '+width,async t=>{
  const {page,origin}=await setup(t,'office.yggmetro.com');
  let writes=0;page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes++;});
@@ -16,6 +34,10 @@ for(const width of [390,768,1440])test('Office rejects broken mappings and prese
  const download=page.waitForEvent('download');await page.locator('#download').click();
  const data=JSON.parse(await fs.readFile(await(await download).path(),'utf8'));
  assert.equal(data.home.title,'Preserved draft');assert.deepEqual(data.products,baseline.products);assert.deepEqual(data.guides,baseline.guides);
+ await page.locator('#import').setInputFiles({name:'roundtrip.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('นำเข้าฉบับร่างแล้ว'));
+ const roundtrip=page.waitForEvent('download');await page.locator('#download').click();
+ assert.deepEqual(JSON.parse(await fs.readFile(await(await roundtrip).path(),'utf8')),data);
  const broken=structuredClone(baseline);delete broken.galleryItems;
  await page.locator('#import').setInputFiles({name:'broken.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(broken))});
  await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('อ่านไฟล์ไม่ได้'));

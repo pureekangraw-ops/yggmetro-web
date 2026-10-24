@@ -9,7 +9,7 @@ Based on merged main 43c32c9ff06e76ceadae4b4f35441678619effeb. Remote main was f
 Only public/assets/shop/studio/editor.js application bytes change. Validation now requires complete guides, unique/stable routing identifiers, valid category relationships, usable HTTPS URLs without embedded credentials, supported image names, and the string/array shapes used by the storefront. Invalid imports leave the edited draft intact. Valid draft import/export remains local and unchanged in purpose. Product IDs are mapping keys; content copy remains editable. File existence still needs source/PR asset validation; this browser check cannot certify unpublished image files or external URL availability.
 
 - Red evidence: old editor accepted missing guides; the expected rejection assertion failed (red.log).
-- Green: four Office browser cases pass, including malformed advanced JSON/file imports, draft preservation and valid import/export at 390/768/1440, no overflow and no non-GET/HEAD browser requests (office.log).
+- Green: five Office browser cases pass, including malformed advanced JSON/file imports, draft preservation and valid import/export at 390/768/1440, no overflow and no non-GET/HEAD browser requests (office.log).
 - Existing Sites content/asset/routing tests: 4/4 pass (mapping.log). Syntax and diff checks pass.
 - Screenshots: test-results/editor-integrity/editor-{390,768,1440}.png; uploaded by existing browser CI. No repeated unchanged full local suite or live browser audit.
 - inventory.json lists the local candidate's public-asset hashes and all six unchanged product destinations/images. It is not a live asset-manifest or rollback certification.
@@ -34,3 +34,9 @@ Only public/assets/shop/studio/editor.js application bytes change. Validation no
 5. Production release requires a reviewed follow-up release path binding approved source/build/assets to fresh active deployment/full traffic, fail-closed readback, and GO's exclusive deployment window plus explicit rollout/rollback authorization. The guard protects repository entrypoints, not all direct Cloudflare API/dashboard deployers. Do not remove it or dispatch production deployment for this continuation.
 
 This PR is reviewable source only. No merge, deployment, release-lock removal, product-content publication, transaction, secret or customer-data change. A request to deploy this website must name the final assembled revision/assets and approved release mechanism; a generic green-test result is not that approval.
+
+## Independent review correction: asynchronous import ordering
+
+The reviewer reproduced a second inherited defect: an older delayed file read replaced a later successful import. The focused regression reproduced it (race-red.log). Imports now capture a selection sequence and draft revision; a newer file selection, cancellation, empty selection, field edit, raw-JSON edit or successful raw apply invalidates the pending read. Stale successes/errors cannot replace content or notices. File selection while initial data is unavailable is rejected without changing drafts.
+
+The affected Office suite passes 5/5: delayed out-of-order completion, editing during reads, incomplete raw JSON preservation, empty selection, chooser cancel event, malformed imports, valid imports and complete export→reimport→export equality at 390/768/1440. Existing local-only behavior and GO catalog remain unchanged. No broad unchanged local suite was rerun; normal PR CI remains required.

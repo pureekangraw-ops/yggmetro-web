@@ -324,8 +324,8 @@
     },
     {
       "path": "public/assets/shop/studio/editor.js",
-      "bytes": 8791,
-      "sha256": "d071cda2000da4489edb5e69f15fd48037d4f09568bf1e4291cdb8221811844f"
+      "bytes": 9520,
+      "sha256": "4d93a7960e4c8621d1e0e2ae2af83cf1287693c8287d46588577f1e590c4debb"
     },
     {
       "path": "public/assets/shop/studio/effects.js",
