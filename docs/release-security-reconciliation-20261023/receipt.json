@@ -1,0 +1,30 @@
+{
+  "main": "6e24fb3fe8453fe269b853848c002fba394affd9",
+  "pr70": "b7f02dc6e881023d7991f173a00d09569e936246",
+  "pr71": "21f3a84a54dd9952a551a2ad57df1bb5c6ce8c82",
+  "preservedGitObjects": [
+    "040000 tree ddbe8e3ac76d19f027b87fc1c4498c120ad876a6\tdocs/shop-release-20261023/evidence",
+    "040000 tree 5f6b6dd8a3a57fe0f4fe87a23b5afaa46a0cad8a\tdocs/sites19",
+    "100644 blob 382fff9030c52fc9d6941b6530851594026651b4\tpackage-lock.json",
+    "100644 blob 77e7a22413f3cf27395c8b1b349f8210ae6dad52\tpackage.json",
+    "040000 tree a9d5390c3f681b74b9daeace2892217f79fca257\tpublic",
+    "040000 tree 09e24a9101d1dd25d56a6eda697da1e567abf0b6\treleases",
+    "040000 tree fdfe25fcbed5bdc1052c56600b6a3d2e4586d126\tscripts",
+    "040000 tree 5d75f48e0b45acd061c1c78abac2595c60fb81c4\tsrc",
+    "100644 blob 98d7663dda36d5e1d85e6eea7af02508442c4127\twrangler.jsonc"
+  ],
+  "targetedTests": 54,
+  "fullRegressionTests": 172,
+  "node": "24.19.0",
+  "wrangler": "4.151.1",
+  "dryRunNoBundleByteEqual": true,
+  "candidateWorkerSha256": "6505f6df6cbbd48bf879bc9a479e7a84d23bd9015a7062d8b749d3bf40194ef7",
+  "productionCompared": false,
+  "deployPerformed": false,
+  "releaseFreeze": "unchanged unconditional guard",
+  "negativeWorkflowBaselinesRejected": [
+    "main",
+    "pr70",
+    "pr71"
+  ]
+}

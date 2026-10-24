@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "status": 200,
+  "result": {
+    "deployments": [
+      {
+        "id": "a2a34c6d-67da-49aa-9541-a0993aec53ff",
+        "source": "api",
+        "versions": [
+          {
+            "version_id": "ccd6faa9-dbee-406f-b0e1-c12a2c666268",
+            "percentage": 100
+          }
+        ],
+        "created_on": "2026-10-23T06:28:18.65528Z"
+      }
+    ]
+  },
+  "observedAt": "2026-10-23T06:47:16.782Z"
+}

@@ -5,7 +5,7 @@ test('cart and checkout are real pages with empty states and a route back to sho
 });
 test('checkout only offers configured goods and never exposes delivery keys',async()=>{
  const env={STRIPE_TEST_CHECKOUT_ENABLED:'true',STRIPE_TEST_KEY:'rk_test_fixture',STRIPE_TEST_WEBHOOK_SECRET:'whsec_fixture',SHOP_ORDERS:{prepare(){}},SHOP_DOWNLOADS:{get(){},head(){}},STRIPE_TEST_CATALOG:JSON.stringify({'finance-simulator':{enabled:true,priceId:'price_TEST',amount:900,currency:'usd',deliveryKey:'private/shop-home.zip'}})};
- const html=(await page('/products/finance-simulator',env)).html;assert.match(html,/data-add-to-cart="finance-simulator"/);assert.doesNotMatch(html,/private\/shop-home.zip|rk_test_fixture|whsec_fixture/);
+ const html=(await page('/products/finance-simulator',env)).html;assert.doesNotMatch(html,/data-add-to-cart="finance-simulator"/);assert.match(html,/www\.notion\.com\/th\/templates\/ygg-metro-personal-finance-simulator/);assert.doesNotMatch(html,/private\/shop-home.zip|rk_test_fixture|whsec_fixture/);
  const plain=(await page('/products/finance-simulator')).html;assert.doesNotMatch(plain,/<button[^>]+data-add-to-cart/);
 });
 test('navigation uses clear text labels and accessible customer paths',async()=>{

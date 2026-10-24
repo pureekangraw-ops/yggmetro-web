@@ -1,0 +1,14 @@
+✔ shop to owned GO draft and chat at 390 (1578.934903ms)
+✔ shop to owned GO draft and chat at 1440 (1855.724582ms)
+✔ lost create response and reload retry keeps a single draft (2066.000658ms)
+✔ create retry cannot overwrite edited draft and another browser cannot read it (2315.582266ms)
+✔ typed unsent text is transferred as data and catalog client link uses the handoff (984.690873ms)
+✔ Admin sees context and reloading preserves a later selection (1668.07578ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11004.268163

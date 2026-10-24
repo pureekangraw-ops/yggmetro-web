@@ -45,7 +45,7 @@ test("public catalog chat answers from shop data without provider or payment cla
     const shop=await ask("ราคา SHOP HOME");
     assert.match(shop.data.reply,/US\$9/);
     const finance=await ask("Finance Simulator ซื้อได้ไหม");
-    assert.match(finance.data.reply,/เตรียมเปิดขาย/);
+    assert.match(finance.data.reply,/ขายบน Notion Marketplace/);
     const payment=await ask("ผมจ่ายเงินแล้วใช่ไหม");
     assert.match(payment.data.reply,/ยังตรวจยอดหรือยืนยันสถานะไม่ได้/);
     assert.doesNotMatch(payment.data.reply,/ชำระเงินสำเร็จ/);

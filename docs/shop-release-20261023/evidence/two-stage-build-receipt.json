@@ -1,0 +1,27 @@
+{
+  "baselineManifestEntriesVerified": 135,
+  "sourceArchiveSha256": "42fa4c8b9292ecf1a5b68732f1a7fb1ab08585fb9ee5798168378b6f5800279a",
+  "wranglerVersion": "4.151.1",
+  "esbuildVersion": "0.28.2",
+  "commands": [
+    "wrangler deploy --config <verified-baseline>/wrangler.jsonc --dry-run --outdir <build-dir>",
+    "esbuild <build-dir>/index.js --minify --format=esm --outfile=<build-dir>/worker.mjs"
+  ],
+  "historicalCommandFullyRecovered": false,
+  "historicalIntermediate": {
+    "bytes": 1076021,
+    "sha256": "84df89aa9c4b73357dfb6f0af46a3256545c3eba58975c0b29f08e07ee4fcf68",
+    "source": "GO Brain 47ff5cca-6c24-455e-aff9-832e7ee8723c revision 1, supplied by parent"
+  },
+  "localIntermediate": {
+    "bytes": 1080333,
+    "sha256": "4f0ec1d11e36ba87b39b78b965c8ee30f1834e592060c2c8448458509c549852"
+  },
+  "finalWorker": {
+    "bytes": 564730,
+    "sha256": "1d2f1f8bd15e0f4b3ebec9e0850736bd32ffc1345f38d08d8a42eccf481f9436",
+    "byteEqualCapturedProductionRuntime": true,
+    "sourceMapTrailer": false
+  },
+  "scope": "Unmodified verified canonical baseline only; not responsive candidate. No deployment performed. Intermediate difference cause not established without historical intermediate."
+}

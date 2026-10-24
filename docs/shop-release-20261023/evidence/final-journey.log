@@ -1,0 +1,17 @@
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 390px (9530.596515ms)
+✔ Shop → saved request → Admin takeover/reply → delivery, isolation and revisit at 1440px (9737.668467ms)
+✔ lost committed message response retries the exact payload once and keeps newer composition (1218.287526ms)
+✔ late response and repeated submit cannot erase edits or cross request composers (1261.45927ms)
+✔ safe network errors preserve edits and canceled browser navigation keeps unsaved brief (793.093212ms)
+✔ home Custom Order form creates one owned submitted request and opens its customer readback (3267.278118ms)
+✔ custom form lost confirmation response retries one request and retains newer edits (2009.073355ms)
+✔ lost custom confirmation survives real reload through owned readback without duplicate submission (2338.828697ms)
+✔ lost custom draft-save response restores server fields after reload and submits the same request once (1427.76374ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32101.989662

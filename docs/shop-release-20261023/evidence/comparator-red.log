@@ -1,0 +1,53 @@
+✔ unreconciled source cannot release, even with status or environment overrides (66.474834ms)
+✔ active comparison accepts only the pinned current deployment and traffic split (0.724348ms)
+✖ active comparison rejects malformed baseline and provider schemas (1.596256ms)
+✖ traffic comparison ignores object key order and version ordering (0.66695ms)
+✖ invalid traffic distributions fail on either side even when identical (1.014178ms)
+✔ local deploy aborts before spawning Wrangler (564.999674ms)
+✔ workflow dependency blocks both main push and dispatch before credential job (3.377462ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 4
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 758.699794
+
+✖ failing tests:
+
+test at tests/shop-release-guard.test.cjs:33:1
+✖ active comparison rejects malformed baseline and provider schemas (1.596256ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (/workspace/yggmetro-web/tests/shop-release-guard.test.cjs:35:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests/shop-release-guard.test.cjs:49:1
+✖ traffic comparison ignores object key order and version ordering (0.66695ms)
+  Error: Production changed (including direct API deployment); reconcile before release.
+      at assertActiveDeployment (file:///workspace/yggmetro-web/scripts/shop-release-guard.mjs:14:11)
+      at TestContext.<anonymous> (/workspace/yggmetro-web/tests/shop-release-guard.test.cjs:55:16)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/shop-release-guard.test.cjs:61:1
+✖ invalid traffic distributions fail on either side even when identical (1.014178ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (/workspace/yggmetro-web/tests/shop-release-guard.test.cjs:71:12)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

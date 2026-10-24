@@ -6,7 +6,7 @@ import web from '../../src/index.js';
 import requestStore from './request-store.cjs';
 
 // Isolated Node/SQLite browser harness. No production binding, credential, AI or payment.
-export async function startRequestPreview({adminToken} = {}) {
+export async function startRequestPreview({adminToken,host='shop.yggmetro.com'} = {}) {
   const {db, env} = requestStore.fixture();
   // Explicit synthetic fixture only; never load a credential from the environment.
   if (adminToken) env.YGG_ADMIN_CREDENTIALS = JSON.stringify({fixture_admin: createHash('sha256').update(adminToken).digest('hex')});
@@ -15,7 +15,7 @@ export async function startRequestPreview({adminToken} = {}) {
     const file = path.resolve(assets, '.' + new URL(request.url).pathname);
     if (!file.startsWith(assets + path.sep)) return new Response('Not Found', {status: 404});
     try {
-      const type = {'.js':'text/javascript', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp'}[path.extname(file)] || 'application/octet-stream';
+      const type = {'.css':'text/css','.json':'application/json','.html':'text/html','.js':'text/javascript', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp'}[path.extname(file)] || 'application/octet-stream';
       return new Response(await fs.readFile(file), {headers: {'content-type': type}});
     } catch { return new Response('Not Found', {status: 404}); }
   }};
@@ -25,8 +25,8 @@ export async function startRequestPreview({adminToken} = {}) {
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const headers = new Headers(req.headers);
-      if (headers.get('origin') === origin) headers.set('origin', 'https://shop.yggmetro.com');
-      const result = await web.fetch(new Request('https://shop.yggmetro.com' + req.url, {
+      if (headers.get('origin') === origin) headers.set('origin', 'https://'+host);
+      const result = await web.fetch(new Request('https://'+host + req.url, {
         method: req.method, headers,
         ...(!['GET', 'HEAD'].includes(req.method) ? {body: Buffer.concat(chunks)} : {}),
       }), env);

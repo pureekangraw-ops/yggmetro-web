@@ -1,0 +1,72 @@
+{
+  "generator": "scripts/optimize-shop-images.py",
+  "pillow": "12.3.0",
+  "quality": 90,
+  "method": 6,
+  "outputs": [
+    {
+      "source": "public/assets/shop/studio/assets/brand-wordmark.png",
+      "sourceSha256": "daf4c6b9067d03bf2baa3b633477a716594d33a4313c513d8694bb5f779298cd",
+      "sourceBytes": 968216,
+      "sourceDimensions": [
+        2172,
+        724
+      ],
+      "output": "public/assets/shop/studio/assets/brand-wordmark.webp",
+      "outputSha256": "1b0a6a6d6e88dbbae1825aec21c066571c42359412bf945f99ca1499601c6b7a",
+      "outputBytes": 95664,
+      "outputDimensions": [
+        1040,
+        347
+      ]
+    },
+    {
+      "source": "public/assets/shop/studio/assets/nav-shop.png",
+      "sourceSha256": "8e867e30817d01341a424a3418a2764ade677c520f48b6478aafa470991885a0",
+      "sourceBytes": 1614016,
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "output": "public/assets/shop/studio/assets/nav-shop.webp",
+      "outputSha256": "9507769f4ad7237e12b49c9b25f33cd9bd607f59e2010bf0b97bf39dab8f1676",
+      "outputBytes": 43414,
+      "outputDimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "source": "public/assets/shop/studio/assets/nav-gallery.png",
+      "sourceSha256": "d2bc50f21f9ceb5093ea8093583f4facb68ed0739fd65020b25cda6dd2c11d1f",
+      "sourceBytes": 1428449,
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "output": "public/assets/shop/studio/assets/nav-gallery.webp",
+      "outputSha256": "49ac67c41c433e458838f3fb29084fb89f7afb7c6175ed18b084886892aa5194",
+      "outputBytes": 40522,
+      "outputDimensions": [
+        384,
+        384
+      ]
+    },
+    {
+      "source": "public/assets/shop/studio/assets/nav-custom-order.png",
+      "sourceSha256": "6fb7c909708492450f4607a44c73c0873355172f75999019b539f012e0e07ee2",
+      "sourceBytes": 1418491,
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "output": "public/assets/shop/studio/assets/nav-custom-order.webp",
+      "outputSha256": "23398525eb078066606eb5a9c2bcd97458243d0f1aba361d77c3e4e1f48f6c50",
+      "outputBytes": 34460,
+      "outputDimensions": [
+        384,
+        384
+      ]
+    }
+  ]
+}
