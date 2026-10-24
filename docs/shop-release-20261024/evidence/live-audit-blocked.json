@@ -1,0 +1,105 @@
+{
+  "origin": "https://shop.yggmetro.com",
+  "capturedAt": "2026-10-24T01:28:32.830Z",
+  "kind": "runtime-observation-not-authored-source",
+  "pages": [
+    {
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/#/home",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/home\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/home\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/#/gallery",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/gallery\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/gallery\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/cart",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/cart\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/cart\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/how-to-buy",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/how-to-buy\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/how-to-buy\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/#/home",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/home\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/home\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/#/gallery",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/gallery\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/gallery\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/cart",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/cart\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/cart\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "isMobile": true,
+      "deviceScaleFactor": 1,
+      "route": "/how-to-buy",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/how-to-buy\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/how-to-buy\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "isMobile": false,
+      "deviceScaleFactor": 1,
+      "route": "/#/home",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/home\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/home\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "isMobile": false,
+      "deviceScaleFactor": 1,
+      "route": "/#/gallery",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/#/gallery\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/#/gallery\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "isMobile": false,
+      "deviceScaleFactor": 1,
+      "route": "/cart",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/cart\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/cart\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "isMobile": false,
+      "deviceScaleFactor": 1,
+      "route": "/how-to-buy",
+      "error": "page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://shop.yggmetro.com/how-to-buy\nCall log:\n\u001b[2m  - navigating to \"https://shop.yggmetro.com/how-to-buy\", waiting until \"networkidle\"\u001b[22m\n"
+    }
+  ],
+  "assets": [],
+  "blockedRequests": []
+}

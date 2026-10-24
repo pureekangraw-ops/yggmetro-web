@@ -16,7 +16,7 @@ const requestKey='yggmetro-checkout-checkout-test-test';
 const savedId=page=>page.evaluate(key=>sessionStorage.getItem(key),requestKey);
 const submit=page=>page.locator('button[form="secure-checkout-form"]').click();
 
-for(const width of [390,1440])test('40 THB storefront → checkout → verified fixture webhook → owner download at '+width+'px',async t=>{
+for(const width of [390,768,1440])test('40 THB storefront → checkout → verified fixture webhook → owner download at '+width+'px',async t=>{
  const {fixture,context,page,checkout}=await setup(t,{width});await checkout();
  assert.match(await page.locator('.order-total').innerText(),/฿40\.00/);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -96,7 +96,7 @@ test('a damaged started request is not replaced with a new purchase after reload
  assert.equal(fixture.created,0);
 });
 
-for(const width of [390,1440])test('sandbox resource links and images remain local and resolve at '+width+'px',async t=>{
+for(const width of [390,768,1440])test('sandbox resource links and images remain local and resolve at '+width+'px',async t=>{
  const {fixture,page}=await setup(t,{width});
  // These routes contain no remote embeds; fail closed if a regression attempts external loading.
  const external=[];await page.route('**/*',route=>{
