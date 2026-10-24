@@ -1,0 +1,12 @@
+✔ display-sized image derivatives retain verified original assets and reduce bytes (42.766734ms)
+✔ editable storefront content is complete, safe and references real assets (1.794902ms)
+✔ real shop serves the Sites shell and canonical route without demo work or invoices (236.143087ms)
+✔ Office editor publishes nothing and exposes only public configuration (1.760207ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 368.491705
