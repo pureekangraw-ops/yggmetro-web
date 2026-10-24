@@ -1,0 +1,12 @@
+✔ Office rejects broken mappings and preserves draft at 390 (2194.141707ms)
+✔ Office rejects broken mappings and preserves draft at 768 (1911.522102ms)
+✔ Office rejects broken mappings and preserves draft at 1440 (1958.500422ms)
+✔ Office edits export a usable content file and never write the live server (1070.574315ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7626.153765

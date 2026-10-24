@@ -1,4 +1,34 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),{chromium}=require('playwright');
+for(const width of [390,768,1440])test('Office rejects broken mappings and preserves draft at '+width,async t=>{
+ const {page,origin}=await setup(t,'office.yggmetro.com');
+ let writes=0;page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes++;});
+ await page.setViewportSize({width,height:900});
+ await page.goto(origin+'/admin/storefront');
+ await page.locator('#home input').first().fill('Preserved draft');
+ await page.locator('details').filter({has:page.locator('#raw')}).locator('summary').click();
+ const baseline=await(await page.request.get(origin+'/admin/storefront/content')).json();
+ for(const mutate of [d=>delete d.guides,d=>d.products[1].id=d.products[0].id,d=>d.products[0].url='https://',d=>d.products[0].category='missing',d=>d.guides[d.products[0].id].steps=[],d=>d.guides[d.products[0].id].aliases=null]){
+  const broken=structuredClone(baseline);mutate(broken);
+  await page.locator('#raw').fill(JSON.stringify(broken));await page.locator('#apply-raw').click();
+  assert.match(await page.locator('#notice').textContent(),/ใช้ข้อมูลไม่ได้/);
+  assert.equal(await page.locator('#home input').first().inputValue(),'Preserved draft');
+ }
+ const download=page.waitForEvent('download');await page.locator('#download').click();
+ const data=JSON.parse(await fs.readFile(await(await download).path(),'utf8'));
+ assert.equal(data.home.title,'Preserved draft');assert.deepEqual(data.products,baseline.products);assert.deepEqual(data.guides,baseline.guides);
+ const broken=structuredClone(baseline);delete broken.galleryItems;
+ await page.locator('#import').setInputFiles({name:'broken.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(broken))});
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.startsWith('อ่านไฟล์ไม่ได้'));
+ assert.match(await page.locator('#notice').textContent(),/อ่านไฟล์ไม่ได้/);
+ assert.equal(await page.locator('#home input').first().inputValue(),'Preserved draft');
+ const valid=structuredClone(baseline);valid.home.title='Valid imported draft';
+ await page.locator('#import').setInputFiles({name:'valid.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(valid))});
+ await page.waitForFunction(()=>document.querySelector('#home input').value==='Valid imported draft');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+ await fs.mkdir('test-results/editor-integrity',{recursive:true});
+ await page.screenshot({path:`test-results/editor-integrity/editor-${width}.png`,fullPage:true});
+ assert.equal(writes,0,'draft validation/import/export must remain local');
+});
 async function setup(t,host='shop.yggmetro.com'){const {startRequestPreview}=await import('../helpers/request-preview.mjs');const server=await startRequestPreview({host});const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH});const context=await browser.newContext({viewport:{width:390,height:900},acceptDownloads:true});const page=await context.newPage();page.setDefaultTimeout(10000);const errors=[];page.on('pageerror',e=>errors.push(e.message));t.after(async()=>{await browser.close();await server.close();assert.deepEqual(errors,[])});return {...server,browser,context,page};}
 for(const loss of [null,'create','confirm'])test('Sites brief reaches owned request with '+(loss||'no')+' response loss',async t=>{
  const {page,origin,db,context}=await setup(t);await page.goto(origin+'/custom-order');await page.locator('[data-brief=form]').first().click();await page.locator('[name=service]').selectOption('website');await page.locator('[name=goal]').fill('Sites genuine fixture request');await page.locator('[name=contact]').fill('private-test@example.invalid');await page.locator('#custom-brief-form button[type=submit]').click();await page.locator('#brief-consent').check();
