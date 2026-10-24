@@ -13,7 +13,7 @@ for(const width of [390,768,1440]) test(`responsive purchase guidance and assist
   await context.route('**/*',route=>route.request().method()==='GET'&&new URL(route.request().url()).origin===origin?route.continue():route.abort());
   t.after(async()=>{await browser.close();await new Promise(r=>server.close(r));assert.deepEqual(errors,[])});
   await page.goto(origin+'/');
-  await page.evaluate(async()=>{await Promise.all([...document.images].map(image=>image.decode().catch(()=>{})));});
+  await page.evaluate(async()=>{await Promise.all([...document.images].map(image=>{image.loading='eager';return image.decode().catch(()=>{});}));});
   assert.deepEqual(await page.evaluate(()=>[...document.images].filter(image=>!image.naturalWidth).map(image=>image.getAttribute('src'))),[],'baseline image transfer must be complete before visual acceptance');
   const before=await page.evaluate(()=>({heroTop:document.querySelector('#home-product-stage').getBoundingClientRect().top,viewport:innerHeight,launcherPosition:getComputedStyle(document.querySelector('#go-sales-root')).position}));
   assert.notEqual(before.launcherPosition,'fixed','closed mascot must not float over page content');
@@ -51,4 +51,22 @@ for(const width of [390,768,1440]) test(`responsive purchase guidance and assist
   assert.match(await page.locator('main').innerText(),/Notion Marketplace/);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   await page.screenshot({path:`test-results/responsive-release/buying-${width}.png`,fullPage:true});
+  // Shared shell/CSS also affects these customer surfaces. Keep the audit read-only;
+  // the request/payment journey suites exercise writes against isolated fixtures.
+  for(const route of ['/shop','/gallery','/custom-order','/services','/contact','/hermes','/#/cart','/#/work','/#/invoice','/cart','/client']){
+    const response=await page.goto(origin+route);
+    if(route==='/#/cart')await page.waitForURL(origin+'/cart');
+    if(['/#/work','/#/invoice'].includes(route))await page.waitForURL(origin+'/client');
+    assert.ok(response.ok(),`${route}: HTTP ${response.status()}`);
+    await page.evaluate(async()=>{await Promise.all([...document.images].map(image=>{image.loading='eager';return image.decode().catch(()=>{});}));});
+    const geometry=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
+      brokenImages:[...document.images].filter(image=>!image.naturalWidth).map(image=>image.getAttribute('src')),
+      text:document.body.innerText.trim().length,
+    }));
+    assert.equal(geometry.overflow,false,`${route} at ${width}px overflows`);
+    assert.deepEqual(geometry.brokenImages,[],`${route} images at ${width}px`);
+    assert.ok(geometry.text>40,`${route} must render customer content`);
+    await page.screenshot({path:`test-results/responsive-release/surface-${route.replace(/[^a-z0-9]/gi,'_')}-${width}.png`,fullPage:true});
+  }
 });

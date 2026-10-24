@@ -84,10 +84,10 @@ test('local deploy aborts before spawning Wrangler',()=>{
 test('workflow dependency blocks both main push and dispatch before credential job',()=>{
   const w=fs.readFileSync('.github/workflows/deploy.yml','utf8');
   assert.match(w,/workflow_dispatch:/);assert.match(w,/branches: \[main\]/);
-  assert.match(w,/  deploy:\n    needs: release-integrity\n/);
-  const gate=w.split('  release-integrity:\n')[1].split('\n  deploy:')[0];
+  assert.match(w,/  deploy:\n    needs: \[release-integrity, safety\]\n/);
+  const gate=w.split('  release-integrity:\n')[1].split('\n  safety:')[0];
   assert.match(gate,/run: node scripts\/shop-release-guard.mjs/);
   assert.doesNotMatch(gate,/secrets\.|CLOUDFLARE|continue-on-error|if:|npm ci/);
-  assert.match(w,/node scripts\/shop-release-guard.mjs\n          npx wrangler deploy/);
+  assert.match(w,/node scripts\/shop-release-guard.mjs\n          \.\/node_modules\/\.bin\/wrangler deploy --dry-run/);
   assert.doesNotMatch(w,/continue-on-error|if: always/);
 });

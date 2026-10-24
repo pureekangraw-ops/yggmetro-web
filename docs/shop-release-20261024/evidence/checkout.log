@@ -1,0 +1,28 @@
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 390px (4247.624826ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 768px (2898.285689ms)
+✔ 40 THB storefront → checkout → verified fixture webhook → owner download at 1440px (3087.217486ms)
+✔ provider timeout preserves request and contact across reload and resumes the original checkout (1414.852708ms)
+✔ success response lost behind a gateway failure preserves request and contact across reload and resumes the original checkout (1623.448267ms)
+✔ D1 insert failure preserves request and contact across reload and resumes the original checkout (2410.505807ms)
+✔ CHECKOUT_CONFLICT stops automatic new purchases and preserves the attempt after returning to the product (2407.298874ms)
+✔ CHECKOUT_EXPIRED stops automatic new purchases and preserves the attempt after returning to the product (1933.685183ms)
+✔ CHECKOUT_RECONCILIATION_REQUIRED stops automatic new purchases and preserves the attempt after returning to the product (1564.417416ms)
+✔ repeated cookie-bootstrap responses stop after one retry without a provider Session (1224.956323ms)
+✔ unavailable recovery storage prevents an untrackable purchase (1079.096826ms)
+✔ a damaged started request is not replaced with a new purchase after reload (1243.344347ms)
+✔ sandbox resource links and images remain local and resolve at 390px (1499.95493ms)
+✔ sandbox resource links and images remain local and resolve at 768px (1599.073273ms)
+✔ sandbox resource links and images remain local and resolve at 1440px (1638.904946ms)
+✔ mascot protects checkout notices and retains controls at 320px (1564.84349ms)
+✔ mascot protects checkout notices and retains controls at 390px (1642.697579ms)
+✔ mascot protects checkout notices and retains controls at 540px (1815.19785ms)
+✔ mascot protects checkout notices and retains controls at 708px (1835.796652ms)
+✔ mascot protects checkout notices and retains controls at 1440px (1921.84947ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39500.367591
